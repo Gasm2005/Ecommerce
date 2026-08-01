@@ -1,0 +1,58 @@
+<% if (result.term.length < 2) { %>
+
+  <div class="border border-line bg-ivory p-5 shadow-[0_24px_60px_-30px_rgba(23,19,15,.45)]">
+    <p class="mb-3 text-[10px] uppercase tracking-luxe text-gold">Trending searches</p>
+    <div class="flex flex-wrap gap-2">
+      <% ['Bridal lehenga','Banarasi saree','Mehendi','Cocktail gown','Under ₹25,000','Velvet'].forEach(function (t) { %>
+        <a href="/category/all?q=<%= encodeURIComponent(t) %>" class="border border-line px-3 py-1.5 text-xs text-muted transition hover:border-maroon hover:text-maroon"><%= t %></a>
+      <% }); %>
+    </div>
+  </div>
+
+<% } else if (!result.products.length && !result.groups.length) { %>
+
+  <div class="border border-line bg-ivory p-6 text-center shadow-[0_24px_60px_-30px_rgba(23,19,15,.45)]">
+    <p class="font-serif text-base">No matches for “<%= result.term %>”</p>
+    <p class="mt-1 text-xs text-muted">Try a fabric, colour or occasion — “organza”, “emerald”, “sangeet”.</p>
+    <a href="/category/all" class="mt-4 inline-block border border-maroon px-4 py-2 text-[11px] uppercase tracking-luxe text-maroon">Browse everything</a>
+  </div>
+
+<% } else { %>
+
+  <div class="max-h-[70vh] overflow-y-auto border border-line bg-ivory shadow-[0_24px_60px_-30px_rgba(23,19,15,.45)]">
+    <% if (result.groups.length) { %>
+      <div class="border-b border-line/70 px-4 pb-2 pt-3">
+        <% result.groups.forEach(function (g) { %>
+          <a href="<%= g.href %>" class="flex items-center justify-between px-1 py-2 text-sm transition hover:text-maroon">
+            <span><%= g.label %></span>
+            <span class="text-[10px] uppercase tracking-luxe text-gold"><%= g.sub %></span>
+          </a>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <% if (result.products.length) { %>
+      <p class="px-5 pt-4 text-[10px] uppercase tracking-luxe text-gold">Products</p>
+      <ul>
+        <% result.products.forEach(function (p) { %>
+          <li>
+            <a href="/product/<%= p.slug %>" class="flex items-center gap-4 px-5 py-3 transition hover:bg-cream/60">
+              <img loading="lazy" src="<%= p.images[0] %>" alt="<%= p.name %>" class="h-16 w-12 shrink-0 object-cover">
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm text-ink"><%= p.name %></span>
+                <span class="block truncate text-xs text-muted"><%= p.fabric %> · <%= p.occasion.join(', ') %></span>
+              </span>
+              <span class="shrink-0 text-sm text-maroon"><%= money(p.price) %></span>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    <% } %>
+
+    <a href="/category/all?q=<%= encodeURIComponent(result.term) %>"
+       class="block border-t border-line px-5 py-3.5 text-center text-[11px] uppercase tracking-luxe text-maroon transition hover:bg-cream/60">
+      View all results for “<%= result.term %>”
+    </a>
+  </div>
+
+<% } %>

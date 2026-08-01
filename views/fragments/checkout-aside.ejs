@@ -1,0 +1,50 @@
+<%
+  /* The money column: summary + the action that commits to it, together.
+     Sits beside the form on desktop and sticks while the form scrolls, so the
+     total and the button are never hunted for. On mobile it falls below the
+     fields, which is the right reading order there.
+
+     Locals:
+       primaryLabel, primaryPost   — the CTA
+       busyLabel                   — optional in-flight label
+       backLabel                   — optional back action
+       backHref  or  backPost      — link (step 1) or HTMX post (steps 2-3)
+       note                        — optional reassurance line
+     Every button posts with hx-include="#step-form", so it works from out here. */
+%>
+<aside class="lg:col-span-5">
+  <div class="space-y-3 lg:sticky lg:top-[132px]">
+
+    <%- include('../partials/order-summary') %>
+
+    <div class="border border-line bg-ivory p-4">
+      <button type="button" hx-post="<%= primaryPost %>" hx-include="#step-form"
+              hx-target="#checkout-body" hx-swap="innerHTML"
+              class="w-full bg-maroon px-6 py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+        <% if (busyLabel) { %>
+          <span class="htmx-hide-on-request"><%= primaryLabel %></span>
+          <span class="htmx-show-on-request"><%= busyLabel %></span>
+        <% } else { %>
+          <%= primaryLabel %>
+        <% } %>
+      </button>
+
+      <% if (note) { %>
+        <p class="mt-3 text-center text-[11px] leading-relaxed text-muted"><%= note %></p>
+      <% } %>
+
+      <% if (backLabel) { %>
+        <div class="mt-3 text-center">
+          <% if (typeof backPost !== 'undefined' && backPost) { %>
+            <button type="button" hx-post="<%= backPost %>" hx-include="#step-form"
+                    hx-target="#checkout-body" hx-swap="innerHTML"
+                    class="text-[10px] uppercase tracking-[0.14em] text-muted underline underline-offset-4 hover:text-maroon"><%= backLabel %></button>
+          <% } else { %>
+            <a href="<%= backHref %>"
+               class="text-[10px] uppercase tracking-[0.14em] text-muted underline underline-offset-4 hover:text-maroon"><%= backLabel %></a>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</aside>

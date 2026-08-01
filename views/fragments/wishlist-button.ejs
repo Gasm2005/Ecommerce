@@ -1,0 +1,27 @@
+<%
+  const wlVariant = (typeof variant !== 'undefined' && variant) ? variant : 'card';
+  const wlActive = (typeof active !== 'undefined') ? active : wishlistIds.includes(product.id);
+  const wlCount = (typeof count !== 'undefined') ? count : wishlistIds.length;
+%>
+<button type="button"
+        data-wl="<%= product.id %>"
+        aria-pressed="<%= wlActive %>"
+        aria-label="<%= wlActive ? 'Remove from wishlist' : 'Save to wishlist' %>"
+        hx-post="/wishlist/toggle/<%= product.id %>?variant=<%= wlVariant %>"
+        hx-target="this" hx-swap="outerHTML"
+        class="<%= wlVariant === 'pdp'
+          ? 'flex h-12 w-12 shrink-0 items-center justify-center border border-line transition hover:border-maroon'
+          : 'absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-ivory/90 backdrop-blur transition hover:bg-ivory' %>">
+  <svg width="<%= wlVariant === 'pdp' ? 20 : 17 %>" height="<%= wlVariant === 'pdp' ? 20 : 17 %>" viewBox="0 0 24 24"
+       fill="<%= wlActive ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="1.5"
+       class="<%= wlActive ? 'text-maroon' : 'text-ink' %>">
+    <path d="M12 20.5s-7.5-4.6-7.5-9.7A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 3.2c0 5.1-7.5 9.7-7.5 9.7Z"/>
+  </svg>
+</button>
+
+<% if (isHx) { %>
+  <span id="wish-count" hx-swap-oob="true"
+        class="<%= wlCount ? '' : 'hidden ' %>absolute -right-0.5 -top-0.5 min-w-[17px] rounded-full bg-gold px-1 text-center text-[10px] font-medium leading-[17px] text-ivory"><%= wlCount %></span>
+  <span id="wish-count-tab" hx-swap-oob="true"
+        class="<%= wlCount ? '' : 'hidden ' %>absolute right-[22%] top-1.5 min-w-[16px] rounded-full bg-gold px-1 text-center text-[9px] font-medium leading-4 text-ivory"><%= wlCount %></span>
+<% } %>

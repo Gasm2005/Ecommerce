@@ -1,0 +1,120 @@
+<%
+  // App-like chrome for phone + tablet (everything below `lg`).
+  // Bottom tab bar, full-screen search sheet, category sheet.
+  const path = currentPath || '/';
+  const isHome = path === '/';
+  const isCat = path.startsWith('/category') || path.startsWith('/product');
+  const isWish = path.startsWith('/wishlist');
+  const isBag = path.startsWith('/cart') || path.startsWith('/checkout');
+  const tabOn = 'text-maroon';
+  const tabOff = 'text-muted';
+%>
+
+<!-- ===================== full-screen search sheet ===================== -->
+<div x-cloak x-show="$store.ui.appSearch" class="fixed inset-0 z-[88] flex flex-col bg-ivory lg:hidden"
+     x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-3"
+     x-transition:leave="transition ease-in duration-150" x-transition:leave-end="opacity-0"
+     role="dialog" aria-modal="true" aria-label="Search">
+
+  <div class="flex items-center gap-2 border-b border-line px-3 py-3">
+    <button @click="$store.ui.appSearch = false" class="p-2 text-ink" aria-label="Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+
+    <form action="/search" method="get" role="search" class="relative flex-1">
+      <input type="search" name="q" x-ref="appq" placeholder="Search lehengas, sarees, occasions…"
+             autocomplete="off" spellcheck="false" enterkeyhint="search"
+             class="w-full border border-line bg-cream/50 py-3 pl-4 pr-10 text-sm text-ink placeholder:text-muted/80 focus:border-maroon focus:bg-ivory focus:outline-none"
+             hx-get="/fragments/search-suggest"
+             hx-trigger="keyup changed delay:300ms, focus once"
+             hx-target="#suggest-app"
+             hx-indicator="#spin-app">
+      <span id="spin-app" class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2">
+        <svg class="animate-spin text-maroon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9" stroke-linecap="round"/></svg>
+      </span>
+    </form>
+  </div>
+
+  <div id="suggest-app" class="flex-1 overflow-y-auto p-3"></div>
+</div>
+
+<!-- ===================== category sheet (slides up) ===================== -->
+<div x-cloak x-show="$store.ui.appCats" class="fixed inset-0 z-[88] lg:hidden" role="dialog" aria-modal="true" aria-label="Categories">
+  <div x-show="$store.ui.appCats" x-transition.opacity @click="$store.ui.appCats = false" class="absolute inset-0 bg-ink/45"></div>
+  <div x-show="$store.ui.appCats"
+       x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-full"
+       x-transition:leave="transition ease-in duration-200" x-transition:leave-end="translate-y-full"
+       class="absolute inset-x-0 bottom-0 max-h-[86vh] overflow-y-auto rounded-t-2xl bg-ivory pb-[calc(4.6rem+env(safe-area-inset-bottom))]">
+
+    <div class="sticky top-0 flex items-center justify-between border-b border-line bg-ivory px-5 py-4">
+      <span class="font-serif text-lg">Shop by category</span>
+      <button @click="$store.ui.appCats = false" class="p-1 text-2xl leading-none text-muted" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3 px-4 py-5 sm:grid-cols-4">
+      <% config.nav.forEach(function (item, i) { %>
+        <a href="/category/<%= item.slug %>" class="group block text-center">
+          <div class="aspect-square overflow-hidden rounded-xl bg-cream">
+            <img loading="lazy" class="h-full w-full object-cover"
+                 src="<%= (item.featured && item.featured.image) || ('/ph.svg?seed=cat' + item.slug + '&w=420&h=420&label=' + encodeURIComponent(item.label)) %>" alt="<%= item.label %>">
+          </div>
+          <p class="mt-2 text-[11px] uppercase tracking-[0.12em] text-ink"><%= item.label %></p>
+        </a>
+      <% }); %>
+      <a href="/category/all?sort=new" class="block text-center">
+        <div class="flex aspect-square items-center justify-center rounded-xl border border-maroon/30 bg-maroon/5">
+          <span class="font-serif text-sm text-maroon">New In</span>
+        </div>
+        <p class="mt-2 text-[11px] uppercase tracking-[0.12em] text-ink">Latest</p>
+      </a>
+    </div>
+
+    <div class="border-t border-line px-4 py-5">
+      <p class="mb-3 text-[10px] uppercase tracking-luxe text-gold">By occasion</p>
+      <div class="flex flex-wrap gap-2">
+        <% config.occasions.forEach(function (o) { %>
+          <a href="<%= o.href %>" class="border border-line px-3.5 py-2 text-xs text-muted"><%= o.label %></a>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= bottom tab bar ========================= -->
+<nav class="fixed inset-x-0 bottom-0 z-[70] border-t border-line bg-ivory/95 backdrop-blur lg:hidden"
+     style="padding-bottom: env(safe-area-inset-bottom)" aria-label="Primary">
+  <ul class="grid grid-cols-5">
+    <li>
+      <a href="/" class="flex flex-col items-center gap-1 py-2.5 <%= isHome ? tabOn : tabOff %>">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="<%= isHome ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="1.4"><path d="M4 10.5 12 4l8 6.5V20H4v-9.5Z"/></svg>
+        <span class="text-[9px] uppercase tracking-[0.1em]">Home</span>
+      </a>
+    </li>
+    <li>
+      <button @click="$store.ui.openAppSearch()" class="flex w-full flex-col items-center gap-1 py-2.5 <%= tabOff %>">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="text-[9px] uppercase tracking-[0.1em]">Search</span>
+      </button>
+    </li>
+    <li>
+      <button @click="$store.ui.appCats = true" class="flex w-full flex-col items-center gap-1 py-2.5 <%= isCat ? tabOn : tabOff %>">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+        <span class="text-[9px] uppercase tracking-[0.1em]">Shop</span>
+      </button>
+    </li>
+    <li>
+      <a href="/wishlist" class="relative flex flex-col items-center gap-1 py-2.5 <%= isWish ? tabOn : tabOff %>">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="<%= isWish ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="1.4"><path d="M12 20.5s-7.5-4.6-7.5-9.7A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 3.2c0 5.1-7.5 9.7-7.5 9.7Z"/></svg>
+        <span class="text-[9px] uppercase tracking-[0.1em]">Saved</span>
+        <span id="wish-count-tab" class="<%= wishlistIds.length ? '' : 'hidden ' %>absolute right-[22%] top-1.5 min-w-[16px] rounded-full bg-gold px-1 text-center text-[9px] font-medium leading-4 text-ivory"><%= wishlistIds.length %></span>
+      </a>
+    </li>
+    <li>
+      <button @click="$store.ui.cart = true" class="relative flex w-full flex-col items-center gap-1 py-2.5 <%= isBag ? tabOn : tabOff %>">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        <span class="text-[9px] uppercase tracking-[0.1em]">Bag</span>
+        <span id="cart-count-tab" class="<%= cartSummary.count ? '' : 'hidden ' %>absolute right-[22%] top-1.5 min-w-[16px] rounded-full bg-maroon px-1 text-center text-[9px] font-medium leading-4 text-ivory"><%= cartSummary.count %></span>
+      </button>
+    </li>
+  </ul>
+</nav>

@@ -1,0 +1,101 @@
+<%- include('./partials/open', {
+  active: 'orders',
+  adminTitle: 'Orders',
+  adminSubtitle: result.total + ' matching · ' + money(result.value) + ' value',
+  adminActions: '<a href="/admin/orders/export.csv' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">Export CSV</a>'
+}) %>
+
+<!-- status tabs -->
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="/admin/orders<%= tokenQs %>"
+     class="border px-3.5 py-2 text-[10.5px] uppercase tracking-[0.12em] <%= !filters.status ? 'border-maroon bg-maroon text-ivory' : 'border-line bg-panel text-muted' %>">
+    All <span class="opacity-70"><%= counts.all %></span>
+  </a>
+  <% statusCounts.forEach(function (s) { %>
+    <a href="/admin/orders?status=<%= s.id %><%= adminToken ? '&token=' + adminToken : '' %>"
+       class="border px-3.5 py-2 text-[10.5px] uppercase tracking-[0.12em] <%= filters.status === s.id ? 'border-maroon bg-maroon text-ivory' : 'border-line bg-panel text-muted' %>">
+      <%= s.label %> <span class="opacity-70"><%= s.count %></span>
+    </a>
+  <% }); %>
+</div>
+
+<!-- filters -->
+<form hx-get="/admin/orders/rows" hx-target="#order-rows" hx-swap="innerHTML" data-auto-submit
+      class="card mb-4 flex flex-wrap items-end gap-3 p-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+  <input type="hidden" name="status" value="<%= filters.status %>">
+
+  <div class="min-w-[200px] flex-1">
+    <label class="adm-label" for="q">Search</label>
+    <input id="q" name="q" value="<%= filters.q %>" placeholder="Order id, name, phone, city, product"
+           class="adm-input" hx-get="/admin/orders/rows" hx-target="#order-rows" hx-trigger="keyup changed delay:350ms" hx-include="closest form">
+  </div>
+
+  <div>
+    <label class="adm-label" for="payment">Payment</label>
+    <select id="payment" name="payment" class="adm-select">
+      <option value="">All methods</option>
+      <option value="cod" <%= filters.payment === 'cod' ? 'selected' : '' %>>COD (<%= counts.cod %>)</option>
+      <option value="prepaid" <%= filters.payment === 'prepaid' ? 'selected' : '' %>>Prepaid (<%= counts.prepaid %>)</option>
+      <% orders.PAYMENT_METHODS.forEach(function (m) { %>
+        <option value="<%= m.id %>" <%= filters.payment === m.id ? 'selected' : '' %>><%= m.label %></option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div>
+    <label class="adm-label" for="paymentStatus">Payment status</label>
+    <select id="paymentStatus" name="paymentStatus" class="adm-select">
+      <option value="">Any</option>
+      <% orders.PAYMENT_STATUSES.forEach(function (p) { %>
+        <option value="<%= p.id %>" <%= filters.paymentStatus === p.id ? 'selected' : '' %>><%= p.label %></option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div>
+    <%
+      /* The morning list for a shop with its own delivery: "what am I taking out
+         today". Only shown when the store actually has local delivery configured —
+         a courier-only client should not see a filter that always returns nothing. */
+      const hasZones = Array.isArray((config.shipping || {}).zones) && config.shipping.zones.length;
+    %>
+    <% if (hasZones || counts.selfDeliver) { %>
+      <label class="adm-label" for="fulfilment">Who delivers</label>
+      <select id="fulfilment" name="fulfilment" class="adm-select">
+        <option value="">Anyone</option>
+        <option value="self" <%= filters.fulfilment === 'self' ? 'selected' : '' %>>Us (<%= counts.selfDeliver %> open)</option>
+        <option value="own" <%= filters.fulfilment === 'own' ? 'selected' : '' %>>Our delivery</option>
+        <option value="pickup" <%= filters.fulfilment === 'pickup' ? 'selected' : '' %>>Store pickup</option>
+        <option value="courier" <%= filters.fulfilment === 'courier' ? 'selected' : '' %>>Courier</option>
+      </select>
+    <% } %>
+  </div>
+
+  <div>
+    <label class="adm-label" for="from">From</label>
+    <input id="from" type="date" name="from" value="<%= filters.from %>" class="adm-input">
+  </div>
+  <div>
+    <label class="adm-label" for="to">To</label>
+    <input id="to" type="date" name="to" value="<%= filters.to %>" class="adm-input">
+  </div>
+
+  <div>
+    <label class="adm-label" for="sort">Sort</label>
+    <select id="sort" name="sort" class="adm-select">
+      <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Newest</option>
+      <option value="oldest" <%= filters.sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
+      <option value="value-desc" <%= filters.sort === 'value-desc' ? 'selected' : '' %>>Value high→low</option>
+      <option value="value-asc" <%= filters.sort === 'value-asc' ? 'selected' : '' %>>Value low→high</option>
+    </select>
+  </div>
+
+  <a href="/admin/orders<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Reset</a>
+</form>
+
+<div id="order-rows" class="adm-swap">
+  <%- include('./fragments/order-rows') %>
+</div>
+
+<%- include('./partials/close') %>

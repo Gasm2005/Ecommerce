@@ -1,0 +1,112 @@
+<%- include('./partials/open', {
+  active: 'export',
+  adminTitle: 'Export data',
+  adminSubtitle: 'Everything in this store, whenever you want it',
+  adminActions: '<a href="/admin/export/all.zip' + tokenQs + '" class="adm-btn adm-btn-primary adm-btn-sm">Download everything</a>'
+}) %>
+
+<%
+  /* Two audiences, two downloads: the owner (or a new platform) wants
+     everything; the accountant wants one period's GST tables and nothing else. */
+  const totalRows = Object.values(counts).reduce((s, n) => s + n, 0);
+%>
+
+<div class="grid gap-3 xl:grid-cols-2">
+
+  <!-- ------------------------------------------------------ everything ---- -->
+  <div class="card p-4">
+    <h2 class="font-serif text-base">Your complete store data</h2>
+    <p class="mt-1 text-[12.5px] leading-relaxed text-muted">
+      One archive, <%= totalRows.toLocaleString('en-IN') %> records. CSV for Excel,
+      JSON for anything else. This is your data — download it whenever you like,
+      no notice needed.
+    </p>
+
+    <table class="adm-table mt-3">
+      <thead><tr><th>File</th><th class="num">Rows</th></tr></thead>
+      <tbody>
+        <% Object.entries(counts).forEach(function (entry) { %>
+          <tr>
+            <td class="font-mono text-[11.5px] text-ink"><%= entry[0] %></td>
+            <td class="num text-muted"><%= entry[1].toLocaleString('en-IN') %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <a href="/admin/export/all.zip<%= tokenQs %>" class="adm-btn adm-btn-primary mt-4">Download everything (.zip)</a>
+
+    <p class="mt-3 text-[11px] leading-relaxed text-muted">
+      Password hashes, payment keys and the licence key are deliberately left out —
+      those are credentials, not business records. Product images are referenced by
+      URL; download them separately if you are moving platforms.
+    </p>
+  </div>
+
+  <!-- ------------------------------------------------------------- GST ---- -->
+  <div class="card p-4">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 class="font-serif text-base">For your accountant</h2>
+      <span class="pill pill-info">GSTR-1</span>
+    </div>
+    <p class="mt-1 text-[12.5px] leading-relaxed text-muted">
+      The return's own tables, already summarised: B2CS by place of supply, B2CL
+      invoice-wise, HSN summary, documents issued, credit notes for refunds, and the
+      3B figure that gets paid.
+    </p>
+
+    <form class="mt-3 flex flex-wrap items-end gap-2" method="get" action="/admin/export">
+      <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+      <div>
+        <label class="adm-label" for="range">Period</label>
+        <select id="range" name="range" class="adm-select" onchange="this.form.submit()">
+          <% ranges.forEach(function (r) { %>
+            <option value="<%= r.id %>" <%= spec.range === r.id ? 'selected' : '' %>><%= r.label %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div><label class="adm-label" for="from">From</label><input id="from" name="from" type="date" class="adm-input" value="<%= spec.from || '' %>"></div>
+      <div><label class="adm-label" for="to">To</label><input id="to" name="to" type="date" class="adm-input" value="<%= spec.to || '' %>"></div>
+      <button class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Apply</button>
+    </form>
+
+    <dl class="mt-4 space-y-1.5 border-t border-line pt-3 text-[12.5px]">
+      <div class="flex justify-between"><dt class="text-muted">Period</dt><dd class="text-ink"><%= gst.period %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">Taxable value</dt><dd class="tabular-nums"><%= money(gst.summary.totals.taxable) %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">CGST</dt><dd class="tabular-nums"><%= money(gst.summary.totals.cgst) %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">SGST</dt><dd class="tabular-nums"><%= money(gst.summary.totals.sgst) %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">IGST</dt><dd class="tabular-nums"><%= money(gst.summary.totals.igst) %></dd></div>
+      <div class="flex justify-between border-t border-line pt-2">
+        <dt>Tax payable</dt>
+        <dd class="font-serif text-[15px] tabular-nums"><%= money(gst.summary.totals.cgst + gst.summary.totals.sgst + gst.summary.totals.igst) %></dd>
+      </div>
+      <div class="flex justify-between pt-1 text-[11px]">
+        <dt class="text-muted">Invoices in this period</dt><dd class="text-muted"><%= gst.tables.docs.count || 0 %></dd>
+      </div>
+      <% if (gst.tables.b2cl.count) { %>
+        <div class="flex justify-between text-[11px]">
+          <dt class="text-muted">Reported invoice-wise (B2CL, above ₹2.5L)</dt><dd class="text-muted"><%= gst.tables.b2cl.count %></dd>
+        </div>
+      <% } %>
+      <% if (gst.tables.credits.count) { %>
+        <div class="flex justify-between text-[11px]">
+          <dt class="text-muted">Credit notes (refunds)</dt><dd class="text-muted"><%= gst.tables.credits.count %></dd>
+        </div>
+      <% } %>
+    </dl>
+
+    <a href="/admin/export/gst.zip<%= tokenQs ? tokenQs + '&' : '?' %>range=<%= spec.range %><%= spec.from ? '&from=' + spec.from : '' %><%= spec.to ? '&to=' + spec.to : '' %>"
+       class="adm-btn adm-btn-primary mt-4">Download GST papers (.zip)</a>
+
+    <p class="mt-3 text-[11px] leading-relaxed text-muted">
+      These are working papers, not a portal upload — the figures are final and get
+      transferred into the GST portal or your filing software as they are.
+      <% if (!gst.tables.b2b.count) { %>
+        Every sale here is treated as B2C: checkout does not collect a buyer GSTIN yet,
+        so a reseller cannot claim input credit.
+      <% } %>
+    </p>
+  </div>
+</div>
+
+<%- include('./partials/close') %>

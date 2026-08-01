@@ -1,0 +1,27 @@
+<%
+  const c = config.theme.colors;
+  const money = (n) => config.currency.symbol + Number(n || 0).toLocaleString(config.currency.locale || 'en-IN');
+  const first = String(order.customer.name || '').split(' ')[0] || 'there';
+  const cashDue = status === 'shipped' && order.codPlan && order.codPlan.dueOnDelivery;
+%>
+<%- include('./_head', { config, brand, settings, title: 'Order ' + order.id + ' — ' + status, preheader: headline }) %>
+
+<p style="margin:0 0 6px; font-family:Georgia,serif; font-size:22px; color:<%= c.ink %>;"><%= headline %></p>
+
+<p style="margin:0 0 4px; font-size:14px; line-height:1.7; color:<%= c.muted %>;">
+  <%= first %>, order <strong style="color:<%= c.ink %>;"><%= order.id %></strong> is now
+  <strong style="color:<%= c.ink %>;"><%= status %></strong>.
+  <% if (cashDue) { %>
+    Please keep <strong style="color:<%= c.ink %>;"><%= money(order.codPlan.dueOnDelivery) %></strong> in cash ready for the courier.
+  <% } %>
+</p>
+
+<%- include('./_order-table', { config, order }) %>
+
+<% if (status === 'cancelled') { %>
+  <p style="margin:20px 0 0; font-size:13px; line-height:1.7; color:<%= c.muted %>;">
+    Anything already paid is refunded to the original payment method within 5–7 working days.
+  </p>
+<% } %>
+
+<%- include('./_foot', { config, brand, settings }) %>

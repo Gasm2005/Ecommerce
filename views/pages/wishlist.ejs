@@ -1,0 +1,24 @@
+<%- include('../partials/document-open', { title: 'Wishlist' }) %>
+
+<div class="mx-auto max-w-[1600px] px-4 py-8 lg:px-8 lg:py-12">
+  <div class="border-b border-line pb-6">
+    <p class="text-[10px] uppercase tracking-luxe text-gold">Saved for later</p>
+    <h1 class="mt-2 font-serif text-3xl lg:text-4xl">Wishlist <span class="text-lg text-muted">(<%= products.length %>)</span></h1>
+  </div>
+
+  <% if (!products.length) { %>
+    <div class="py-24 text-center">
+      <p class="font-serif text-2xl">Nothing saved yet</p>
+      <p class="mx-auto mt-3 max-w-sm text-sm text-muted">Tap the heart on any piece to keep it here — your list is remembered on this device.</p>
+      <a href="/category/all" class="mt-8 inline-block bg-maroon px-8 py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">Start browsing</a>
+    </div>
+  <% } else { %>
+    <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-12">
+      <% products.forEach(function (p) { %>
+        <%- include('../partials/product-card', { product: p }) %>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/document-close') %>

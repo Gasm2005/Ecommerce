@@ -1,0 +1,11 @@
+<% if (ok) { %>
+  <div class="border border-gold/50 bg-gold/5 p-5">
+    <p class="font-serif text-lg">Thank you</p>
+    <p class="mt-2 text-sm leading-relaxed text-muted">
+      Your review of <%= product.name %> is with our team. We check reviews (and any photos or video)
+      before publishing — usually within a day.
+    </p>
+  </div>
+<% } else { %>
+  <%- include('./review-form', { product: product, reason: reason || 'Please check the highlighted details.', state: state || {}, keptMedia: keptMedia || [] }) %>
+<% } %>

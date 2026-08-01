@@ -1,0 +1,59 @@
+<%
+  const isAppend = (typeof append !== 'undefined') && append;
+  // Fragment route — never the pretty /category URL, or the whole page would
+  // get swapped into the grid.
+  const nextUrl = catalog.buildFragmentUrl(slug, filters, { page: filters.page + 1 });
+  const revealTrigger = config.features.infiniteScroll ? 'revealed once, click' : 'click';
+%>
+
+<% if (!result.items.length) { %>
+
+  <div class="col-span-full py-20 text-center">
+    <p class="font-serif text-2xl">Nothing matches those filters</p>
+    <p class="mx-auto mt-3 max-w-sm text-sm text-muted">Try removing a filter, or widen the price range. Our stylists can also source pieces on request.</p>
+    <button type="button" onclick="clearFilters()"
+            class="mt-7 inline-block border border-maroon px-7 py-3 text-[11px] uppercase tracking-luxe text-maroon transition hover:bg-maroon hover:text-ivory">Clear all filters</button>
+  </div>
+
+<% } else { %>
+
+  <% result.items.forEach(function (p, i) { %>
+    <%- include('../partials/product-card', { product: p, priority: (!isAppend && i < 4) }) %>
+  <% }); %>
+
+  <% if (result.hasMore) { %>
+    <div id="grid-sentinel" class="col-span-full flex flex-col items-center pt-6">
+      <button type="button"
+              hx-get="<%= nextUrl %>"
+              hx-trigger="<%= revealTrigger %>"
+              hx-target="#grid-sentinel"
+              hx-swap="outerHTML"
+              hx-indicator="#more-skeleton"
+              class="border border-ink px-9 py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:bg-maroon hover:text-ivory">
+        Load more <span class="text-muted">(<%= result.total - (result.page * result.perPage) %> left)</span>
+      </button>
+
+      <div id="more-skeleton" class="htmx-indicator mt-8 grid w-full grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4 lg:gap-x-6">
+        <% for (let s = 0; s < 4; s++) { %>
+          <div><div class="skeleton aspect-[3/4]"></div><div class="skeleton mt-3 h-4 w-3/4"></div><div class="skeleton mt-2 h-3 w-1/3"></div></div>
+        <% } %>
+      </div>
+    </div>
+  <% } else if (filters.page > 1) { %>
+    <p class="col-span-full pt-8 text-center text-[10px] uppercase tracking-luxe text-muted">You’ve reached the end of this edit</p>
+  <% } %>
+
+<% } %>
+
+<%
+  // Out-of-band bits: only for filter/sort swaps (an append must not clobber them).
+  if (isHx && !isAppend) {
+%>
+  <p id="result-count" hx-swap-oob="true" class="text-xs text-muted">
+    <%= result.total %> <%= result.total === 1 ? 'piece' : 'pieces' %>
+  </p>
+
+  <%- include('../partials/active-chips', { oob: true }) %>
+
+  <span id="filter-count" hx-swap-oob="true" class="<%= activeCount ? '' : 'hidden' %> ml-1 text-maroon">(<%= activeCount %>)</span>
+<% } %>

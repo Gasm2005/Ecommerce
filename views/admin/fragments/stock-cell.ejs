@@ -1,0 +1,21 @@
+<%
+  /* Inline stock stepper — swaps itself, so the row never reloads.
+     locals: p (product), threshold */
+  const stock = Number.isFinite(p.stock) ? p.stock : null;
+  const tone = stock === null ? 'info' : (stock <= 0 ? 'critical' : (stock <= threshold ? 'warning' : 'good'));
+%>
+<span id="stock-<%= p.id %>" class="inline-flex items-center gap-1.5">
+  <button class="border border-line px-1.5 leading-none text-muted transition hover:border-maroon hover:text-maroon"
+          hx-post="/admin/products/<%= p.id %>/stock" hx-target="#stock-<%= p.id %>" hx-swap="outerHTML"
+          hx-vals='<%- JSON.stringify({ delta: -1, token: adminToken || undefined }) %>'
+          aria-label="Decrease stock">−</button>
+
+  <span class="pill pill-<%= tone %> min-w-[46px] justify-center">
+    <%= stock === null ? '—' : (stock <= 0 ? 'Out' : stock) %>
+  </span>
+
+  <button class="border border-line px-1.5 leading-none text-muted transition hover:border-maroon hover:text-maroon"
+          hx-post="/admin/products/<%= p.id %>/stock" hx-target="#stock-<%= p.id %>" hx-swap="outerHTML"
+          hx-vals='<%- JSON.stringify({ delta: 1, token: adminToken || undefined }) %>'
+          aria-label="Increase stock">+</button>
+</span>

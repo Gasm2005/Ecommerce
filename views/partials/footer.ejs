@@ -1,0 +1,45 @@
+<footer class="mt-24 border-t border-line bg-cream/60">
+  <div class="mx-auto max-w-[1600px] px-4 py-14 lg:px-8 lg:py-20">
+    <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+
+      <div class="lg:col-span-4">
+        <span class="block font-serif text-2xl tracking-[0.18em]"><%= config.brand.logoText %></span>
+        <% if (config.brand.logoSubtext) { %>
+          <span class="mt-1 block text-[9px] tracking-luxe text-gold"><%= config.brand.logoSubtext %></span>
+        <% } %>
+        <p class="mt-5 max-w-sm text-sm leading-relaxed text-muted"><%= config.footer.blurb %></p>
+        <div class="mt-6 space-y-1 text-sm text-muted">
+          <p><a href="tel:<%= config.brand.supportPhone %>" class="hover:text-maroon"><%= config.brand.supportPhone %></a></p>
+          <p><a href="mailto:<%= config.brand.supportEmail %>" class="hover:text-maroon"><%= config.brand.supportEmail %></a></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8">
+        <% config.footer.columns.forEach(function (col) { %>
+          <div>
+            <p class="mb-4 text-[10px] uppercase tracking-luxe text-gold"><%= col.title %></p>
+            <ul class="space-y-2.5">
+              <% col.links.forEach(function (l) { %>
+                <li><a href="<%= l.href %>" class="text-sm text-muted transition hover:text-maroon"><%= l.label %></a></li>
+              <% }); %>
+            </ul>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="mt-14 flex flex-col gap-5 border-t border-line pt-7 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex flex-wrap items-center gap-5">
+        <% config.footer.social.forEach(function (s) { %>
+          <a href="<%= s.href %>" class="text-[10px] uppercase tracking-luxe text-muted transition hover:text-maroon"><%= s.label %></a>
+        <% }); %>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <% config.footer.payments.forEach(function (pm) { %>
+          <span class="border border-line bg-ivory px-2.5 py-1 text-[9px] uppercase tracking-[0.12em] text-muted"><%= pm %></span>
+        <% }); %>
+      </div>
+      <p class="text-[11px] text-muted"><%= config.footer.copyright %></p>
+    </div>
+  </div>
+</footer>

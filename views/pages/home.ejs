@@ -1,0 +1,57 @@
+<%- include('../partials/document-open', { title: null }) %>
+
+<!-- ================================ hero ================================ -->
+<section class="relative">
+  <div class="relative h-[78vh] min-h-[520px] w-full overflow-hidden bg-cream lg:h-[86vh]">
+    <img src="<%= config.hero.image || ('/ph.svg?seed=hero-main&w=1920&h=1080&kind=hero&label=' + encodeURIComponent(config.brand.name + ' Bridal 2026')) %>"
+         alt="<%= config.hero.imageAlt %>" fetchpriority="high" decoding="async"
+         class="absolute inset-0 h-full w-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-ink/55 via-ink/25 to-transparent"></div>
+
+    <div class="relative mx-auto flex h-full max-w-[1600px] items-center px-6 lg:px-8">
+      <div class="max-w-xl text-ivory">
+        <p class="text-[10px] uppercase tracking-luxe text-goldLight"><%= config.hero.eyebrow %></p>
+        <h1 class="mt-5 whitespace-pre-line font-serif text-[2.5rem] leading-[1.08] sm:text-6xl lg:text-[4.25rem]"><%= config.hero.heading %></h1>
+        <p class="mt-6 max-w-md text-sm leading-relaxed text-ivory/85 lg:text-base"><%= config.hero.body %></p>
+        <div class="mt-9 flex flex-wrap gap-3">
+          <a href="<%= config.hero.ctaPrimary.href %>"
+             class="bg-ivory px-8 py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:bg-gold hover:text-ivory"><%= config.hero.ctaPrimary.label %></a>
+          <a href="<%= config.hero.ctaSecondary.href %>"
+             class="border border-ivory/60 px-8 py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:border-ivory hover:bg-ivory/10"><%= config.hero.ctaSecondary.label %></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- trust strip -->
+  <div class="border-b border-line bg-ivory">
+    <div class="mx-auto grid max-w-[1600px] grid-cols-2 divide-x divide-line lg:grid-cols-4 lg:px-8">
+      <% config.trustBadges.forEach(function (b, i) { %>
+        <div class="px-4 py-5 text-center <%= i > 1 ? 'border-t border-line lg:border-t-0' : '' %>">
+          <p class="text-[10px] uppercase tracking-luxe text-gold"><%= b.title %></p>
+          <p class="mt-1 text-xs text-muted"><%= b.text %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== sections ============================== -->
+<% (config.homeSections || []).forEach(function (section, i) { %>
+  <% if (i === 0) { %>
+    <%- include('../fragments/home-section', { section: section, index: i, lazy: false }) %>
+  <% } else { %>
+    <div hx-get="/fragments/home-section/<%= i %>" hx-trigger="revealed once" hx-swap="outerHTML"
+         class="mx-auto max-w-[1600px] px-4 py-16 lg:px-8">
+      <div class="skeleton mx-auto h-4 w-28"></div>
+      <div class="skeleton mx-auto mt-4 h-8 w-72"></div>
+      <div class="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-6">
+        <% for (let s = 0; s < 4; s++) { %>
+          <div><div class="skeleton aspect-[3/4]"></div><div class="skeleton mt-3 h-4 w-3/4"></div><div class="skeleton mt-2 h-3 w-1/3"></div></div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+<% }); %>
+
+<%- include('../partials/document-close') %>

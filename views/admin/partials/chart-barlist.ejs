@@ -1,0 +1,28 @@
+<%
+  /* Horizontal bar list — magnitude comparison across categories. One hue
+     (sequential): identity comes from the row label, not from colour.
+     locals: rows [{label, value, meta}], valueFormat ('money'|'number') */
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  const fmt = (typeof valueFormat !== 'undefined' && valueFormat === 'number')
+    ? (v) => v.toLocaleString('en-IN')
+    : (v) => money(Math.round(v));
+%>
+<div class="viz relative space-y-2.5">
+  <% if (!rows.length) { %>
+    <p class="py-6 text-center text-[12px] text-muted">No data in this period.</p>
+  <% } %>
+  <% rows.forEach(function (r) { %>
+    <div>
+      <div class="flex items-baseline justify-between gap-3">
+        <span class="truncate text-[12.5px] capitalize text-ink"><%= r.label %></span>
+        <span class="shrink-0 text-[12px] tabular-nums text-muted"><%= fmt(r.value) %></span>
+      </div>
+      <div class="mt-1.5 h-[7px] w-full bg-cream"
+           data-label="<%= r.label %>" data-value="<%= fmt(r.value) %>"
+           <%= r.meta ? 'data-value2="' + r.meta + '"' : '' %>>
+        <div class="h-full rounded-r-[3px]" style="width: <%= Math.max(1.5, (r.value / max) * 100).toFixed(1) %>%; background: var(--series-1)"></div>
+      </div>
+      <% if (r.meta) { %><p class="mt-1 text-[10.5px] text-muted"><%= r.meta %></p><% } %>
+    </div>
+  <% }); %>
+</div>

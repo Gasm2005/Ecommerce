@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Not allowed · <%= config.brand.name %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: <%- JSON.stringify(config.theme.colors) %> } } }
+  </script>
+</head>
+<body class="flex min-h-screen items-center justify-center bg-cream px-4 font-sans text-ink">
+  <div class="max-w-sm border border-line bg-ivory p-8 text-center">
+    <p class="text-[10px] uppercase tracking-[0.18em] text-gold">Admin</p>
+    <h1 class="mt-3 font-serif text-2xl">Not your section</h1>
+    <p class="mt-3 text-sm leading-relaxed text-muted">
+      Your account is a <strong class="text-ink"><%= user.role %></strong>, which doesn't include
+      <strong class="text-ink"><%= section %></strong>. Ask an owner to change your role if you need it.
+    </p>
+    <div class="mt-6 flex flex-wrap justify-center gap-3">
+      <a href="/admin" class="bg-maroon px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-ivory">Dashboard</a>
+      <a href="/admin/logout" class="border border-line px-6 py-3 text-[11px] uppercase tracking-[0.16em] text-muted">Sign out</a>
+    </div>
+  </div>
+</body>
+</html>

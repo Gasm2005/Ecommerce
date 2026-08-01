@@ -1,0 +1,107 @@
+/* ------------------------------------------------------------------------
+   admin.css — admin-only additions on top of app.css.
+   ------------------------------------------------------------------------ */
+
+/* Charts: roles, so light/dark and rebrands change in one place. */
+.viz {
+  --surface-1: #ffffff;
+  --text-primary: #17130f;
+  --text-secondary: #77706a;
+  --text-muted: #9d968f;
+  --grid: #ece5d9;
+  --series-1: #a32b41;   /* validated pair: CVD ΔE 15.7, normal ΔE 21.5 */
+  --series-2: #a98436;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --critical: #d03b3b;
+}
+
+/* Recessive axes and gridlines (never compete with the data). */
+.viz .grid-line { stroke: var(--grid); stroke-width: 1; }
+.viz .axis-text { fill: var(--text-secondary); font-size: 10px; }
+.viz .value-text { fill: var(--text-primary); font-size: 11px; }
+
+/* Bars: 4px rounded data-end anchored to the baseline. */
+.viz .bar { transition: opacity .15s ease; }
+.viz:hover .bar { opacity: .55; }
+.viz .bar:hover, .viz .bar.is-active { opacity: 1; }
+
+/* 2px surface gap between adjacent fills is drawn via bar width, not stroke. */
+.viz .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.viz .marker { r: 4; stroke: var(--surface-1); stroke-width: 2; }
+
+/* Sparkline blocks sit inside KPI tiles. */
+.spark { display: block; width: 100%; height: 34px; overflow: visible; }
+
+/* Hover layer: one tooltip element per chart, positioned by admin.js. */
+.viz-tooltip {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  white-space: nowrap;
+  border: 1px solid #ece5d9;
+  background: #fff;
+  padding: 6px 9px;
+  font-size: 11px;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px -12px rgba(23, 19, 15, .35);
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.viz-tooltip.is-visible { opacity: 1; }
+.viz-tooltip b { font-weight: 500; }
+
+/* Tables: dense, scannable, sticky header inside a scroll container. */
+.adm-table { width: 100%; border-collapse: collapse; }
+.adm-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #fff;
+  border-bottom: 1px solid #e3d8c6;
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #77706a;
+  white-space: nowrap;
+}
+.adm-table tbody td { border-bottom: 1px solid rgba(227, 216, 198, .6); padding: 10px 12px; vertical-align: middle; }
+.adm-table tbody tr:hover { background: #fbf8f3; }
+.adm-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Status pills. */
+.pill { display: inline-flex; align-items: center; gap: 5px; border: 1px solid; padding: 2px 8px; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.pill::before { content: ''; width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+.pill-good { color: #0a7d0a; border-color: rgba(12,163,12,.35); background: rgba(12,163,12,.07); }
+.pill-warning { color: #8a6206; border-color: rgba(250,178,25,.45); background: rgba(250,178,25,.1); }
+.pill-critical { color: #b02f2f; border-color: rgba(208,59,59,.35); background: rgba(208,59,59,.07); }
+.pill-info { color: #4b4740; border-color: #e3d8c6; background: #faf7f1; }
+
+/* Inputs: one class instead of repeating six utilities everywhere. */
+.adm-input, .adm-select, .adm-textarea {
+  width: 100%;
+  border: 1px solid #e3d8c6;
+  background: #fff;
+  padding: 8px 11px;
+  font-size: 13px;
+  color: #17130f;
+}
+.adm-input:focus, .adm-select:focus, .adm-textarea:focus { outline: none; border-color: #6b1b2b; }
+.adm-textarea { line-height: 1.55; resize: vertical; }
+.adm-label { display: block; margin-bottom: 5px; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: #77706a; }
+
+.adm-btn { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #17130f; padding: 9px 16px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; transition: all .15s ease; }
+.adm-btn:hover { border-color: #6b1b2b; color: #6b1b2b; }
+.adm-btn-primary { border-color: #6b1b2b; background: #6b1b2b; color: #fbf8f3; }
+.adm-btn-primary:hover { background: #48111c; border-color: #48111c; color: #fbf8f3; }
+.adm-btn-ghost { border-color: #e3d8c6; color: #77706a; }
+.adm-btn-ghost:hover { border-color: #6b1b2b; color: #6b1b2b; }
+.adm-btn-danger { border-color: rgba(208,59,59,.5); color: #b02f2f; }
+.adm-btn-danger:hover { background: #d03b3b; border-color: #d03b3b; color: #fff; }
+.adm-btn-sm { padding: 5px 10px; font-size: 9.5px; }
+
+.card { border: 1px solid #e3d8c6; background: #fff; }
+
+/* HTMX: fade the swapping region instead of showing a spinner. */
+.adm-swap.htmx-swapping { opacity: .35; transition: opacity .12s ease; }

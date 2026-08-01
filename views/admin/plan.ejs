@@ -1,0 +1,132 @@
+<%- include('./partials/open', {
+  active: 'plan',
+  adminTitle: 'Your plan',
+  adminSubtitle: info.plan.label + ' · ' + info.features.filter(function (f) { return f.on; }).length + ' of ' + info.features.length + ' features on',
+  adminActions: ''
+}) %>
+
+<%
+  /* An honest inventory: everything the platform can do, what this store has,
+     and what the next tier adds. No countdowns, no "limited offer" — a client
+     deciding whether to spend a lakh deserves a plain table. */
+  const money = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
+  const on = info.features.filter((f) => f.on);
+  const off = info.features.filter((f) => !f.on);
+%>
+
+<div class="grid gap-3 xl:grid-cols-3">
+
+  <!-- ------------------------------------------------------- current ---- -->
+  <div class="card p-4">
+    <p class="adm-label">Current plan</p>
+    <p class="mt-1 font-serif text-2xl"><%= info.plan.label %></p>
+    <p class="mt-1 text-[12.5px] leading-relaxed text-muted"><%= info.plan.blurb %></p>
+    <p class="mt-3 text-[11px] text-muted"><%= money(info.plan.price) %> one time</p>
+
+    <% if (info.upgradeTo) { %>
+      <div class="mt-4 border-t border-line pt-4">
+        <p class="adm-label">Next tier</p>
+        <p class="mt-1 text-[13px] text-ink"><%= info.upgradeTo.label %> · <%= money(info.upgradeTo.price) %></p>
+        <p class="mt-1 text-[12px] leading-relaxed text-muted">
+          Adds <%= off.length %> feature<%= off.length === 1 ? '' : 's' %>.
+        </p>
+      </div>
+    <% } else { %>
+      <p class="mt-4 border-t border-line pt-4 text-[12px] text-muted">
+        You're on the full platform — nothing is withheld.
+      </p>
+    <% } %>
+  </div>
+
+  <!-- ------------------------------------------------------ included ---- -->
+  <div class="card p-4">
+    <div class="flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Included</h2>
+      <span class="pill pill-good"><%= on.length %></span>
+    </div>
+    <ul class="mt-3 space-y-2">
+      <% on.forEach(function (f) { %>
+        <li class="flex items-start gap-2 text-[12.5px]">
+          <span class="mt-[3px] text-good">✓</span>
+          <span>
+            <span class="text-ink"><%= f.label %></span>
+            <% if (f.viaExtra) { %><span class="pill pill-info ml-1">added on</span><% } %>
+            <span class="block text-[11px] leading-relaxed text-muted"><%= f.blurb %></span>
+          </span>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+
+  <!-- -------------------------------------------------------- locked ---- -->
+  <div class="card p-4">
+    <div class="flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Not included</h2>
+      <span class="pill <%= off.length ? 'pill-warning' : 'pill-good' %>"><%= off.length %></span>
+    </div>
+
+    <% if (!off.length) { %>
+      <p class="mt-3 text-[12.5px] text-muted">Everything is switched on.</p>
+    <% } else { %>
+      <ul class="mt-3 space-y-2">
+        <% off.forEach(function (f) { %>
+          <li class="flex items-start gap-2 text-[12.5px]">
+            <span class="mt-[2px] text-muted">🔒</span>
+            <span>
+              <span class="text-ink"><%= f.label %></span>
+              <% if (f.unlockedBy) { %>
+                <span class="pill pill-info ml-1"><%= f.unlockedBy.label %></span>
+              <% } %>
+              <span class="block text-[11px] leading-relaxed text-muted"><%= f.blurb %></span>
+            </span>
+          </li>
+        <% }); %>
+      </ul>
+    <% } %>
+  </div>
+</div>
+
+<!-- ------------------------------------------------------- comparison ---- -->
+<div class="card mt-3 p-4">
+  <h2 class="font-serif text-base">Every plan</h2>
+  <div class="mt-3 overflow-x-auto">
+    <table class="adm-table min-w-[620px]">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <% info.plans.forEach(function (p) { %>
+            <th class="num whitespace-nowrap">
+              <%= p.label %>
+              <span class="block text-[10px] font-normal normal-case tracking-normal text-muted"><%= money(p.price) %></span>
+            </th>
+          <% }); %>
+        </tr>
+      </thead>
+      <tbody>
+        <% info.features.forEach(function (f) { %>
+          <tr>
+            <td>
+              <span class="text-ink"><%= f.label %></span>
+              <% if (f.core) { %><span class="pill pill-info ml-1">core</span><% } %>
+            </td>
+            <% info.plans.forEach(function (p) { %>
+              <%
+                const included = p.features === '*' || p.features.includes(f.id);
+                const isCurrent = p.id === info.plan.id;
+              %>
+              <td class="num <%= isCurrent ? 'bg-cream/60' : '' %>">
+                <span class="<%= included ? 'text-good' : 'text-muted/40' %>"><%= included ? '✓' : '—' %></span>
+              </td>
+            <% }); %>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-3 text-[11px] leading-relaxed text-muted">
+    The shaded column is your plan. Every feature is already built and tested —
+    a higher tier switches it on, it is never installed later.
+  </p>
+</div>
+
+<%- include('./partials/close') %>

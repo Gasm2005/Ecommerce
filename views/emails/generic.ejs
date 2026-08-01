@@ -1,0 +1,7 @@
+<% const c = config.theme.colors; %>
+<%- include('./_head', { config, brand, settings, title: headline, preheader: String(body).slice(0, 90) }) %>
+
+<p style="margin:0 0 8px; font-family:Georgia,serif; font-size:22px; color:<%= c.ink %>;"><%= headline %></p>
+<p style="margin:0; font-size:14px; line-height:1.7; color:<%= c.muted %>;"><%= body %></p>
+
+<%- include('./_foot', { config, brand, settings }) %>

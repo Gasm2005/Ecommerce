@@ -1,0 +1,1063 @@
+[
+  {
+    "id": "p001",
+    "slug": "raniya-zardozi-bridal-lehenga",
+    "name": "Raniya Zardozi Bridal Lehenga",
+    "subtitle": "Hand-embroidered raw silk with dupatta",
+    "categories": [
+      "bridal",
+      "lehengas"
+    ],
+    "price": 189000,
+    "mrp": 225000,
+    "colors": [
+      "Rani Pink",
+      "Maroon"
+    ],
+    "fabric": "Raw Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Wedding",
+      "Reception"
+    ],
+    "popularity": 98,
+    "createdAt": "2026-06-18",
+    "badge": "Bestseller",
+    "description": "A ceremonial lehenga built on hand-loomed raw silk, embroidered end to end in zardozi, dabka and antique sequins. The panel layout is drawn by hand so the motifs bloom outward from the hem — a technique our karigars call phool-jaal.",
+    "fabricDetails": "Raw silk base · Zardozi, dabka, kasab & antique sequin hand embroidery · Cancan-lined 8-panel skirt · Organza dupatta with hand-scalloped gota border",
+    "care": "Dry clean only. Store rolled in muslin.",
+    "deliveryDays": 21,
+    "_imagesNote": "Example of an explicit gallery — put as many URLs as you like (2, 4, 8…). Leave images:[] to fall back to generated placeholders. Paths can be /static/img/... , or any absolute CDN/S3 URL.",
+    "images": [
+      "/ph.svg?seed=p001-front&w=900&h=1200&label=Front",
+      "/ph.svg?seed=p001-back&w=900&h=1200&label=Back",
+      "/ph.svg?seed=p001-dupatta&w=900&h=1200&label=Dupatta",
+      "/ph.svg?seed=p001-blouse&w=900&h=1200&label=Blouse",
+      "/ph.svg?seed=p001-zardozi&w=900&h=1200&label=Zardozi%20detail",
+      "/ph.svg?seed=p001-hem&w=900&h=1200&label=Hem%20detail"
+    ],
+    "stock": 5,
+    "cost": 77659,
+    "sku": "AAN-0001"
+  },
+  {
+    "id": "p002",
+    "slug": "kesar-banarasi-kadhwa-saree",
+    "name": "Kesar Banarasi Kadhwa Saree",
+    "subtitle": "Pure katan silk, real zari",
+    "categories": [
+      "sarees",
+      "bridal"
+    ],
+    "price": 68500,
+    "mrp": 79000,
+    "colors": [
+      "Gold",
+      "Ivory"
+    ],
+    "fabric": "Banarasi Silk",
+    "sizes": [
+      "Free Size"
+    ],
+    "occasion": [
+      "Wedding",
+      "Festive"
+    ],
+    "popularity": 94,
+    "createdAt": "2026-05-30",
+    "badge": "Handloom",
+    "description": "Woven on a single loom in Banaras over forty days using the kadhwa technique, where each motif is woven separately rather than cut away — the reason the reverse of this saree is as clean as its face.",
+    "fabricDetails": "Pure katan silk · 98% tested real zari · Kadhwa buta all over · Unstitched blouse piece 0.8m",
+    "care": "Dry clean. Refold along a new line every three months.",
+    "deliveryDays": 7,
+    "images": [],
+    "stock": 12,
+    "cost": 30338,
+    "sku": "AAN-0002"
+  },
+  {
+    "id": "p003",
+    "slug": "noor-ivory-tissue-lehenga",
+    "name": "Noor Ivory Tissue Lehenga",
+    "subtitle": "Pastel bridal with pearl work",
+    "categories": [
+      "bridal",
+      "lehengas"
+    ],
+    "price": 142000,
+    "mrp": 165000,
+    "colors": [
+      "Ivory",
+      "Champagne"
+    ],
+    "fabric": "Tissue Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Wedding",
+      "Engagement"
+    ],
+    "popularity": 91,
+    "createdAt": "2026-07-02",
+    "badge": "New",
+    "description": "For the daylight bride. Ivory tissue holds a faint metallic sheen on its own, so the embroidery stays deliberately restrained — freshwater pearls, crystal beads and a whisper of silver dabka.",
+    "fabricDetails": "Tissue silk · Pearl, crystal & silver dabka hand work · Structured corset blouse with boning · Scalloped tissue dupatta",
+    "care": "Dry clean only.",
+    "deliveryDays": 18,
+    "images": [],
+    "stock": 11,
+    "cost": 60221,
+    "sku": "AAN-0003"
+  },
+  {
+    "id": "p004",
+    "slug": "mehr-velvet-sangeet-lehenga",
+    "name": "Mehr Velvet Sangeet Lehenga",
+    "subtitle": "Emerald velvet with mirror work",
+    "categories": [
+      "festive",
+      "lehengas"
+    ],
+    "price": 96000,
+    "mrp": 118000,
+    "colors": [
+      "Emerald",
+      "Bottle Green"
+    ],
+    "fabric": "Velvet",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Sangeet",
+      "Reception"
+    ],
+    "popularity": 88,
+    "createdAt": "2026-06-05",
+    "badge": null,
+    "description": "Cut for movement. The velvet is a fine micro-pile that photographs deep green under warm light, and the mirror work is set in concentric rings so the skirt throws light while you dance.",
+    "fabricDetails": "Micro-pile velvet · Hand-cut mirror, thread & bead work · Flared 10-panel skirt · Net dupatta",
+    "care": "Dry clean. Never fold along the pile.",
+    "deliveryDays": 16,
+    "images": [],
+    "stock": 6,
+    "cost": 45750,
+    "sku": "AAN-0004"
+  },
+  {
+    "id": "p005",
+    "slug": "saanjh-sequin-cocktail-gown",
+    "name": "Saanjh Sequin Cocktail Gown",
+    "subtitle": "Liquid sequin, cowl back",
+    "categories": [
+      "cocktail",
+      "gowns"
+    ],
+    "price": 54000,
+    "mrp": 62000,
+    "colors": [
+      "Wine",
+      "Black"
+    ],
+    "fabric": "Sequin",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Cocktail",
+      "Reception"
+    ],
+    "popularity": 86,
+    "createdAt": "2026-07-11",
+    "badge": "New",
+    "description": "A bias-cut column in fine liquid sequin that pours over the body. The back falls into a deep cowl, held by a single hand-finished loop.",
+    "fabricDetails": "Fine liquid sequin on stretch mesh · Bias cut · Concealed side zip · Fully lined",
+    "care": "Dry clean only. Store flat.",
+    "deliveryDays": 12,
+    "images": [],
+    "stock": 10,
+    "cost": 23164,
+    "sku": "AAN-0005"
+  },
+  {
+    "id": "p006",
+    "slug": "gulaab-organza-saree",
+    "name": "Gulaab Organza Saree",
+    "subtitle": "Hand-painted rose motifs",
+    "categories": [
+      "sarees",
+      "festive"
+    ],
+    "price": 32000,
+    "mrp": 38000,
+    "colors": [
+      "Blush Pink",
+      "Ivory"
+    ],
+    "fabric": "Organza",
+    "sizes": [
+      "Free Size"
+    ],
+    "occasion": [
+      "Festive",
+      "Engagement"
+    ],
+    "popularity": 84,
+    "createdAt": "2026-06-28",
+    "badge": null,
+    "description": "Silk organza, hand-painted panel by panel with roses that fade from stem to bloom. No two sarees carry identical brushwork.",
+    "fabricDetails": "Pure silk organza · Hand-painted with fabric pigments · Satin piped edge · Raw silk blouse piece",
+    "care": "Dry clean. Avoid direct sunlight.",
+    "deliveryDays": 9,
+    "images": [],
+    "stock": 2,
+    "cost": 14675,
+    "sku": "AAN-0006"
+  },
+  {
+    "id": "p007",
+    "slug": "ambar-chanderi-anarkali",
+    "name": "Ambar Chanderi Anarkali",
+    "subtitle": "Floor-length with gota patti",
+    "categories": [
+      "festive"
+    ],
+    "price": 28500,
+    "mrp": 34000,
+    "colors": [
+      "Mustard",
+      "Gold"
+    ],
+    "fabric": "Chanderi",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "occasion": [
+      "Festive",
+      "Haldi"
+    ],
+    "popularity": 90,
+    "createdAt": "2026-05-14",
+    "badge": "Bestseller",
+    "description": "The everyday-festive workhorse. Chanderi keeps the volume airy through a long day, and the gota patti is stitched flat so nothing catches.",
+    "fabricDetails": "Handwoven Chanderi silk-cotton · Gota patti & mukaish work · 42 panel kalidar cut · Cotton churidar & Chanderi dupatta",
+    "care": "Dry clean recommended.",
+    "deliveryDays": 8,
+    "images": [],
+    "stock": 5,
+    "cost": 12673,
+    "sku": "AAN-0007"
+  },
+  {
+    "id": "p008",
+    "slug": "zoya-cape-reception-gown",
+    "name": "Zoya Cape Reception Gown",
+    "subtitle": "Draped gown with embroidered cape",
+    "categories": [
+      "gowns",
+      "bridal"
+    ],
+    "price": 118000,
+    "mrp": 138000,
+    "colors": [
+      "Champagne",
+      "Ivory"
+    ],
+    "fabric": "Crepe",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Reception",
+      "Cocktail"
+    ],
+    "popularity": 82,
+    "createdAt": "2026-07-20",
+    "badge": "New",
+    "description": "A pre-draped crepe gown under a detachable embroidered cape — two silhouettes in one, which is why it keeps ending up in reception trousseaus.",
+    "fabricDetails": "Stretch crepe base · Detachable net cape with zardozi & crystal work · Sweeping 18-inch trail · Boned bodice",
+    "care": "Dry clean only.",
+    "deliveryDays": 20,
+    "images": [],
+    "stock": 21,
+    "cost": 57254,
+    "sku": "AAN-0008"
+  },
+  {
+    "id": "p009",
+    "slug": "heer-red-bridal-saree",
+    "name": "Heer Red Bridal Saree",
+    "subtitle": "Georgette with zardozi border",
+    "categories": [
+      "sarees",
+      "bridal"
+    ],
+    "price": 87000,
+    "mrp": 99000,
+    "colors": [
+      "Red",
+      "Maroon"
+    ],
+    "fabric": "Georgette",
+    "sizes": [
+      "Free Size"
+    ],
+    "occasion": [
+      "Wedding"
+    ],
+    "popularity": 92,
+    "createdAt": "2026-04-22",
+    "badge": "Bestseller",
+    "description": "Bridal red without the weight. Fine georgette drapes close to the body while the embroidery is concentrated at the border and pallu, keeping the pleats light.",
+    "fabricDetails": "Fine georgette · Zardozi, dabka & sequin border with 9-inch pallu jaal · Hand-finished pico edge · Embroidered blouse piece",
+    "care": "Dry clean only.",
+    "deliveryDays": 14,
+    "images": [],
+    "stock": 17,
+    "cost": 42253,
+    "sku": "AAN-0009"
+  },
+  {
+    "id": "p010",
+    "slug": "ira-mirror-haldi-set",
+    "name": "Ira Mirror Haldi Set",
+    "subtitle": "Sharara set in marigold",
+    "categories": [
+      "festive"
+    ],
+    "price": 24000,
+    "mrp": 29000,
+    "colors": [
+      "Marigold",
+      "Mustard"
+    ],
+    "fabric": "Cotton Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Haldi",
+      "Mehendi"
+    ],
+    "popularity": 87,
+    "createdAt": "2026-06-12",
+    "badge": null,
+    "description": "Built for a morning function — breathable cotton silk, mirror work that survives being hugged, and a sharara that lets you sit cross-legged on the floor.",
+    "fabricDetails": "Cotton silk · Hand mirror & thread work · Elasticated sharara · Bandhani-print dupatta",
+    "care": "Gentle dry clean.",
+    "deliveryDays": 7,
+    "images": [],
+    "stock": 0,
+    "cost": 11032,
+    "sku": "AAN-0010"
+  },
+  {
+    "id": "p011",
+    "slug": "meera-mehendi-lehenga",
+    "name": "Meera Mehendi Lehenga",
+    "subtitle": "Bandhani with shisha work",
+    "categories": [
+      "festive",
+      "lehengas"
+    ],
+    "price": 46000,
+    "mrp": 54000,
+    "colors": [
+      "Turquoise",
+      "Marigold"
+    ],
+    "fabric": "Georgette",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Mehendi",
+      "Haldi"
+    ],
+    "popularity": 85,
+    "createdAt": "2026-05-08",
+    "badge": null,
+    "description": "Kutch shisha work over hand-tied bandhani. The palette is deliberately loud — this is the outfit that reads best in mehendi photographs.",
+    "fabricDetails": "Hand-tied bandhani georgette · Kutch shisha & torn-thread work · Cancan-free light flare · Tassel-trimmed dupatta",
+    "care": "Dry clean only.",
+    "deliveryDays": 11,
+    "images": [],
+    "stock": 1,
+    "cost": 20122,
+    "sku": "AAN-0011"
+  },
+  {
+    "id": "p012",
+    "slug": "aisha-black-tulle-gown",
+    "name": "Aisha Black Tulle Gown",
+    "subtitle": "Corset gown with crystal spray",
+    "categories": [
+      "cocktail",
+      "gowns"
+    ],
+    "price": 76000,
+    "mrp": 89000,
+    "colors": [
+      "Black",
+      "Wine"
+    ],
+    "fabric": "Tulle",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Cocktail"
+    ],
+    "popularity": 80,
+    "createdAt": "2026-07-16",
+    "badge": "New",
+    "description": "Nine layers of soft tulle over a boned corset, with crystals sprayed densest at the bodice and thinning toward the hem so the skirt looks like it dissolves.",
+    "fabricDetails": "9-layer soft tulle · Fully boned corset with lace-up back · Hand-set crystal & bugle bead spray · Sweep train",
+    "care": "Dry clean. Hang on a padded hanger.",
+    "deliveryDays": 15,
+    "images": [],
+    "stock": 24,
+    "cost": 31331,
+    "sku": "AAN-0012"
+  },
+  {
+    "id": "p013",
+    "slug": "tara-tissue-cocktail-saree",
+    "name": "Tara Tissue Cocktail Saree",
+    "subtitle": "Pre-draped with belt",
+    "categories": [
+      "cocktail",
+      "sarees"
+    ],
+    "price": 39000,
+    "mrp": 46000,
+    "colors": [
+      "Silver",
+      "Champagne"
+    ],
+    "fabric": "Tissue Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Cocktail",
+      "Engagement"
+    ],
+    "popularity": 83,
+    "createdAt": "2026-07-08",
+    "badge": null,
+    "description": "A pre-stitched tissue saree you step into. Pleats are set by hand and pressed permanently, and the embroidered belt does the holding — thirty seconds to wear.",
+    "fabricDetails": "Tissue silk · Permanently set hand pleats · Embroidered waist belt · Stitched blouse (specify size)",
+    "care": "Dry clean only.",
+    "deliveryDays": 10,
+    "images": [],
+    "stock": 12,
+    "cost": 16968,
+    "sku": "AAN-0013"
+  },
+  {
+    "id": "p014",
+    "slug": "roohi-pastel-engagement-lehenga",
+    "name": "Roohi Pastel Engagement Lehenga",
+    "subtitle": "Powder blue with resham jaal",
+    "categories": [
+      "lehengas",
+      "festive"
+    ],
+    "price": 72000,
+    "mrp": 84000,
+    "colors": [
+      "Powder Blue",
+      "Ivory"
+    ],
+    "fabric": "Organza",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Engagement",
+      "Reception"
+    ],
+    "popularity": 79,
+    "createdAt": "2026-06-22",
+    "badge": null,
+    "description": "Resham thread jaal in tonal blue over organza — the embroidery reads as texture rather than pattern until you are close.",
+    "fabricDetails": "Silk organza · Tonal resham jaal with pearl centres · Lightly canned skirt · Organza dupatta with resham border",
+    "care": "Dry clean only.",
+    "deliveryDays": 15,
+    "images": [],
+    "stock": 9,
+    "cost": 33218,
+    "sku": "AAN-0014"
+  },
+  {
+    "id": "p015",
+    "slug": "shalin-maroon-velvet-gown",
+    "name": "Shalin Maroon Velvet Gown",
+    "subtitle": "High-neck with zardozi yoke",
+    "categories": [
+      "gowns",
+      "festive"
+    ],
+    "price": 64000,
+    "mrp": 74000,
+    "colors": [
+      "Maroon",
+      "Wine"
+    ],
+    "fabric": "Velvet",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Reception",
+      "Festive"
+    ],
+    "popularity": 76,
+    "createdAt": "2026-05-26",
+    "badge": null,
+    "description": "A winter-wedding gown. High neck, long sleeves, zardozi confined to the yoke — the velvet does the rest.",
+    "fabricDetails": "Stretch velvet · Zardozi & dabka yoke · Concealed back zip · Full lining",
+    "care": "Dry clean only.",
+    "deliveryDays": 14,
+    "images": [],
+    "stock": 13,
+    "cost": 30082,
+    "sku": "AAN-0015"
+  },
+  {
+    "id": "p016",
+    "slug": "naina-kanjivaram-saree",
+    "name": "Naina Kanjivaram Saree",
+    "subtitle": "Temple border, pure zari",
+    "categories": [
+      "sarees",
+      "bridal"
+    ],
+    "price": 94000,
+    "mrp": 108000,
+    "colors": [
+      "Emerald",
+      "Gold"
+    ],
+    "fabric": "Kanjivaram Silk",
+    "sizes": [
+      "Free Size"
+    ],
+    "occasion": [
+      "Wedding",
+      "Festive"
+    ],
+    "popularity": 89,
+    "createdAt": "2026-04-10",
+    "badge": "Handloom",
+    "description": "Woven in Kanchipuram with the traditional korvai join, where body and border are interlocked by hand on separate shuttles — you can feel the ridge where they meet.",
+    "fabricDetails": "Pure mulberry silk · Korvai temple border · Pure silver zari with gold dip · Contrast pallu, blouse piece attached",
+    "care": "Dry clean. Store in cotton, away from naphthalene.",
+    "deliveryDays": 9,
+    "images": [],
+    "stock": 1,
+    "cost": 41517,
+    "sku": "AAN-0016"
+  },
+  {
+    "id": "p017",
+    "slug": "avni-blush-cocktail-lehenga",
+    "name": "Avni Blush Cocktail Lehenga",
+    "subtitle": "Sequin skirt with cowl blouse",
+    "categories": [
+      "cocktail",
+      "lehengas"
+    ],
+    "price": 58000,
+    "mrp": 68000,
+    "colors": [
+      "Blush Pink",
+      "Champagne"
+    ],
+    "fabric": "Sequin",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Cocktail",
+      "Sangeet"
+    ],
+    "popularity": 81,
+    "createdAt": "2026-07-04",
+    "badge": null,
+    "description": "Sequin lehenga in a nude-blush that behaves like metallic under club light, paired with a draped cowl blouse and no dupatta by design.",
+    "fabricDetails": "Tonal sequin on mesh · Draped cowl blouse · Panelled slim-flare skirt · Fully lined in crepe",
+    "care": "Dry clean only.",
+    "deliveryDays": 13,
+    "images": [],
+    "stock": 6,
+    "cost": 23817,
+    "sku": "AAN-0017"
+  },
+  {
+    "id": "p018",
+    "slug": "kavya-red-benarasi-lehenga",
+    "name": "Kavya Red Banarasi Lehenga",
+    "subtitle": "Handloom brocade, bridal red",
+    "categories": [
+      "bridal",
+      "lehengas"
+    ],
+    "price": 156000,
+    "mrp": 182000,
+    "colors": [
+      "Red",
+      "Gold"
+    ],
+    "fabric": "Banarasi Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Wedding"
+    ],
+    "popularity": 95,
+    "createdAt": "2026-03-28",
+    "badge": "Bestseller",
+    "description": "A brocade bridal built entirely from handloom Banarasi — no embroidery at all. The weave carries the weight, which keeps it far lighter than a comparable zardozi lehenga.",
+    "fabricDetails": "Handloom Banarasi brocade with real zari · 8-panel skirt with cotton cancan · Brocade blouse · Rangkat dupatta",
+    "care": "Dry clean only.",
+    "deliveryDays": 24,
+    "images": [],
+    "stock": 22,
+    "cost": 68639,
+    "sku": "AAN-0018"
+  },
+  {
+    "id": "p019",
+    "slug": "dia-mint-festive-sharara",
+    "name": "Dia Mint Festive Sharara",
+    "subtitle": "Mukaish work, short kurta",
+    "categories": [
+      "festive"
+    ],
+    "price": 21000,
+    "mrp": 26000,
+    "colors": [
+      "Mint",
+      "Ivory"
+    ],
+    "fabric": "Chanderi",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "occasion": [
+      "Festive",
+      "Mehendi"
+    ],
+    "popularity": 78,
+    "createdAt": "2026-06-30",
+    "badge": null,
+    "description": "Lucknowi mukaish — flattened silver wire twisted into the weave — over pale mint Chanderi. Reads quiet in daylight, glitters faintly at night.",
+    "fabricDetails": "Chanderi silk-cotton · Hand mukaish (badla) work · Wide sharara pants · Matching dupatta",
+    "care": "Dry clean. Iron on reverse, low heat.",
+    "deliveryDays": 7,
+    "images": [],
+    "stock": 0,
+    "cost": 8854,
+    "sku": "AAN-0019"
+  },
+  {
+    "id": "p020",
+    "slug": "myra-ivory-cocktail-gown",
+    "name": "Myra Ivory Cocktail Gown",
+    "subtitle": "Pearl fringe, asymmetric hem",
+    "categories": [
+      "cocktail",
+      "gowns"
+    ],
+    "price": 68000,
+    "mrp": 79000,
+    "colors": [
+      "Ivory",
+      "Champagne"
+    ],
+    "fabric": "Crepe",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Cocktail",
+      "Engagement"
+    ],
+    "popularity": 74,
+    "createdAt": "2026-07-24",
+    "badge": "New",
+    "description": "Ivory crepe cut on an asymmetric hem, finished with a pearl fringe that moves half a beat behind you.",
+    "fabricDetails": "Heavy crepe · Hand-strung pearl & bugle fringe · Asymmetric hem · Invisible zip, fully lined",
+    "care": "Dry clean only. Store flat to protect fringe.",
+    "deliveryDays": 12,
+    "images": [],
+    "stock": 6,
+    "cost": 28971,
+    "sku": "AAN-0020"
+  },
+  {
+    "id": "p021",
+    "slug": "sanya-purple-silk-saree",
+    "name": "Sanya Purple Silk Saree",
+    "subtitle": "Paithani-inspired pallu",
+    "categories": [
+      "sarees",
+      "festive"
+    ],
+    "price": 43000,
+    "mrp": 51000,
+    "colors": [
+      "Purple",
+      "Gold"
+    ],
+    "fabric": "Banarasi Silk",
+    "sizes": [
+      "Free Size"
+    ],
+    "occasion": [
+      "Festive",
+      "Wedding"
+    ],
+    "popularity": 77,
+    "createdAt": "2026-05-19",
+    "badge": null,
+    "description": "A deep aubergine silk with a Paithani-inspired parrot-and-vine pallu woven in contrast gold.",
+    "fabricDetails": "Katan silk · Handwoven contrast pallu · Real zari border · Blouse piece included",
+    "care": "Dry clean only.",
+    "deliveryDays": 8,
+    "images": [],
+    "stock": 3,
+    "cost": 18205,
+    "sku": "AAN-0021"
+  },
+  {
+    "id": "p022",
+    "slug": "leher-blue-reception-lehenga",
+    "name": "Leher Blue Reception Lehenga",
+    "subtitle": "Midnight blue with silver dabka",
+    "categories": [
+      "lehengas",
+      "cocktail"
+    ],
+    "price": 108000,
+    "mrp": 126000,
+    "colors": [
+      "Navy",
+      "Silver"
+    ],
+    "fabric": "Velvet",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Reception",
+      "Cocktail"
+    ],
+    "popularity": 84,
+    "createdAt": "2026-06-15",
+    "badge": null,
+    "description": "Midnight velvet embroidered in silver dabka waves that run diagonally across the skirt, so the pattern lengthens the frame.",
+    "fabricDetails": "Micro-pile velvet · Silver dabka, cutdana & crystal work · Diagonal wave layout · Net dupatta with scalloped edge",
+    "care": "Dry clean only.",
+    "deliveryDays": 18,
+    "images": [],
+    "stock": 12,
+    "cost": 47864,
+    "sku": "AAN-0022"
+  },
+  {
+    "id": "p023",
+    "slug": "anaya-gold-tissue-gown",
+    "name": "Anaya Gold Tissue Gown",
+    "subtitle": "Pleated column with cape sleeves",
+    "categories": [
+      "gowns",
+      "festive"
+    ],
+    "price": 52000,
+    "mrp": 61000,
+    "colors": [
+      "Gold",
+      "Champagne"
+    ],
+    "fabric": "Tissue Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Festive",
+      "Reception"
+    ],
+    "popularity": 72,
+    "createdAt": "2026-06-02",
+    "badge": null,
+    "description": "Knife-pleated tissue in antique gold, with cape sleeves that fall from the shoulder seam. One of the few gowns here that needs no jewellery.",
+    "fabricDetails": "Tissue silk, knife-pleated by hand · Cape sleeves · Elasticated inner waist · Lined body",
+    "care": "Dry clean. Do not press pleats flat.",
+    "deliveryDays": 12,
+    "images": [],
+    "stock": 5,
+    "cost": 24397,
+    "sku": "AAN-0023"
+  },
+  {
+    "id": "p024",
+    "slug": "riddhi-peach-festive-saree",
+    "name": "Riddhi Peach Festive Saree",
+    "subtitle": "Sequin jaal on georgette",
+    "categories": [
+      "sarees",
+      "cocktail"
+    ],
+    "price": 26500,
+    "mrp": 32000,
+    "colors": [
+      "Peach",
+      "Champagne"
+    ],
+    "fabric": "Georgette",
+    "sizes": [
+      "Free Size"
+    ],
+    "occasion": [
+      "Festive",
+      "Cocktail"
+    ],
+    "popularity": 80,
+    "createdAt": "2026-07-13",
+    "badge": "New",
+    "description": "An all-over tonal sequin jaal on soft georgette — the easiest entry point into a party saree, and it pleats beautifully.",
+    "fabricDetails": "Soft georgette · Tonal sequin & thread jaal · Pico-finished edge · Sequin blouse piece",
+    "care": "Dry clean only.",
+    "deliveryDays": 8,
+    "images": [],
+    "stock": 16,
+    "cost": 11880,
+    "sku": "AAN-0024"
+  },
+  {
+    "id": "p025",
+    "slug": "vaani-white-mehendi-set",
+    "name": "Vaani White Mehendi Set",
+    "subtitle": "Chikankari kurta with palazzo",
+    "categories": [
+      "festive"
+    ],
+    "price": 18500,
+    "mrp": 23000,
+    "colors": [
+      "Ivory",
+      "White"
+    ],
+    "fabric": "Cotton Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "occasion": [
+      "Mehendi",
+      "Haldi",
+      "Festive"
+    ],
+    "popularity": 86,
+    "createdAt": "2026-05-02",
+    "badge": "Bestseller",
+    "description": "Hand chikankari from Lucknow — shadow work, murri and phanda stitches — on breathable cotton silk. The set most of our clients re-wear the most.",
+    "fabricDetails": "Cotton silk · Hand chikankari (shadow, murri, phanda) · Straight palazzo · Chikankari dupatta",
+    "care": "Hand wash cold, dry in shade. Do not bleach.",
+    "deliveryDays": 6,
+    "images": [],
+    "stock": 21,
+    "cost": 8296,
+    "sku": "AAN-0025"
+  },
+  {
+    "id": "p026",
+    "slug": "ishaani-rust-bridal-lehenga",
+    "name": "Ishaani Rust Bridal Lehenga",
+    "subtitle": "Rust & gold with double dupatta",
+    "categories": [
+      "bridal",
+      "lehengas"
+    ],
+    "price": 172000,
+    "mrp": 198000,
+    "colors": [
+      "Rust",
+      "Gold"
+    ],
+    "fabric": "Raw Silk",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "occasion": [
+      "Wedding",
+      "Sangeet"
+    ],
+    "popularity": 90,
+    "createdAt": "2026-07-22",
+    "badge": "New",
+    "description": "For the bride who wants out of red without leaving tradition. Rust raw silk, gold zardozi, and two dupattas — one draped over the head, one at the waist.",
+    "fabricDetails": "Raw silk · Zardozi, gota & cutdana hand work · 8-panel skirt, cotton cancan · Two dupattas (net & tissue)",
+    "care": "Dry clean only.",
+    "deliveryDays": 22,
+    "images": [],
+    "stock": 1,
+    "cost": 75186,
+    "sku": "AAN-0026"
+  },
+  {
+    "id": "p027",
+    "slug": "prisha-silver-cocktail-saree",
+    "name": "Prisha Silver Cocktail Saree",
+    "subtitle": "Metallic drape with cape blouse",
+    "categories": [
+      "cocktail",
+      "sarees"
+    ],
+    "price": 47000,
+    "mrp": 55000,
+    "colors": [
+      "Silver",
+      "Grey"
+    ],
+    "fabric": "Organza",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Cocktail"
+    ],
+    "popularity": 73,
+    "createdAt": "2026-06-26",
+    "badge": null,
+    "description": "A structured metallic organza drape worn with a cape blouse — closer to evening wear than to a traditional saree, which is the point.",
+    "fabricDetails": "Metallic organza · Pre-set drape with hidden hooks · Embroidered cape blouse · Crepe lining",
+    "care": "Dry clean only.",
+    "deliveryDays": 13,
+    "images": [],
+    "stock": 9,
+    "cost": 23008,
+    "sku": "AAN-0027"
+  },
+  {
+    "id": "p028",
+    "slug": "amara-emerald-engagement-gown",
+    "name": "Amara Emerald Engagement Gown",
+    "subtitle": "One-shoulder with jaal skirt",
+    "categories": [
+      "gowns",
+      "cocktail"
+    ],
+    "price": 82000,
+    "mrp": 96000,
+    "colors": [
+      "Emerald",
+      "Gold"
+    ],
+    "fabric": "Crepe",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "occasion": [
+      "Engagement",
+      "Cocktail",
+      "Reception"
+    ],
+    "popularity": 75,
+    "createdAt": "2026-07-27",
+    "badge": "New",
+    "description": "One-shoulder emerald crepe with a gold jaal skirt that catches light only when you move. Cut with a fitted waist and a soft fishtail.",
+    "fabricDetails": "Stretch crepe · Gold zari & sequin jaal skirt overlay · One-shoulder draped bodice · Fishtail hem",
+    "care": "Dry clean only.",
+    "deliveryDays": 16,
+    "images": [],
+    "stock": 0,
+    "cost": 39714,
+    "sku": "AAN-0028"
+  }
+]

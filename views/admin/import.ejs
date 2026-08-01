@@ -1,0 +1,124 @@
+<%- include('./partials/open', {
+  active: 'import',
+  adminTitle: 'Bulk upload',
+  adminSubtitle: productCount + ' products in the catalogue',
+  adminActions: '<a href="/admin/import/template.csv' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">CSV template</a>'
+}) %>
+
+<div class="grid gap-3 xl:grid-cols-3"
+     x-data="{
+       format: 'csv', mode: 'append', fileName: '', rows: 0, dragging: false,
+       load(file) {
+         if (!file) return;
+         this.fileName = file.name;
+         this.format = /\.json$/i.test(file.name) ? 'json' : 'csv';
+         const reader = new FileReader();
+         reader.onload = () => { $refs.payload.value = reader.result; this.count(); };
+         reader.readAsText(file);
+       },
+       count() {
+         const t = ($refs.payload.value || '').trim();
+         if (!t) { this.rows = 0; return; }
+         this.rows = this.format === 'json'
+           ? (t.match(/\{/g) || []).length
+           : Math.max(0, t.split(/\r?\n/).filter(l => l.trim()).length - 1);
+       }
+     }">
+
+  <form class="space-y-3 xl:col-span-2"
+        hx-post="/admin/import/preview" hx-target="#import-result" hx-swap="innerHTML" hx-indicator="#import-busy">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <input type="hidden" name="format" :value="format">
+    <input type="hidden" name="mode" :value="mode">
+
+    <div class="card p-4">
+      <label @dragover.prevent="dragging = true" @dragleave="dragging = false"
+             @drop.prevent="dragging = false; load($event.dataTransfer.files[0])"
+             :class="dragging ? 'border-maroon bg-cream/60' : 'border-line'"
+             class="flex cursor-pointer flex-col items-center justify-center border border-dashed px-6 py-10 text-center transition">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" class="text-gold"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <p class="mt-3 font-serif text-base">Drop a .csv or .json file</p>
+        <p class="mt-1 text-[11.5px] text-muted">or click to choose · paste below · <%= productCount %> products currently listed</p>
+        <input type="file" accept=".csv,.json,text/csv,application/json" class="hidden" @change="load($event.target.files[0])">
+        <p x-show="fileName" x-cloak class="mt-3 border border-line bg-panel px-3 py-1.5 text-[11.5px]">
+          <span x-text="fileName"></span> · <span x-text="rows"></span> rows
+        </p>
+      </label>
+
+      <div class="mt-4">
+        <div class="mb-1.5 flex items-center justify-between">
+          <label class="adm-label mb-0" for="payload">Or paste the data</label>
+          <span class="text-[11px] text-muted"><span x-text="rows"></span> rows detected</span>
+        </div>
+        <textarea id="payload" name="payload" x-ref="payload" @input="count()" rows="9" spellcheck="false"
+                  placeholder="name,subtitle,categories,price,…"
+                  class="adm-textarea font-mono text-[11.5px]"></textarea>
+      </div>
+
+      <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <p class="adm-label">Format</p>
+          <div class="flex gap-2">
+            <template x-for="f in ['csv', 'json']" :key="f">
+              <button type="button" @click="format = f; count()"
+                      :class="format === f ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink'"
+                      class="border px-4 py-2 text-[10.5px] uppercase tracking-[0.12em]" x-text="f"></button>
+            </template>
+          </div>
+        </div>
+        <div>
+          <label class="adm-label" for="mode">If a product already exists</label>
+          <select id="mode" class="adm-select" @change="mode = $event.target.value">
+            <option value="append">Append — skip existing slugs</option>
+            <option value="upsert">Update — overwrite matches</option>
+            <option value="replace">Replace — discard the catalogue</option>
+          </select>
+          <p x-show="mode === 'replace'" x-cloak class="mt-1.5 text-[11px] text-critical">
+            Replace wipes all <%= productCount %> products. A backup is still written first.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <button type="submit" class="adm-btn adm-btn-primary">
+          <span class="htmx-hide-on-request">Preview import</span>
+          <span class="htmx-show-on-request">Checking…</span>
+        </button>
+        <a href="/admin/import/template.csv<%= tokenQs %>" class="text-[10.5px] uppercase tracking-[0.12em] text-maroon underline underline-offset-4">Download template</a>
+      </div>
+    </div>
+  </form>
+
+  <aside class="space-y-3">
+    <div class="card p-4">
+      <p class="adm-label">Columns</p>
+      <p class="text-[11.5px] leading-relaxed text-muted">
+        Multi-value fields use <code class="bg-cream px-1">|</code>. Blank cells take sensible defaults.
+      </p>
+      <dl class="mt-3 space-y-2 text-[11.5px]">
+        <% columns.forEach(function (c) { %>
+          <div>
+            <dt class="font-mono text-[11px] text-ink"><%= c.label %><% if (c.required) { %><span class="text-critical">*</span><% } %></dt>
+            <dd class="text-muted"><%= c.hint %></dd>
+          </div>
+        <% }); %>
+      </dl>
+    </div>
+
+    <div class="card p-4 text-[11.5px] leading-relaxed text-muted">
+      <p class="adm-label">Command line</p>
+      <pre class="mt-1 overflow-x-auto bg-cream/60 p-2 font-mono text-[11px] text-ink">npm run import -- file.csv
+npm run import -- file.csv --mode=upsert
+npm run import -- file.csv --dry</pre>
+      <p class="mt-2">Same parser, same validation. <code class="bg-cream px-1">--dry</code> writes nothing.</p>
+    </div>
+  </aside>
+</div>
+
+<div id="import-busy" class="htmx-indicator mt-4">
+  <div class="skeleton h-6 w-48"></div>
+  <div class="skeleton mt-3 h-32 w-full"></div>
+</div>
+<div id="import-result" class="mt-4"></div>
+
+<%- include('./partials/close') %>

@@ -1,0 +1,35 @@
+<div class="border border-gold/50 bg-gold/5 p-6">
+  <div class="flex items-start gap-4">
+    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold text-gold">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m5 13 4 4L19 7"/></svg>
+    </span>
+    <div>
+      <p class="font-serif text-xl">Import complete</p>
+      <p class="mt-2 text-sm text-muted">
+        <%= result.created %> created · <%= result.updated %> updated · <%= result.skipped %> skipped.
+        The catalogue now holds <strong class="text-ink"><%= result.written %></strong> products.
+      </p>
+      <p class="mt-2 text-xs text-muted">
+        Backup of the previous catalogue: <code class="bg-ivory px-1 font-mono"><%= result.backupPath %></code>
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center gap-4">
+    <a href="/category/all?sort=new" class="bg-maroon px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">View new arrivals</a>
+    <a href="/admin" class="text-[10px] uppercase tracking-[0.14em] text-maroon underline underline-offset-4">Import another file</a>
+  </div>
+
+  <% const created = analysis.rows.filter(function (r) { return r.action !== 'skip'; }).slice(0, 12); %>
+  <% if (created.length) { %>
+    <ul class="mt-6 grid gap-2 border-t border-gold/30 pt-5 text-xs sm:grid-cols-2">
+      <% created.forEach(function (r) { %>
+        <li>
+          <a href="/product/<%= r.product.slug %>" class="text-ink hover:text-maroon">
+            <%= r.product.name %> <span class="text-muted">· <%= money(r.product.price) %></span>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+  <% } %>
+</div>

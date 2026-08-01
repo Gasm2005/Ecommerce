@@ -1,0 +1,58 @@
+<%- include('./partials/open', {
+  active: null,
+  adminTitle: feature.label,
+  adminSubtitle: 'Not included in the ' + plan.label + ' plan',
+  adminActions: ''
+}) %>
+
+<%
+  /* Shown when the store's plan doesn't include what was asked for. Deliberately
+     not an error page: the feature works, it just hasn't been bought. So the job
+     here is to say plainly what it does and what it costs — no dark patterns, no
+     fake urgency, and a working store left untouched behind it. */
+  const money = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
+%>
+
+<div class="mx-auto max-w-2xl">
+  <div class="card p-6">
+    <div class="flex items-start gap-4">
+      <div class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line text-muted">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <h2 class="font-serif text-lg"><%= feature.label %></h2>
+        <p class="mt-1 text-[13px] leading-relaxed text-muted"><%= feature.blurb %></p>
+
+        <p class="mt-4 text-[12.5px] leading-relaxed text-muted">
+          Your store is on <strong class="text-ink"><%= plan.label %></strong>.
+          <% if (unlockedBy) { %>
+            This is part of <strong class="text-ink"><%= unlockedBy.label %></strong> —
+            <%= money(unlockedBy.price) %> one time.
+          <% } else { %>
+            Contact us to switch it on.
+          <% } %>
+        </p>
+
+        <% if (unlockedBy) { %>
+          <p class="mt-3 text-[12px] leading-relaxed text-muted">
+            <%= unlockedBy.blurb %>
+          </p>
+        <% } %>
+
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a href="/admin/plan" class="adm-btn adm-btn-primary adm-btn-sm">See what's included</a>
+          <a href="/admin" class="adm-btn adm-btn-ghost adm-btn-sm">Back to dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-3 px-1 text-[11px] leading-relaxed text-muted">
+    Nothing about your store has changed — orders, products and everything else on
+    your plan carry on exactly as before.
+  </p>
+</div>
+
+<%- include('./partials/close') %>

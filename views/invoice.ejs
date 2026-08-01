@@ -1,0 +1,299 @@
+<%
+  /* Print-first GST invoice. Standalone HTML with its own styles — no theme
+     chrome, no Tailwind CDN — so "Save as PDF" from any browser produces a clean
+     A4 page, and it prints identically offline.
+     locals: inv (from src/invoice.js), config, isAdmin */
+  const b = inv.business;
+  const o = inv.order;
+  const t = inv.totals;
+  const money = (n) => '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const date = (d) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Tax invoice <%= inv.invoice.number %> · <%= b.tradeName %></title>
+  <style>
+    /* A4 with sane print margins; the browser's own "Save as PDF" is the export. */
+    @page { size: A4; margin: 12mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px;
+      font: 12px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #17130f; background: #f3ebde;
+    }
+    .sheet { max-width: 820px; margin: 0 auto; background: #fff; border: 1px solid #e3d8c6; padding: 28px 30px; }
+    .row { display: flex; gap: 24px; }
+    .row > * { min-width: 0; }
+    .grow { flex: 1; }
+    .right { text-align: right; }
+    h1 { margin: 0; font: 500 20px/1.2 Georgia, "Times New Roman", serif; letter-spacing: .04em; }
+    .muted { color: #77706a; }
+    .label { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #a98436; }
+    .strong { color: #17130f; font-weight: 500; }
+    .rule { border-top: 1px solid #e3d8c6; margin: 16px 0; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: #77706a; font-weight: 400;
+         text-align: left; padding: 8px 6px; border-bottom: 1px solid #17130f; }
+    td { padding: 9px 6px; border-bottom: 1px solid #efe7da; vertical-align: top; }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    tfoot td { border-bottom: none; padding: 5px 6px; }
+    .total-row td { border-top: 1px solid #17130f; font-size: 14px; font-weight: 500; padding-top: 9px; }
+
+    .box { border: 1px solid #e3d8c6; padding: 12px 14px; }
+    .warn { border: 1px solid #d03b3b; background: #fdf4f4; padding: 10px 12px; color: #b02f2f; font-size: 11px; }
+    .toolbar { max-width: 820px; margin: 0 auto 14px; display: flex; gap: 8px; justify-content: flex-end; }
+    .btn { border: 1px solid #6b1b2b; background: #6b1b2b; color: #fff; padding: 8px 16px;
+           font-size: 10px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; text-decoration: none; }
+    .btn-ghost { background: #fff; color: #6b1b2b; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .sheet { border: none; padding: 0; max-width: none; }
+      .toolbar, .noprint { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar noprint">
+    <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+    <% if (isAdmin) { %>
+      <a class="btn btn-ghost" href="/admin/orders/<%= o.id %>">Back to order</a>
+    <% } %>
+  </div>
+
+  <div class="sheet">
+
+    <% if (inv.gstinMissing || inv.sellerStateMissing) { %>
+      <div class="warn noprint" style="margin-bottom:16px;">
+        <strong>Not a valid tax invoice yet.</strong>
+        Missing: <%= [inv.gstinMissing ? 'business GSTIN' : null, inv.sellerStateMissing ? 'business state' : null].filter(Boolean).join(', ') %>.
+        Fill these in Settings → Business details.
+      </div>
+    <% } %>
+
+    <!-- header -->
+    <div class="row">
+      <div class="grow">
+        <h1><%= b.tradeName %></h1>
+        <div class="muted" style="margin-top:4px;"><%= b.legalName %></div>
+        <div class="muted" style="margin-top:8px;">
+          <% b.addressLines.forEach(function (l) { %><%= l %><br><% }); %>
+          <%= b.state %><%= b.stateCode ? ' (' + b.stateCode + ')' : '' %>
+        </div>
+        <div style="margin-top:8px;">
+          <% if (b.gstin) { %><div><span class="label">GSTIN</span> <span class="strong"><%= b.gstin %></span></div><% } %>
+          <% if (b.pan) { %><div class="muted">PAN <%= b.pan %></div><% } %>
+          <div class="muted"><%= b.phone %> · <%= b.email %></div>
+        </div>
+      </div>
+
+      <div class="right" style="min-width:220px;">
+        <div class="label">Tax invoice<%= o.customer.gstin ? ' · B2B' : '' %></div>
+        <div class="strong" style="font-size:15px; margin-top:4px;"><%= inv.invoice.number %></div>
+        <div class="muted" style="margin-top:10px;">
+          <div>Invoice date: <span class="strong"><%= date(inv.invoice.issuedAt) %></span></div>
+          <div>Order: <span class="strong"><%= o.id %></span></div>
+          <div>Order date: <%= date(o.createdAt) %></div>
+          <div style="margin-top:6px;">Place of supply: <span class="strong"><%= inv.placeOfSupply %></span></div>
+          <div><%= inv.interState ? 'Inter-state supply (IGST)' : 'Intra-state supply (CGST + SGST)' %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- parties -->
+    <div class="row">
+      <div class="grow box">
+        <div class="label">Billed &amp; shipped to</div>
+        <%
+          /* A registered buyer's invoice must carry their registered name and
+             GSTIN, or their input credit claim fails. The name on the order is
+             whoever typed it; the name on the certificate is what gets printed. */
+          const buyerGstin = o.customer.gstin;
+        %>
+        <div class="strong" style="margin-top:6px;">
+          <%= buyerGstin && o.customer.businessName ? o.customer.businessName : o.customer.name %>
+        </div>
+        <% if (buyerGstin) { %>
+          <div style="margin-top:3px;">
+            <span class="label">GSTIN</span> <span class="strong"><%= buyerGstin %></span>
+          </div>
+          <div class="muted" style="font-size:11px;">Attn: <%= o.customer.name %></div>
+        <% } %>
+        <div class="muted" style="margin-top:2px;">
+          <%= o.address.address1 %><br>
+          <%= o.address.city %>, <%= o.address.state %> <%= o.address.pincode %><br>
+          <%= o.address.country %><br>
+          <%= o.customer.phone %><% if (o.customer.email) { %> · <%= o.customer.email %><% } %>
+        </div>
+      </div>
+      <div class="box" style="min-width:240px;">
+        <div class="label">Payment</div>
+        <div style="margin-top:6px;">
+          <div class="strong" style="text-transform:capitalize;"><%= inv.payment.method.replace('-', ' ') %> · <%= inv.payment.status.replace('_', ' ') %></div>
+          <% if (inv.payment.dueOnDelivery) { %>
+            <div class="muted" style="margin-top:4px;">Paid online: <%= money(inv.payment.paidNow) %></div>
+            <div class="strong">Due on delivery: <%= money(inv.payment.dueOnDelivery) %></div>
+          <% } %>
+          <% if (inv.payment.reference) { %>
+            <div class="muted" style="margin-top:4px;">Ref <%= inv.payment.reference %></div>
+          <% } %>
+          <% if (o.discountCode) { %>
+            <div class="muted" style="margin-top:4px;">Coupon <%= o.discountCode %> applied</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- lines -->
+    <table style="margin-top:18px;">
+      <thead>
+        <tr>
+          <th style="width:26px;">#</th>
+          <th>Description</th>
+          <th style="width:62px;">HSN</th>
+          <th class="num" style="width:36px;">Qty</th>
+          <th class="num" style="width:82px;">Rate</th>
+          <th class="num" style="width:88px;">Taxable</th>
+          <th class="num" style="width:44px;">GST</th>
+          <% if (inv.interState) { %>
+            <th class="num" style="width:82px;">IGST</th>
+          <% } else { %>
+            <th class="num" style="width:76px;">CGST</th>
+            <th class="num" style="width:76px;">SGST</th>
+          <% } %>
+          <th class="num" style="width:92px;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% inv.lines.forEach(function (l) { %>
+          <tr>
+            <td class="muted"><%= l.sr %></td>
+            <td>
+              <div class="strong"><%= l.name %></div>
+              <div class="muted" style="font-size:11px;"><%= l.size %><%= l.color ? ' · ' + l.color : '' %></div>
+            </td>
+            <td class="muted"><%= l.hsn %></td>
+            <td class="num"><%= l.qty %></td>
+            <td class="num"><%= money(l.unitInclusive) %></td>
+            <td class="num"><%= money(l.taxableValue) %></td>
+            <td class="num muted"><%= l.rate %>%</td>
+            <% if (inv.interState) { %>
+              <td class="num"><%= money(l.igst) %></td>
+            <% } else { %>
+              <td class="num"><%= money(l.cgst) %></td>
+              <td class="num"><%= money(l.sgst) %></td>
+            <% } %>
+            <td class="num strong"><%= money(l.lineTotal) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <!-- summary -->
+    <div class="row" style="margin-top:18px;">
+      <div class="grow">
+        <div class="label">Tax summary by rate</div>
+        <table style="margin-top:6px;">
+          <thead>
+            <tr>
+              <th>Rate</th><th class="num">Taxable</th>
+              <% if (inv.interState) { %><th class="num">IGST</th><% } else { %><th class="num">CGST</th><th class="num">SGST</th><% } %>
+              <th class="num">Total tax</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% inv.byRate.forEach(function (r) { %>
+              <tr>
+                <td><%= r.rate %>%</td>
+                <td class="num"><%= money(r.taxable) %></td>
+                <% if (inv.interState) { %><td class="num"><%= money(r.igst) %></td>
+                <% } else { %><td class="num"><%= money(r.cgst) %></td><td class="num"><%= money(r.sgst) %></td><% } %>
+                <td class="num"><%= money(r.total) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+
+        <div class="box" style="margin-top:14px;">
+          <div class="label">Amount in words</div>
+          <div class="strong" style="margin-top:4px;"><%= t.amountInWords %></div>
+        </div>
+      </div>
+
+      <div style="min-width:280px;">
+        <table>
+          <tfoot>
+            <tr><td class="muted">Taxable value</td><td class="num"><%= money(t.taxableValue) %></td></tr>
+            <% if (t.discount) { %>
+              <tr><td class="muted">Discount applied<%= o.discountCode ? ' (' + o.discountCode + ')' : '' %></td><td class="num">− <%= money(t.discount) %></td></tr>
+            <% } %>
+            <% if (inv.interState) { %>
+              <tr><td class="muted">IGST</td><td class="num"><%= money(t.igst) %></td></tr>
+            <% } else { %>
+              <tr><td class="muted">CGST</td><td class="num"><%= money(t.cgst) %></td></tr>
+              <tr><td class="muted">SGST</td><td class="num"><%= money(t.sgst) %></td></tr>
+            <% } %>
+            <%# Shipping and gift wrap appear as taxable lines above, so they are
+                already inside the taxable value — no separate row here. %>
+            <% if (t.roundOff) { %>
+              <tr><td class="muted">Round off</td><td class="num"><%= (t.roundOff > 0 ? '+ ' : '− ') + money(Math.abs(t.roundOff)) %></td></tr>
+            <% } %>
+            <tr class="total-row"><td>Total</td><td class="num"><%= money(t.rounded) %></td></tr>
+          </tfoot>
+        </table>
+
+        <% if (b.bank) { %>
+          <div class="box" style="margin-top:14px;">
+            <div class="label">Bank details</div>
+            <div class="muted" style="margin-top:4px;">
+              <%= b.bank.name %><br>
+              <%= b.bank.accountName %><br>
+              A/c <%= b.bank.accountNumber %><br>
+              IFSC <%= b.bank.ifsc %>
+              <% if (b.bank.upi) { %><br>UPI <%= b.bank.upi %><% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- terms + signature -->
+    <div class="row">
+      <div class="grow">
+        <% if (b.termsLines.length) { %>
+          <div class="label">Terms</div>
+          <ol class="muted" style="margin:6px 0 0; padding-left:16px; font-size:11px;">
+            <% b.termsLines.forEach(function (l) { %><li style="margin-bottom:3px;"><%= l %></li><% }); %>
+          </ol>
+        <% } %>
+        <p class="muted" style="margin-top:10px; font-size:10px;">
+          This is a computer-generated invoice. Prices are inclusive of GST; tax shown is the component
+          contained in the price, not an addition to it.
+        </p>
+      </div>
+      <div class="right" style="min-width:220px; padding-top:20px;">
+        <div style="height:44px;"></div>
+        <div class="rule" style="margin:0 0 6px;"></div>
+        <div class="strong"><%= b.signatureName %></div>
+        <div class="muted" style="font-size:10px;">Authorised signatory</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ?print=1 opens the print dialog straight away — used by the "Download
+       invoice" links so one click gets you to a PDF. */
+    if (new URLSearchParams(location.search).get('print') === '1') {
+      window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 250); });
+    }
+  </script>
+</body>
+</html>

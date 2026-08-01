@@ -1,0 +1,27 @@
+<div class="border border-gold/50 bg-gold/5 p-6">
+  <div class="flex items-start gap-4">
+    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold text-gold">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m5 13 4 4L19 7"/></svg>
+    </span>
+    <div>
+      <p class="font-serif text-xl">Return request received</p>
+      <p class="mt-2 text-sm leading-relaxed text-muted">
+        Reference <strong class="text-ink"><%= request.id %></strong> against order <%= order.id %>.
+        We review requests within one working day and arrange a pickup once approved.
+      </p>
+      <dl class="mt-4 space-y-1 text-sm">
+        <div class="flex justify-between border-t border-gold/30 pt-2"><dt class="text-muted">Reason</dt><dd><%= request.reason %></dd></div>
+        <div class="flex justify-between"><dt class="text-muted">Pieces</dt><dd><%= request.items.length %></dd></div>
+        <div class="flex justify-between"><dt class="text-muted">Expected refund</dt><dd><%= money(request.requestedAmount) %></dd></div>
+        <div class="flex justify-between"><dt class="text-muted">Refund to</dt><dd><%= (returns.METHODS.find(function (m) { return m.id === request.method; }) || {}).label %></dd></div>
+        <% if (request.media && request.media.length) { %>
+          <div class="flex justify-between"><dt class="text-muted">Attachments</dt><dd><%= request.media.length %> file<%= request.media.length === 1 ? '' : 's' %></dd></div>
+        <% } %>
+      </dl>
+      <p class="mt-4 text-xs text-muted">
+        Keep the piece in its original packaging with tags on until pickup. Questions:
+        <a href="tel:<%= config.brand.supportPhone %>" class="text-maroon"><%= config.brand.supportPhone %></a>
+      </p>
+    </div>
+  </div>
+</div>

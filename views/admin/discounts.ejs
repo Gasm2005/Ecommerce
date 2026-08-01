@@ -1,0 +1,97 @@
+<%- include('./partials/open', {
+  active: 'discounts',
+  adminTitle: 'Discounts',
+  adminSubtitle: rows.filter(function (r) { return r.active; }).length + ' active of ' + rows.length,
+  adminActions: null
+}) %>
+
+<div class="grid gap-3 xl:grid-cols-3">
+  <div class="card xl:col-span-2">
+    <div class="overflow-x-auto">
+      <table class="adm-table min-w-[860px]">
+        <thead>
+          <tr><th>Code</th><th>Type</th><th class="num">Value</th><th class="num">Min order</th>
+              <th class="num">Used</th><th class="num">Given away</th><th class="num">Revenue</th><th>Expires</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% rows.forEach(function (d) { %>
+            <%
+              const expired = d.expiresAt && new Date(d.expiresAt + 'T23:59:59Z') < new Date();
+              const tone = !d.active ? 'info' : (expired ? 'critical' : 'good');
+            %>
+            <tr>
+              <td>
+                <span class="font-mono text-ink"><%= d.code %></span>
+                <span class="mt-1 block"><span class="pill pill-<%= tone %>"><%= !d.active ? 'Paused' : (expired ? 'Expired' : 'Live') %></span></span>
+                <% if (d.note) { %><span class="mt-1 block text-[10.5px] text-muted"><%= d.note %></span><% } %>
+              </td>
+              <td class="text-muted"><%= (types.find(function (t) { return t.id === d.type; }) || {}).label || d.type %></td>
+              <td class="num"><%= d.type === 'percent' ? d.value + '%' : (d.type === 'flat' ? money(d.value) : '—') %></td>
+              <td class="num text-muted"><%= d.minOrder ? money(d.minOrder) : '—' %></td>
+              <td class="num"><%= d.used %><%= d.usageLimit ? ' / ' + d.usageLimit : '' %></td>
+              <td class="num text-muted"><%= money(d.usage.given) %></td>
+              <td class="num"><%= money(d.usage.revenue) %></td>
+              <td class="whitespace-nowrap text-muted"><%= d.expiresAt || '—' %></td>
+              <td class="num whitespace-nowrap">
+                <button class="text-[10.5px] uppercase tracking-[0.12em] text-maroon"
+                        hx-post="/admin/discounts/<%= d.code %>/toggle" hx-swap="none"
+                        hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'><%= d.active ? 'Pause' : 'Activate' %></button>
+                <button class="ml-3 text-[10.5px] uppercase tracking-[0.12em] text-critical"
+                        hx-post="/admin/discounts/<%= d.code %>/delete" hx-swap="none" hx-trigger="confirmed"
+                        hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'
+                        data-confirm="Code <%= d.code %> stops working immediately. Past orders keep their discount."
+                        data-confirm-title="Delete code?" data-confirm-cta="Delete">Delete</button>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <h2 class="font-serif text-base">Create or update a code</h2>
+    <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+      Codes apply in the cart and carry through to checkout. Using an existing code updates it.
+    </p>
+    <form class="mt-3 space-y-3" hx-post="/admin/discounts" hx-swap="none">
+      <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+      <div>
+        <label class="adm-label" for="code">Code *</label>
+        <input id="code" name="code" class="adm-input font-mono uppercase" required placeholder="FESTIVE15">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="adm-label" for="type">Type</label>
+          <select id="type" name="type" class="adm-select">
+            <% types.forEach(function (t) { %><option value="<%= t.id %>"><%= t.label %></option><% }); %>
+          </select>
+        </div>
+        <div>
+          <label class="adm-label" for="value">Value</label>
+          <input id="value" name="value" class="adm-input" placeholder="15" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="minOrder">Min order</label>
+          <input id="minOrder" name="minOrder" class="adm-input" placeholder="25000" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="usageLimit">Usage limit</label>
+          <input id="usageLimit" name="usageLimit" class="adm-input" placeholder="0 = unlimited" inputmode="numeric">
+        </div>
+      </div>
+      <div>
+        <label class="adm-label" for="expiresAt">Expires</label>
+        <input id="expiresAt" type="date" name="expiresAt" class="adm-input">
+      </div>
+      <div>
+        <label class="adm-label" for="note">Internal note</label>
+        <input id="note" name="note" class="adm-input" placeholder="Diwali campaign">
+      </div>
+      <label class="flex items-center gap-2 text-[12.5px]"><input type="checkbox" name="active" checked> Active</label>
+      <button class="adm-btn adm-btn-primary w-full justify-center">Save code</button>
+    </form>
+  </div>
+</div>
+
+<%- include('./partials/close') %>

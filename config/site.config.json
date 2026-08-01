@@ -1,0 +1,797 @@
+{
+  "plan": "scale",
+  "planExtras": [],
+  "_planReadme": "Which tier this client bought: starter | growth | scale (see src/plan.js). planExtras adds individual feature ids on top of the tier, for the deal where a client pays for one extra thing. Changing this line is the ONLY difference between a Rs49k and a Rs1.99L store.",
+  "_readme": "Ek hi jagah se poora store badlo. Colors, logo, nav, hero, footer — sab yahan se. Products data/products.json mein hain.",
+  "brand": {
+    "name": "AANYÄ",
+    "monogram": "A",
+    "logoText": "AANYÄ",
+    "logoImage": null,
+    "logoSubtext": "COUTURE",
+    "tagline": "Handcrafted heirlooms for the modern bride",
+    "supportPhone": "+91 98200 00000",
+    "supportEmail": "care@aanya.example",
+    "announcement": "Complimentary worldwide shipping · Free size customisation on all bridal orders"
+  },
+  "theme": {
+    "colors": {
+      "ivory": "#FBF8F3",
+      "cream": "#F3EBDE",
+      "sand": "#E9DFCE",
+      "line": "#E3D8C6",
+      "maroon": "#6B1B2B",
+      "maroonDark": "#48111C",
+      "gold": "#A98436",
+      "goldLight": "#D7B96C",
+      "ink": "#17130F",
+      "muted": "#77706A"
+    },
+    "fonts": {
+      "heading": "Playfair Display",
+      "body": "Inter"
+    },
+    "cardRadius": "2px",
+    "buttonRadius": "2px"
+  },
+  "currency": {
+    "code": "INR",
+    "symbol": "₹",
+    "locale": "en-IN"
+  },
+  "features": {
+    "guestCheckout": true,
+    "wishlist": true,
+    "quickView": true,
+    "infiniteScroll": true,
+    "showMrpStrikethrough": true,
+    "productsPerPage": 8
+  },
+  "finance": {
+    "_readme": "Every cost line the owner controls. Product prices are GST-INCLUSIVE, so tax is extracted from the price, never added. Per-SKU cost/GST on the product beats the category default, which beats these globals.",
+    "gstPercentDefault": 12,
+    "defaultCogsPercent": 45,
+    "categoryDefaults": {
+      "_readme": "Optional per-category GST % and fallback COGS %. Used when a product has no cost/gstPercent of its own.",
+      "bridal": {
+        "gstPercent": 12,
+        "cogsPercent": 42
+      },
+      "lehengas": {
+        "gstPercent": 12,
+        "cogsPercent": 44
+      },
+      "sarees": {
+        "gstPercent": 5,
+        "cogsPercent": 48
+      },
+      "festive": {
+        "gstPercent": 5,
+        "cogsPercent": 46
+      },
+      "cocktail": {
+        "gstPercent": 12,
+        "cogsPercent": 43
+      },
+      "gowns": {
+        "gstPercent": 12,
+        "cogsPercent": 43
+      }
+    },
+    "perOrderCosts": {
+      "_readme": "Charged once per order.",
+      "packaging": 120,
+      "shippingCost": 140,
+      "codHandling": 40
+    },
+    "percentCosts": {
+      "_readme": "Percentages of order value.",
+      "paymentGateway": 2,
+      "marketplaceOrPlatform": 0,
+      "returnsProvision": 1.5
+    },
+    "monthlyCosts": {
+      "_readme": "Fixed overheads, prorated to whatever window the dashboard is showing.",
+      "marketing": 120000,
+      "salaries": 140000,
+      "rentAndUtilities": 45000,
+      "software": 12000,
+      "other": 15000
+    },
+    "gstOnShipping": true,
+    "_gstOnShippingReadme": "Shipping and gift wrap are part of a composite supply under GST, so tax is extracted from them at the principal item rate. Set false if your CA wants them shown untaxed.",
+    "depreciationMonthly": 0,
+    "interestMonthly": 0,
+    "incomeTaxPercent": 0,
+    "_belowTheLineReadme": "These sit BELOW EBITDA: depreciation, loan interest, and income tax on the profit that remains. All zero by default. Fill them and profit in hand becomes what the owner actually keeps, not what the business earned.",
+    "gstSlabs": [
+      {
+        "maxPrice": 2500,
+        "percent": 5
+      },
+      {
+        "percent": 18
+      }
+    ],
+    "_gstSlabsReadme": "Apparel GST is slabbed on the sale value of ONE PIECE: below maxPrice gets that percent, the entry without maxPrice is the top slab. A product with its own gstPercent overrides this. Empty the array if your client does not sell slabbed goods.",
+    "tdsPercent": 1,
+    "tcsPercent": 1,
+    "_withholdingReadme": "TDS (income tax s.194-O) and TCS (GST s.52) are withheld by MARKETPLACES on your behalf, not on your own website sales. Both are claimed back in your returns, so they are shown as recoverable and never deducted from profit."
+  },
+  "reviews": {
+    "_readme": "source: local | google | both. Google reviews are business-level (Places API, max 5) — per-product stars come from your own reviews, exported to Google via /feeds/product-reviews.xml. Put the API key in GOOGLE_PLACES_API_KEY, never here.",
+    "source": "local",
+    "googlePlaceId": "",
+    "cacheMinutes": 180,
+    "showStoreBadge": true,
+    "merchantFeed": true,
+    "requirePurchase": true,
+    "allowMedia": true
+  },
+  "inventory": {
+    "lowStockThreshold": 4,
+    "outOfStockBehaviour": "hide-buy-button"
+  },
+  "shipping": {
+    "freeAbove": 4999,
+    "standardCharge": 199,
+    "estimateDaysMetro": 3,
+    "estimateDaysOther": 6,
+    "returnWindowDays": 7,
+    "cod": {
+      "_readme": "Three switches: enabled (COD at all), fullEnabled (nothing upfront — carries all the RTO risk, so off by default), partialEnabled (advance now, rest on delivery). Serviceability: either blocklists, or set pincodeMode to 'allow-list' so COD works ONLY at allowedPincodesOnly.",
+      "enabled": true,
+      "fullEnabled": false,
+      "partialEnabled": true,
+      "advanceType": "percent",
+      "advancePercent": 25,
+      "advanceFlat": 2000,
+      "minOrder": 0,
+      "maxOrder": 100000,
+      "pincodeMode": "block-list",
+      "blockedPincodes": [
+        "110001",
+        "400001"
+      ],
+      "blockedPrefixes": [
+        "19"
+      ],
+      "allowedPincodesOnly": []
+    },
+    "methods": [
+      {
+        "id": "standard",
+        "title": "Standard",
+        "note": "{metro}-{other} working days after dispatch",
+        "charge": null
+      },
+      {
+        "id": "express",
+        "title": "Express",
+        "note": "Priority dispatch · 2-3 working days",
+        "charge": 499
+      },
+      {
+        "id": "nominated",
+        "title": "Nominated date",
+        "note": "Choose a delivery date before your function",
+        "charge": 899
+      }
+    ],
+    "_methodsReadme": "charge:null on a method means use the standard rules (freeAbove / standardCharge). Any number is a flat charge that always applies. {metro} and {other} in a note are replaced with estimateDays.",
+    "giftWrapCharge": 0,
+    "zones": [
+      {
+        "id": "lucknow",
+        "label": "Lucknow city",
+        "prefixes": [
+          "226"
+        ],
+        "cities": [
+          "Lucknow"
+        ],
+        "replacesDefaults": false,
+        "methods": [
+          {
+            "id": "local-sameday",
+            "title": "Same-day delivery",
+            "note": "Delivered by us today, 6pm-9pm",
+            "charge": 0,
+            "fulfilment": "own",
+            "cutoff": "14:00",
+            "days": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri",
+              "sat"
+            ],
+            "slots": [
+              "6pm - 7:30pm",
+              "7:30pm - 9pm"
+            ],
+            "maxMakeDays": 0
+          },
+          {
+            "id": "local-nextday",
+            "title": "Next-day delivery",
+            "note": "Delivered by us tomorrow",
+            "charge": 0,
+            "fulfilment": "own",
+            "maxMakeDays": 0
+          },
+          {
+            "id": "store-pickup",
+            "title": "Collect from the store",
+            "note": "Ready in 2 hours - Hazratganj, Lucknow",
+            "charge": 0,
+            "fulfilment": "pickup",
+            "maxMakeDays": 0
+          }
+        ]
+      }
+    ],
+    "_zonesReadme": "Delivery options by destination. Match on prefixes / pincodes / cities. fulfilment: own = the shop delivers it themselves and it must never be handed to a courier; pickup = the customer collects; courier = normal dispatch. cutoff is store-local time, so same-day stops being offered after it. replacesDefaults:false keeps the store-wide methods available alongside the zone ones."
+  },
+  "nav": [
+    {
+      "label": "Bridal",
+      "slug": "bridal",
+      "columns": [
+        {
+          "title": "By Silhouette",
+          "links": [
+            {
+              "label": "Bridal Lehengas",
+              "href": "/category/lehengas?occasion=Wedding"
+            },
+            {
+              "label": "Wedding Sarees",
+              "href": "/category/sarees?occasion=Wedding"
+            },
+            {
+              "label": "Reception Gowns",
+              "href": "/category/gowns?occasion=Reception"
+            },
+            {
+              "label": "Trousseau Edit",
+              "href": "/category/bridal"
+            }
+          ]
+        },
+        {
+          "title": "By Ceremony",
+          "links": [
+            {
+              "label": "Mehendi",
+              "href": "/category/bridal?occasion=Mehendi"
+            },
+            {
+              "label": "Sangeet",
+              "href": "/category/bridal?occasion=Sangeet"
+            },
+            {
+              "label": "Pheras",
+              "href": "/category/bridal?occasion=Wedding"
+            },
+            {
+              "label": "Reception",
+              "href": "/category/bridal?occasion=Reception"
+            }
+          ]
+        }
+      ],
+      "featured": {
+        "title": "The Benaras Bride",
+        "subtitle": "Hand-woven kadhwa, 2026",
+        "href": "/category/bridal",
+        "image": null
+      }
+    },
+    {
+      "label": "Festive",
+      "slug": "festive",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            {
+              "label": "Anarkalis",
+              "href": "/category/festive?fabric=Chanderi"
+            },
+            {
+              "label": "Sharara Sets",
+              "href": "/category/festive"
+            },
+            {
+              "label": "Kurta Sets",
+              "href": "/category/festive"
+            },
+            {
+              "label": "Under ₹25,000",
+              "href": "/category/festive?price=0-25000"
+            }
+          ]
+        },
+        {
+          "title": "Occasion",
+          "links": [
+            {
+              "label": "Diwali",
+              "href": "/category/festive?occasion=Festive"
+            },
+            {
+              "label": "Karwa Chauth",
+              "href": "/category/festive?occasion=Festive"
+            },
+            {
+              "label": "Haldi",
+              "href": "/category/festive?occasion=Haldi"
+            },
+            {
+              "label": "Puja",
+              "href": "/category/festive?occasion=Festive"
+            }
+          ]
+        }
+      ],
+      "featured": {
+        "title": "Festive Ateliers",
+        "subtitle": "Chanderi & tissue silk",
+        "href": "/category/festive",
+        "image": null
+      }
+    },
+    {
+      "label": "Cocktail",
+      "slug": "cocktail",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            {
+              "label": "Draped Gowns",
+              "href": "/category/gowns"
+            },
+            {
+              "label": "Cocktail Sarees",
+              "href": "/category/cocktail"
+            },
+            {
+              "label": "Sequin Edit",
+              "href": "/category/cocktail?fabric=Sequin"
+            },
+            {
+              "label": "Indo-Western",
+              "href": "/category/cocktail"
+            }
+          ]
+        }
+      ],
+      "featured": {
+        "title": "After Dark",
+        "subtitle": "Liquid sequins & tulle",
+        "href": "/category/cocktail",
+        "image": null
+      }
+    },
+    {
+      "label": "Sarees",
+      "slug": "sarees",
+      "columns": [
+        {
+          "title": "Weaves",
+          "links": [
+            {
+              "label": "Banarasi",
+              "href": "/category/sarees?fabric=Banarasi Silk"
+            },
+            {
+              "label": "Organza",
+              "href": "/category/sarees?fabric=Organza"
+            },
+            {
+              "label": "Tissue",
+              "href": "/category/sarees?fabric=Tissue Silk"
+            },
+            {
+              "label": "Georgette",
+              "href": "/category/sarees?fabric=Georgette"
+            }
+          ]
+        }
+      ],
+      "featured": {
+        "title": "The Weave Room",
+        "subtitle": "Loom to drape",
+        "href": "/category/sarees",
+        "image": null
+      }
+    },
+    {
+      "label": "Lehengas",
+      "slug": "lehengas",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            {
+              "label": "Bridal Red",
+              "href": "/category/lehengas?color=Rani Pink"
+            },
+            {
+              "label": "Pastel",
+              "href": "/category/lehengas?color=Ivory"
+            },
+            {
+              "label": "Velvet",
+              "href": "/category/lehengas?fabric=Velvet"
+            },
+            {
+              "label": "Ready to Ship",
+              "href": "/category/lehengas"
+            }
+          ]
+        }
+      ],
+      "featured": {
+        "title": "Zardozi Heirlooms",
+        "subtitle": "240 hours per panel",
+        "href": "/category/lehengas",
+        "image": null
+      }
+    },
+    {
+      "label": "Gowns",
+      "slug": "gowns",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            {
+              "label": "Cape Gowns",
+              "href": "/category/gowns"
+            },
+            {
+              "label": "Pre-draped",
+              "href": "/category/gowns"
+            },
+            {
+              "label": "Trails",
+              "href": "/category/gowns?occasion=Reception"
+            }
+          ]
+        }
+      ],
+      "featured": {
+        "title": "Sculpted Silhouettes",
+        "subtitle": "Couture atelier",
+        "href": "/category/gowns",
+        "image": null
+      }
+    }
+  ],
+  "hero": {
+    "eyebrow": "The Wedding Edit — 2026",
+    "heading": "Woven for the\nonce-in-a-lifetime",
+    "body": "Hand-embroidered lehengas, Banarasi heirlooms and couture gowns — made to order in our Mumbai atelier.",
+    "ctaPrimary": {
+      "label": "Shop Bridal",
+      "href": "/category/bridal"
+    },
+    "ctaSecondary": {
+      "label": "Explore New Arrivals",
+      "href": "/category/all?sort=new"
+    },
+    "image": null,
+    "imageAlt": "Bride in hand-embroidered bridal lehenga"
+  },
+  "occasions": [
+    {
+      "label": "Wedding",
+      "href": "/category/all?occasion=Wedding",
+      "image": null
+    },
+    {
+      "label": "Mehendi",
+      "href": "/category/all?occasion=Mehendi",
+      "image": null
+    },
+    {
+      "label": "Sangeet",
+      "href": "/category/all?occasion=Sangeet",
+      "image": null
+    },
+    {
+      "label": "Reception",
+      "href": "/category/all?occasion=Reception",
+      "image": null
+    },
+    {
+      "label": "Festive",
+      "href": "/category/all?occasion=Festive",
+      "image": null
+    },
+    {
+      "label": "Haldi",
+      "href": "/category/all?occasion=Haldi",
+      "image": null
+    },
+    {
+      "label": "Engagement",
+      "href": "/category/all?occasion=Engagement",
+      "image": null
+    }
+  ],
+  "homeSections": [
+    {
+      "type": "occasions",
+      "title": "Shop by Occasion",
+      "subtitle": "Seven ceremonies, one wardrobe"
+    },
+    {
+      "type": "grid",
+      "key": "bestsellers",
+      "title": "The Bestsellers",
+      "subtitle": "Most coveted this season",
+      "href": "/category/all?sort=popular"
+    },
+    {
+      "type": "editorial",
+      "title": "Inside the Atelier",
+      "subtitle": "Karigari",
+      "body": "Every zardozi motif is drawn by hand, transferred to organza, then embroidered over 200+ hours by our third-generation karigars in Lucknow.",
+      "cta": {
+        "label": "Our Craft",
+        "href": "/category/bridal"
+      }
+    },
+    {
+      "type": "grid",
+      "key": "new",
+      "title": "New Arrivals",
+      "subtitle": "Fresh off the loom",
+      "href": "/category/all?sort=new"
+    },
+    {
+      "type": "testimonials",
+      "title": "Words from our brides"
+    },
+    {
+      "type": "newsletter",
+      "title": "Join the inner circle",
+      "subtitle": "Early access to trunk shows, private previews and atelier notes."
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "The lehenga fit like it was drawn on me. Three fittings, zero stress — and it arrived a full month before the wedding.",
+      "author": "Ira Malhotra",
+      "location": "Udaipur wedding",
+      "rating": 5
+    },
+    {
+      "quote": "I have never owned a saree this fine. The tissue catches light like water.",
+      "author": "Rhea Nair",
+      "location": "Kochi",
+      "rating": 5
+    },
+    {
+      "quote": "Ordered from London, delivered in nine days with customisation. The finishing is couture-level.",
+      "author": "Simran Gill",
+      "location": "London",
+      "rating": 5
+    }
+  ],
+  "footer": {
+    "blurb": "AANYÄ is a made-to-order couture house working with weaving and embroidery clusters across Banaras, Lucknow and Kutch.",
+    "columns": [
+      {
+        "title": "Shop",
+        "links": [
+          {
+            "label": "Bridal",
+            "href": "/category/bridal"
+          },
+          {
+            "label": "Festive",
+            "href": "/category/festive"
+          },
+          {
+            "label": "Sarees",
+            "href": "/category/sarees"
+          },
+          {
+            "label": "Lehengas",
+            "href": "/category/lehengas"
+          },
+          {
+            "label": "Gowns",
+            "href": "/category/gowns"
+          }
+        ]
+      },
+      {
+        "title": "Client Care",
+        "links": [
+          {
+            "label": "Size Guide",
+            "href": "/category/all"
+          },
+          {
+            "label": "Shipping & Delivery",
+            "href": "/category/all"
+          },
+          {
+            "label": "Returns",
+            "href": "/category/all"
+          },
+          {
+            "label": "Track Order",
+            "href": "/category/all"
+          },
+          {
+            "label": "Contact",
+            "href": "/category/all"
+          }
+        ]
+      },
+      {
+        "title": "Atelier",
+        "links": [
+          {
+            "label": "Our Craft",
+            "href": "/category/all"
+          },
+          {
+            "label": "Book an Appointment",
+            "href": "/category/all"
+          },
+          {
+            "label": "Trunk Shows",
+            "href": "/category/all"
+          },
+          {
+            "label": "Press",
+            "href": "/category/all"
+          }
+        ]
+      }
+    ],
+    "social": [
+      {
+        "label": "Instagram",
+        "href": "https://instagram.com"
+      },
+      {
+        "label": "Facebook",
+        "href": "https://facebook.com"
+      },
+      {
+        "label": "WhatsApp",
+        "href": "https://wa.me/919820000000"
+      },
+      {
+        "label": "Pinterest",
+        "href": "https://pinterest.com"
+      },
+      {
+        "label": "YouTube",
+        "href": "https://youtube.com"
+      }
+    ],
+    "appLinks": [
+      {
+        "label": "Track Order",
+        "href": "/category/all"
+      },
+      {
+        "label": "Shipping",
+        "href": "/category/all"
+      },
+      {
+        "label": "Returns",
+        "href": "/category/all"
+      },
+      {
+        "label": "Size Guide",
+        "href": "/category/all"
+      },
+      {
+        "label": "Contact Us",
+        "href": "/category/all"
+      },
+      {
+        "label": "About",
+        "href": "/category/all"
+      }
+    ],
+    "payments": [
+      "UPI",
+      "Visa",
+      "Mastercard",
+      "Amex",
+      "Net Banking",
+      "COD"
+    ],
+    "copyright": "© AANYÄ Couture. All rights reserved."
+  },
+  "trustBadges": [
+    {
+      "title": "Made to Order",
+      "text": "Free size customisation"
+    },
+    {
+      "title": "Worldwide Shipping",
+      "text": "Delivered in 5–12 days"
+    },
+    {
+      "title": "Handcrafted",
+      "text": "By artisan clusters in India"
+    },
+    {
+      "title": "Secure Payments",
+      "text": "UPI · Cards · COD"
+    }
+  ],
+  "payments": {
+    "_readme": "Gateway is per-store. Keys are NEVER kept here — they live in data/secrets.json (git-ignored) or env vars, written from Admin → Settings → Payments. provider: manual | razorpay | cashfree | stripe | payu.",
+    "provider": "manual",
+    "mode": "test",
+    "autoCapture": true,
+    "partialCodChargesAdvance": true
+  },
+  "notifications": {
+    "_readme": "Email/WhatsApp is per-store too. Credentials live in data/secrets.json. emailProvider: log | smtp | resend | brevo.",
+    "emailProvider": "log",
+    "whatsappProvider": "off",
+    "fromName": "AANYÄ",
+    "fromEmail": "",
+    "replyTo": "care@aanya.example",
+    "storeEmail": "care@aanya.example",
+    "storePhone": "+91 98200 00000",
+    "events": {
+      "order.placed": true,
+      "order.placed.admin": true,
+      "order.shipped": true,
+      "order.delivered": false,
+      "order.cancelled": true,
+      "return.requested": true,
+      "return.requested.admin": true,
+      "return.refunded": true,
+      "review.published": false
+    }
+  },
+  "business": {
+    "_readme": "Legal entity details printed on GST invoices. Fill these before issuing invoices — src/invoice.js reports what is missing.",
+    "legalName": "Aanya Couture Private Limited",
+    "tradeName": "AANYÄ",
+    "gstin": "27AABCA1234A1ZJ",
+    "pan": "AABCA1234A",
+    "addressLines": [
+      "3rd Floor, Waterfield Road",
+      "Bandra West",
+      "Mumbai 400050"
+    ],
+    "state": "Maharashtra",
+    "stateCode": "27",
+    "phone": "",
+    "email": "",
+    "invoicePrefix": "AAN",
+    "defaultHsn": "6211",
+    "signatureName": "",
+    "bank": {
+      "name": "HDFC Bank",
+      "accountName": "Aanya Couture Pvt Ltd",
+      "accountNumber": "XXXXXXXX1234",
+      "ifsc": "HDFC0000123",
+      "upi": "aanya@hdfcbank"
+    },
+    "termsLines": [
+      "Made-to-order pieces are stitched to the measurements supplied at checkout.",
+      "Unaltered pieces may be returned within 7 days of delivery.",
+      "Subject to Mumbai jurisdiction."
+    ]
+  }
+}

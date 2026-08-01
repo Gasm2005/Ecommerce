@@ -1,0 +1,39 @@
+<%- include('./partials/open', { active: 'dashboard', adminTitle: 'Dashboard', adminSubtitle: config.brand.name + ' · ' + orders.all().length + ' orders on record', adminActions: null }) %>
+
+<!-- range picker: presets plus an explicit from/to, so a campaign window
+     (say the 5 days after an influencer post) can be measured directly -->
+<form hx-get="/admin" hx-target="#dash" hx-swap="innerHTML" data-auto-submit
+      class="card mb-4 flex flex-wrap items-end gap-x-2 gap-y-3 p-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <% analytics.RANGES.forEach(function (r) { %>
+      <label class="cursor-pointer">
+        <input type="radio" name="range" value="<%= r.id %>" class="peer sr-only"
+               <%= (s.range.id === r.id && !s.range.custom) ? 'checked' : '' %>
+               onclick="this.form.querySelectorAll('input[type=date]').forEach(function(d){d.value='';})">
+        <span class="block border border-line bg-panel px-3 py-1.5 text-[10.5px] uppercase tracking-[0.12em] text-muted transition peer-checked:border-maroon peer-checked:bg-maroon peer-checked:text-ivory"><%= r.label %></span>
+      </label>
+    <% }); %>
+  </div>
+
+  <div class="ml-auto flex flex-wrap items-end gap-2 border-l border-line pl-3">
+    <div>
+      <label class="adm-label" for="from">From</label>
+      <input id="from" type="date" name="from" value="<%= s.range.custom ? s.from.toISOString().slice(0,10) : '' %>" class="adm-input">
+    </div>
+    <div>
+      <label class="adm-label" for="to">To</label>
+      <input id="to" type="date" name="to" value="<%= s.range.custom ? s.to.toISOString().slice(0,10) : '' %>" class="adm-input">
+    </div>
+    <% if (s.range.custom) { %>
+      <a href="/admin<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Clear</a>
+    <% } %>
+  </div>
+</form>
+
+<div id="dash" class="adm-swap">
+  <%- include('./fragments/dashboard-body') %>
+</div>
+
+<%- include('./partials/close') %>

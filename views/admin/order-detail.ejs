@@ -1,0 +1,13 @@
+<%- include('./partials/open', {
+  active: 'orders',
+  adminTitle: order.id,
+  adminSubtitle: new Date(order.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) + ' · ' + order.channel,
+  adminActions: '<a href="/admin/orders/' + order.id + '/invoice' + tokenQs + '" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">Tax invoice</a>'
+    + '<a href="/admin/orders' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">All orders</a>'
+}) %>
+
+<div id="order-body">
+  <%- include('./fragments/order-detail-body') %>
+</div>
+
+<%- include('./partials/close') %>

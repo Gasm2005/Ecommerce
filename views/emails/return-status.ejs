@@ -1,0 +1,47 @@
+<%
+  const c = config.theme.colors;
+  const money = (n) => config.currency.symbol + Number(n || 0).toLocaleString(config.currency.locale || 'en-IN');
+  const first = String(request.customer.name || '').split(' ')[0] || 'there';
+  const refunded = request.status === 'refunded';
+%>
+<%- include('./_head', {
+  config, brand, settings,
+  title: refunded ? 'Refund processed · ' + request.id : 'Return received · ' + request.id,
+  preheader: refunded ? money(request.refundAmount) + ' refunded' : 'Return ' + request.id + ' received'
+}) %>
+
+<p style="margin:0 0 6px; font-family:Georgia,serif; font-size:22px; color:<%= c.ink %>;">
+  <%= refunded ? 'Your refund is on its way' : 'We have your return request' %>
+</p>
+
+<p style="margin:0 0 18px; font-size:14px; line-height:1.7; color:<%= c.muted %>;">
+  <%= first %>,
+  <% if (refunded) { %>
+    we've refunded <strong style="color:<%= c.ink %>;"><%= money(request.refundAmount) %></strong> against
+    <%= request.orderId %>. Depending on your bank it takes 5–7 working days to appear.
+  <% } else { %>
+    reference <strong style="color:<%= c.ink %>;"><%= request.id %></strong> against order <%= request.orderId %>.
+    We review requests within one working day and arrange a pickup once approved.
+  <% } %>
+</p>
+
+<table role="presentation" width="100%" style="margin:0 0 16px; font-size:13px;">
+  <% request.items.forEach(function (it) { %>
+    <tr>
+      <td style="padding:8px 0; border-bottom:1px solid <%= c.line %>; color:<%= c.ink %>;">
+        <%= it.name %><span style="color:<%= c.muted %>;"> · qty <%= it.qty %></span>
+      </td>
+      <td align="right" style="padding:8px 0; border-bottom:1px solid <%= c.line %>; color:<%= c.ink %>;"><%= money(it.lineTotal) %></td>
+    </tr>
+  <% }); %>
+</table>
+
+<p style="margin:0; font-size:13px; color:<%= c.muted %>;">Reason given: <%= request.reason %></p>
+
+<% if (!refunded) { %>
+  <p style="margin:14px 0 0; font-size:13px; line-height:1.7; color:<%= c.muted %>;">
+    Please keep the piece in its original packaging with tags on until pickup.
+  </p>
+<% } %>
+
+<%- include('./_foot', { config, brand, settings }) %>

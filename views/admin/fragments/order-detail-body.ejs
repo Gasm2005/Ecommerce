@@ -1,0 +1,199 @@
+<%
+  const st = orders.statusMeta(order.status);
+  const ps = orders.PAYMENT_STATUSES.find(function (p) { return p.id === order.paymentStatus; }) || { label: order.paymentStatus, tone: 'info' };
+  const units = order.items.reduce(function (s, it) { return s + it.qty; }, 0);
+  const cogs = order.cogs || 0;
+  const netRevenue = order.total - (order.gstAmount || 0) - (order.shipping || 0);
+  const lineProfit = netRevenue - cogs;
+  const hxPost = { 'hx-target': '#order-body', 'hx-swap': 'innerHTML' };
+%>
+
+<div class="grid gap-3 xl:grid-cols-3">
+
+  <!-- ------------------------------------------------ items + money ---- -->
+  <div class="space-y-3 xl:col-span-2">
+    <div class="card p-4">
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <span class="pill pill-<%= st.tone %>"><%= st.label %></span>
+        <span class="pill pill-<%= ps.tone %>"><%= orders.label(orders.PAYMENT_METHODS, order.paymentMethod) %> · <%= ps.label %></span>
+        <% if (order.discountCode) { %><span class="pill pill-info"><%= order.discountCode %></span><% } %>
+        <% if (order.giftWrap) { %><span class="pill pill-info">Gift wrap</span><% } %>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="adm-table min-w-[560px]">
+          <thead><tr><th>Item</th><th>Variant</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Cost</th><th class="num">Line</th></tr></thead>
+          <tbody>
+            <% order.items.forEach(function (it) { %>
+              <tr>
+                <td><a href="/product/<%= it.slug %>" target="_blank" class="text-ink hover:text-maroon"><%= it.name %></a></td>
+                <td class="text-muted"><%= it.size %> · <%= it.color %></td>
+                <td class="num"><%= it.qty %></td>
+                <td class="num"><%= money(it.price) %></td>
+                <td class="num text-muted"><%= money(it.cost) %></td>
+                <td class="num"><%= money(it.price * it.qty) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <dl class="mt-4 space-y-1.5 border-t border-line pt-4 text-[12.5px]">
+        <div class="flex justify-between"><dt class="text-muted">Subtotal (<%= units %> units)</dt><dd class="tabular-nums"><%= money(order.subtotal) %></dd></div>
+        <% if (order.discount) { %>
+          <div class="flex justify-between"><dt class="text-muted">Discount <%= order.discountCode ? '(' + order.discountCode + ')' : '' %></dt><dd class="tabular-nums text-critical">− <%= money(order.discount) %></dd></div>
+        <% } %>
+        <div class="flex justify-between">
+          <dt class="text-muted"><%= order.deliveryTitle ? order.deliveryTitle + ' delivery' : 'Shipping' %></dt>
+          <dd class="tabular-nums"><%= order.shipping ? money(order.shipping) : 'Free' %></dd>
+        </div>
+        <% if (order.giftWrapCharge) { %>
+          <div class="flex justify-between"><dt class="text-muted">Gift packaging</dt><dd class="tabular-nums"><%= money(order.giftWrapCharge) %></dd></div>
+        <% } %>
+        <div class="flex justify-between border-t border-line pt-2 text-[14px]"><dt class="font-serif">Total charged</dt><dd class="font-serif tabular-nums"><%= money(order.total) %></dd></div>
+        <% if (order.codPlan) { %>
+          <div class="flex justify-between border-t border-line pt-2">
+            <dt class="text-muted">Paid online (advance)</dt>
+            <dd class="tabular-nums"><%= money(order.codPlan.advancePaid || 0) %></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-ink">To collect in cash on delivery</dt>
+            <dd class="tabular-nums text-maroon"><%= money(order.codPlan.dueOnDelivery || 0) %></dd>
+          </div>
+        <% } %>
+        <% if (Number.isFinite(order.refundedAmount)) { %>
+          <div class="flex justify-between border-t border-line pt-2">
+            <dt class="text-muted">Refunded<%= order.returnId ? ' (' + order.returnId + ')' : '' %></dt>
+            <dd class="tabular-nums text-critical">− <%= money(order.refundedAmount) %></dd>
+          </div>
+        <% } %>
+        <div class="flex justify-between pt-1"><dt class="text-muted">of which GST</dt><dd class="tabular-nums text-muted"><%= money(order.gstAmount || 0) %></dd></div>
+        <div class="flex justify-between"><dt class="text-muted">COGS</dt><dd class="tabular-nums text-muted"><%= money(cogs) %></dd></div>
+        <div class="flex justify-between"><dt class="text-ink">Contribution before fees</dt><dd class="tabular-nums <%= lineProfit < 0 ? 'text-critical' : 'text-ink' %>"><%= money(lineProfit) %></dd></div>
+      </dl>
+    </div>
+
+    <!-- ------------------------------------------------ actions ---- -->
+    <div class="card p-4">
+      <h2 class="font-serif text-base">Update order</h2>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <% orders.STATUSES.forEach(function (s) { %>
+          <% if (s.id === order.status) { %>
+            <span class="adm-btn adm-btn-sm opacity-40"><%= s.label %></span>
+          <% } else { %>
+            <button class="adm-btn adm-btn-sm <%= s.tone === 'critical' ? 'adm-btn-danger' : '' %>"
+                    hx-post="/admin/orders/<%= order.id %>/status" hx-target="#order-body" hx-swap="innerHTML"
+                    hx-vals='<%- JSON.stringify({ status: s.id, token: adminToken || undefined }) %>'
+                    <% if (s.tone === 'critical') { %>
+                      hx-trigger="confirmed"
+                      data-confirm="Marking <%= order.id %> as <%= s.label.toLowerCase() %> reverses the sale — it will drop out of revenue and into refunds."
+                      data-confirm-title="Mark <%= s.label.toLowerCase() %>?"
+                      data-confirm-cta="Mark <%= s.label %>"
+                    <% } %>>
+              <%= s.label %>
+            </button>
+          <% } %>
+        <% }); %>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
+        <% orders.PAYMENT_STATUSES.forEach(function (p) { %>
+          <% if (p.id !== order.paymentStatus) { %>
+            <button class="adm-btn adm-btn-ghost adm-btn-sm"
+                    hx-post="/admin/orders/<%= order.id %>/payment" hx-target="#order-body" hx-swap="innerHTML"
+                    hx-vals='<%- JSON.stringify({ paymentStatus: p.id, token: adminToken || undefined }) %>'>
+              Mark payment <%= p.label.toLowerCase() %>
+            </button>
+          <% } %>
+        <% }); %>
+      </div>
+
+      <form class="mt-4 flex flex-wrap items-end gap-2 border-t border-line pt-4"
+            hx-post="/admin/orders/<%= order.id %>/note" hx-target="#order-body" hx-swap="innerHTML">
+        <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+        <div class="min-w-[220px] flex-1">
+          <label class="adm-label" for="note">Internal note</label>
+          <input id="note" name="note" class="adm-input" placeholder="Called customer about measurements" required>
+        </div>
+        <button class="adm-btn adm-btn-primary adm-btn-sm">Add note</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------ customer + timeline ---- -->
+  <div class="space-y-3">
+    <div class="card p-4">
+      <h2 class="font-serif text-base">Customer</h2>
+      <dl class="mt-3 space-y-1.5 text-[12.5px]">
+        <div><dt class="text-[10px] uppercase tracking-[0.12em] text-muted">Name</dt><dd><%= order.customer.name %></dd></div>
+        <div><dt class="text-[10px] uppercase tracking-[0.12em] text-muted">Phone</dt><dd><a href="tel:<%= order.customer.phone %>" class="text-maroon"><%= order.customer.phone %></a></dd></div>
+        <% if (order.customer.email) { %>
+          <div><dt class="text-[10px] uppercase tracking-[0.12em] text-muted">Email</dt><dd><a href="mailto:<%= order.customer.email %>" class="text-maroon break-all"><%= order.customer.email %></a></dd></div>
+        <% } %>
+        <div class="pt-1">
+          <dt class="text-[10px] uppercase tracking-[0.12em] text-muted">Ship to</dt>
+          <dd class="leading-relaxed">
+            <%= order.address.address1 %><br>
+            <%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %><br>
+            <%= order.address.country %>
+          </dd>
+        </div>
+        <div class="pt-1">
+          <dt class="text-[10px] uppercase tracking-[0.12em] text-muted">Delivery</dt>
+          <dd><%= order.deliveryTitle || order.deliveryMethod || 'Standard' %></dd>
+        </div>
+        <% if (order.deliverySlot) { %>
+          <div class="pt-1">
+            <dt class="text-[10px] uppercase tracking-[0.12em] text-muted">Time slot</dt>
+            <dd class="text-ink"><%= order.deliverySlot %></dd>
+          </div>
+        <% } %>
+      </dl>
+
+      <%
+        /* The instruction that matters most on a picking slip. An order the shop
+           delivers itself must not be booked with a courier — by a person now, or
+           by an integration later. So it is a banner, not a field. */
+        const self = order.fulfilment === 'own';
+        const pickup = order.fulfilment === 'pickup';
+      %>
+      <% if (self || pickup) { %>
+        <div class="mt-3 border border-gold/50 bg-gold/5 px-3 py-2.5">
+          <p class="text-[10px] uppercase tracking-luxe text-gold">
+            <%= pickup ? 'Store pickup' : 'Deliver yourself' %>
+          </p>
+          <p class="mt-1 text-[12.5px] leading-relaxed text-ink">
+            <%= pickup
+              ? 'The customer is collecting this from the store. Do not dispatch it.'
+              : 'You are delivering this' + (order.deliveryZoneLabel ? ' in ' + order.deliveryZoneLabel : '') + ' yourself. Do not book a courier.' %>
+          </p>
+          <% if (order.deliveryNote) { %>
+            <p class="mt-1 text-[11.5px] text-muted"><%= order.deliveryNote %></p>
+          <% } %>
+        </div>
+      <% } %>
+      <% if (order.notes) { %>
+        <div class="mt-3 border-t border-line pt-3">
+          <p class="text-[10px] uppercase tracking-[0.12em] text-muted">Customer notes</p>
+          <p class="mt-1 text-[12.5px] leading-relaxed"><%= order.notes %></p>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="card p-4">
+      <h2 class="font-serif text-base">Timeline</h2>
+      <ol class="mt-3 space-y-3">
+        <% timeline.forEach(function (t, i) { %>
+          <li class="flex gap-3">
+            <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full <%= i === 0 ? 'bg-maroon' : 'bg-line' %>"></span>
+            <span class="min-w-0">
+              <span class="block text-[12.5px] text-ink"><%= t.label %></span>
+              <span class="block text-[10.5px] text-muted"><%= new Date(t.at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></span>
+            </span>
+          </li>
+        <% }); %>
+      </ol>
+    </div>
+  </div>
+</div>

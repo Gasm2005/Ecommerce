@@ -1,0 +1,21 @@
+    </main>
+  </div>
+</div>
+
+<div id="admin-toasts" class="pointer-events-none fixed bottom-5 right-5 z-[100] flex w-full max-w-xs flex-col gap-2"></div>
+
+<!-- confirm-and-post dialog, reused by every destructive action -->
+<div x-cloak x-show="$store.admin.confirm.open" class="fixed inset-0 z-[90] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/45" @click="$store.admin.cancel()"></div>
+  <div class="relative w-full max-w-sm border border-line bg-panel p-6 shadow-xl">
+    <p class="font-serif text-lg" x-text="$store.admin.confirm.title"></p>
+    <p class="mt-2 text-sm text-muted" x-text="$store.admin.confirm.body"></p>
+    <div class="mt-6 flex justify-end gap-2">
+      <button @click="$store.admin.cancel()" class="border border-line px-4 py-2 text-[11px] uppercase tracking-[0.14em] text-ink">Cancel</button>
+      <button @click="$store.admin.proceed()" class="bg-critical px-4 py-2 text-[11px] uppercase tracking-[0.14em] text-ivory" x-text="$store.admin.confirm.cta"></button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

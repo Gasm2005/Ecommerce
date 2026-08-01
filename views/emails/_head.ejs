@@ -1,0 +1,32 @@
+<%
+  /* Email shell, top half. Tables and inline styles on purpose — Outlook and
+     Gmail still ignore most modern CSS. Colours come from the store's theme, so
+     a client's mail matches their site without editing this file.
+     locals: config, brand, settings, title, preheader */
+  const c = config.theme.colors;
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+</head>
+<body style="margin:0; padding:0; background:<%= c.cream %>; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:<%= c.ink %>;">
+
+  <!-- inbox preview line, hidden in the body -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;"><%= typeof preheader !== 'undefined' && preheader ? preheader : title %></div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:<%= c.cream %>; padding:24px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; background:<%= c.ivory %>; border:1px solid <%= c.line %>;">
+
+        <tr>
+          <td align="center" style="padding:28px 24px 20px; border-bottom:1px solid <%= c.line %>;">
+            <div style="font-family:Georgia,'Times New Roman',serif; font-size:22px; letter-spacing:3px; color:<%= c.ink %>;"><%= brand.logoText || brand.name %></div>
+            <% if (brand.logoSubtext) { %>
+              <div style="margin-top:4px; font-size:9px; letter-spacing:3px; color:<%= c.gold %>;"><%= brand.logoSubtext %></div>
+            <% } %>
+          </td>
+        </tr>
+
+        <tr><td style="padding:28px 24px;">

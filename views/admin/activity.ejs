@@ -1,0 +1,31 @@
+<%- include('./partials/open', {
+  active: 'activity',
+  adminTitle: 'Activity log',
+  adminSubtitle: rows.length + ' recorded actions (most recent 400)',
+  adminActions: null
+}) %>
+
+<div class="card">
+  <% if (!rows.length) { %>
+    <p class="py-12 text-center text-[12.5px] text-muted">Nothing logged yet. Admin actions appear here as you work.</p>
+  <% } %>
+  <ul class="divide-y divide-line/60">
+    <% rows.forEach(function (r) { %>
+      <li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-3">
+        <span class="pill pill-info shrink-0"><%= r.area %></span>
+        <span class="min-w-0 flex-1 text-[12.5px] text-ink"><%= r.message %></span>
+        <span class="shrink-0 text-[11px] text-muted">
+          <%= new Date(r.at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %>
+        </span>
+      </li>
+    <% }); %>
+  </ul>
+</div>
+
+<p class="mt-4 text-[11.5px] leading-relaxed text-muted">
+  Every write also leaves a timestamped file in <code class="bg-cream px-1">data/backups/</code> —
+  copy one back over <code class="bg-cream px-1">data/products.json</code> or
+  <code class="bg-cream px-1">config/site.config.json</code> to undo a change.
+</p>
+
+<%- include('./partials/close') %>

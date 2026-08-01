@@ -1,0 +1,50 @@
+[
+  {
+    "id": "RET-00001",
+    "orderId": "ORD-00132",
+    "customer": {
+      "name": "Ananya Rao",
+      "email": "ananya.rao@example.com",
+      "phone": "9816132530"
+    },
+    "items": [
+      {
+        "productId": "p016",
+        "slug": "naina-kanjivaram-saree",
+        "name": "Naina Kanjivaram Saree",
+        "size": "Free Size",
+        "color": "Emerald",
+        "qty": 1,
+        "price": 94000,
+        "lineTotal": 94000
+      }
+    ],
+    "reason": "Size or fit",
+    "note": "Blouse runs tight across the shoulders",
+    "media": [],
+    "method": "original",
+    "status": "refunded",
+    "requestedAmount": 94000,
+    "refundAmount": 50000,
+    "requestedAt": "2026-07-31T12:45:49.604Z",
+    "updatedAt": "2026-08-01T04:49:21.648Z",
+    "timeline": [
+      {
+        "at": "2026-07-31T12:45:49.604Z",
+        "label": "Return requested by customer"
+      },
+      {
+        "at": "2026-07-31T12:45:50.474Z",
+        "label": "Marked approved"
+      },
+      {
+        "at": "2026-07-31T12:45:50.482Z",
+        "label": "Marked received"
+      },
+      {
+        "at": "2026-07-31T12:45:50.485Z",
+        "label": "Marked refunded — ₹50,000"
+      }
+    ]
+  }
+]

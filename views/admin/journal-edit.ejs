@@ -1,0 +1,102 @@
+<%
+  const isNew = !post;
+  const p = post || {};
+  const val = (k, d) => (p[k] === undefined || p[k] === null ? (d === undefined ? '' : d) : p[k]);
+%>
+<%- include('./partials/open', {
+  active: 'journal',
+  adminTitle: isNew ? 'New post' : p.title,
+  adminSubtitle: isNew ? 'Draft a journal entry' : '/journal/' + p.slug + ' · ' + p.status,
+  adminActions: (!isNew && p.status === 'published' ? '<a href="/journal/' + p.slug + '" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">View</a>' : '')
+    + '<a href="/admin/journal' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">All posts</a>'
+}) %>
+
+<% if (error) { %>
+  <p class="mb-4 border border-critical/40 bg-critical/5 px-4 py-3 text-[12.5px] text-critical"><%= error %></p>
+<% } %>
+
+<form method="post" action="/admin/journal<%= isNew ? '' : '/' + p.id %><%= tokenQs %>" class="grid gap-3 xl:grid-cols-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+
+  <div class="space-y-3 xl:col-span-2">
+    <div class="card p-4">
+      <div class="space-y-3">
+        <div>
+          <label class="adm-label" for="title">Title *</label>
+          <input id="title" name="title" class="adm-input" required value="<%= val('title') %>">
+        </div>
+        <div>
+          <label class="adm-label" for="excerpt">Excerpt <span class="text-muted">— shown on the journal index and in search results</span></label>
+          <textarea id="excerpt" name="excerpt" rows="2" class="adm-textarea"><%= val('excerpt') %></textarea>
+        </div>
+        <div>
+          <label class="adm-label" for="body">Body <span class="text-muted">— one blank line between paragraphs</span></label>
+          <textarea id="body" name="body" rows="18" class="adm-textarea leading-relaxed"><%= val('body') %></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <h2 class="mb-3 font-serif text-base">Search appearance</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="adm-label" for="seoTitle">Meta title</label>
+          <input id="seoTitle" name="seoTitle" class="adm-input" value="<%= p.seo ? (p.seo.title || '') : '' %>" placeholder="Defaults to the post title">
+        </div>
+        <div>
+          <label class="adm-label" for="seoDescription">Meta description</label>
+          <textarea id="seoDescription" name="seoDescription" rows="2" class="adm-textarea" placeholder="Defaults to the excerpt"><%= p.seo ? (p.seo.description || '') : '' %></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-3">
+    <div class="card sticky top-[76px] p-4">
+      <div class="space-y-3">
+        <div>
+          <label class="adm-label" for="status">Status</label>
+          <select id="status" name="status" class="adm-select">
+            <option value="draft" <%= val('status') === 'draft' ? 'selected' : '' %>>Draft</option>
+            <option value="published" <%= val('status') === 'published' ? 'selected' : '' %>>Published</option>
+          </select>
+        </div>
+        <div>
+          <label class="adm-label" for="publishedAt">Publish date</label>
+          <input id="publishedAt" type="date" name="publishedAt" class="adm-input"
+                 value="<%= p.publishedAt ? String(p.publishedAt).slice(0, 10) : new Date().toISOString().slice(0, 10) %>">
+        </div>
+        <div>
+          <label class="adm-label" for="author">Author</label>
+          <input id="author" name="author" class="adm-input" value="<%= val('author', 'The Atelier') %>">
+        </div>
+        <div>
+          <label class="adm-label" for="tags">Tags <span class="text-muted">(comma separated)</span></label>
+          <input id="tags" name="tags" class="adm-input" value="<%= Array.isArray(p.tags) ? p.tags.join(', ') : '' %>" placeholder="bridal, guides">
+        </div>
+        <div>
+          <label class="adm-label" for="slug">Slug</label>
+          <input id="slug" name="slug" class="adm-input" value="<%= val('slug') %>" placeholder="auto from the title">
+        </div>
+        <div>
+          <label class="adm-label" for="cover">Cover image URL</label>
+          <input id="cover" name="cover" class="adm-input" value="<%= val('cover') %>" placeholder="/static/img/journal/cover.jpg">
+        </div>
+      </div>
+
+      <button class="adm-btn adm-btn-primary mt-4 w-full justify-center"><%= isNew ? 'Create post' : 'Save post' %></button>
+
+      <% if (!isNew) { %>
+        <button type="button" class="adm-btn adm-btn-danger adm-btn-sm mt-2 w-full justify-center"
+                hx-post="/admin/journal/<%= p.id %>/delete" hx-trigger="confirmed"
+                hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'
+                hx-on:htmx:after-request="window.location.href='/admin/journal<%= tokenQs %>'"
+                data-confirm="“<%= p.title %>” will be permanently deleted." data-confirm-title="Delete post?" data-confirm-cta="Delete post">
+          Delete post
+        </button>
+      <% } %>
+    </div>
+  </div>
+</form>
+
+<%- include('./partials/close') %>

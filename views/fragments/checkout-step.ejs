@@ -1,0 +1,374 @@
+<%
+  const v = (k, d) => (state && state[k] !== undefined && state[k] !== '') ? state[k] : (d || '');
+  const err = (k) => errors && errors[k];
+  const inputCls = 'w-full border bg-ivory px-4 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-maroon';
+  const labelCls = 'mb-1 block text-[10px] uppercase tracking-luxe text-muted';
+%>
+
+<!-- progress -->
+<ol class="flex items-center gap-2 border-b border-line pb-4">
+  <% steps.forEach(function (s, i) { %>
+    <li class="flex flex-1 items-center gap-2">
+      <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[13.5px]
+                   <%= step > s.id ? 'border-maroon bg-maroon text-ivory' : (step === s.id ? 'border-maroon text-maroon' : 'border-line text-muted') %>">
+        <%= step > s.id ? '✓' : s.id %>
+      </span>
+      <span class="text-[10px] uppercase tracking-[0.14em] <%= step === s.id ? 'text-ink' : 'text-muted' %>"><%= s.label %></span>
+      <% if (i < steps.length - 1) { %>
+        <span class="ml-1 hidden h-px flex-1 <%= step > s.id ? 'bg-maroon' : 'bg-line' %> sm:block"></span>
+      <% } %>
+    </li>
+  <% }); %>
+</ol>
+
+<% if (errors && errors.gateway) { %>
+  <!-- A gateway that refused the request: say so plainly and offer the way out. -->
+  <div class="mt-5 border border-maroon/40 bg-maroon/5 px-4 py-3">
+    <p class="text-[15px] text-maroon">We couldn’t start the payment.</p>
+    <p class="mt-1 text-[13px] leading-relaxed text-muted"><%= errors.gateway %></p>
+    <p class="mt-2 text-[13px] text-muted">
+      Nothing has been charged and your cart is intact. Try again, choose another method, or call
+      <a href="tel:<%= config.brand.supportPhone %>" class="text-maroon"><%= config.brand.supportPhone %></a>.
+    </p>
+  </div>
+<% } else if (errors && errors.stock) { %>
+  <!-- Someone else bought the last piece while this cart was open. -->
+  <div class="mt-5 border border-maroon/40 bg-maroon/5 px-4 py-3">
+    <p class="text-[15px] text-maroon">Your bag changed while you were checking out.</p>
+    <p class="mt-1 text-[13px] leading-relaxed text-muted"><%= errors.stock %></p>
+    <p class="mt-2 text-[13px] text-muted">
+      Nothing has been charged. <a href="/cart" class="text-maroon underline underline-offset-4">Review your bag</a> and try again.
+    </p>
+  </div>
+<% } else if (errors && errors.paymentMethod === 'unavailable') { %>
+  <p class="mt-5 border border-maroon/40 bg-maroon/5 px-4 py-3 text-[15px] text-maroon">
+    That payment option is no longer available for this order — please pick another below.
+  </p>
+<% } else if (Object.keys(errors || {}).length) { %>
+  <p class="mt-5 border border-maroon/40 bg-maroon/5 px-4 py-3 text-[15px] text-maroon">Please correct the highlighted fields.</p>
+<% } %>
+
+<% if (step === 1) { %>
+
+  <div class="grid gap-x-10 gap-y-8 lg:grid-cols-12">
+    <form id="step-form" class="lg:col-span-7">
+      <input type="hidden" name="_from" value="1">
+
+      <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 class="font-serif text-xl">Delivery address</h2>
+        <% if (config.features.guestCheckout) { %>
+          <p class="text-[13px] text-muted">
+            Guest checkout — no account needed.
+            <button type="button" class="ml-1 text-[10px] uppercase tracking-[0.14em] text-maroon underline underline-offset-4">Login instead</button>
+          </p>
+        <% } %>
+      </div>
+
+      <!-- Four columns so pincode / city / state / country share one row: a
+           shorter form means the total and the button stay on screen. -->
+      <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div class="col-span-2 sm:col-span-4">
+          <label class="<%= labelCls %>">Full name *</label>
+          <input name="fullName" value="<%= v('fullName') %>" placeholder="Priya Sharma" autocomplete="name"
+                 class="<%= inputCls %> <%= err('fullName') ? 'border-maroon' : 'border-line' %>">
+          <% if (err('fullName')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('fullName') %></p><% } %>
+        </div>
+
+        <div class="col-span-2">
+          <label class="<%= labelCls %>">Phone *</label>
+          <input name="phone" inputmode="tel" value="<%= v('phone') %>" placeholder="98200 00000" autocomplete="tel"
+                 class="<%= inputCls %> <%= err('phone') ? 'border-maroon' : 'border-line' %>">
+          <% if (err('phone')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('phone') %></p><% } %>
+        </div>
+
+        <div class="col-span-2">
+          <label class="<%= labelCls %>">Email (for order updates)</label>
+          <input name="email" type="email" value="<%= v('email') %>" placeholder="you@email.com" autocomplete="email"
+                 class="<%= inputCls %> <%= err('email') ? 'border-maroon' : 'border-line' %>">
+          <% if (err('email')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('email') %></p><% } %>
+        </div>
+
+        <div class="col-span-2 sm:col-span-4">
+          <label class="<%= labelCls %>">Address *</label>
+          <input name="address1" value="<%= v('address1') %>" placeholder="Flat / House no., building, street" autocomplete="address-line1"
+                 class="<%= inputCls %> <%= err('address1') ? 'border-maroon' : 'border-line' %>">
+          <% if (err('address1')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('address1') %></p><% } %>
+        </div>
+
+        <div class="col-span-2 sm:col-span-4">
+          <label class="<%= labelCls %>">Landmark / area</label>
+          <input name="address2" value="<%= v('address2') %>" placeholder="Optional" autocomplete="address-line2" class="<%= inputCls %> border-line">
+        </div>
+
+        <!-- Six digits answer city, state, ETA and COD in one round trip. -->
+        <div>
+          <label class="<%= labelCls %>">Pincode *</label>
+          <input name="pincode" inputmode="numeric" maxlength="6" value="<%= v('pincode') %>" placeholder="400050" autocomplete="postal-code"
+                 hx-post="/checkout/pincode" hx-trigger="keyup changed delay:400ms, change"
+                 hx-target="#pincode-info" hx-swap="innerHTML"
+                 class="<%= inputCls %> <%= err('pincode') ? 'border-maroon' : 'border-line' %>">
+        </div>
+
+        <div>
+          <label class="<%= labelCls %>">City *</label>
+          <input id="city-field" name="city" value="<%= v('city') %>" placeholder="Mumbai" autocomplete="address-level2"
+                 class="<%= inputCls %> <%= err('city') ? 'border-maroon' : 'border-line' %>">
+          <% if (err('city')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('city') %></p><% } %>
+        </div>
+
+        <div>
+          <label class="<%= labelCls %>">State *</label>
+          <input id="state-field" name="state" value="<%= v('state') %>" placeholder="Maharashtra" autocomplete="address-level1"
+                 class="<%= inputCls %> <%= err('state') ? 'border-maroon' : 'border-line' %>">
+          <% if (err('state')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('state') %></p><% } %>
+        </div>
+
+        <div>
+          <label class="<%= labelCls %>">Country</label>
+          <input name="country" value="<%= v('country', 'India') %>" autocomplete="country-name" class="<%= inputCls %> border-line">
+        </div>
+
+        <!-- What the pincode told us: city/state filled, ETA, COD availability -->
+        <div id="pincode-info" class="col-span-2 -mt-1 sm:col-span-4">
+          <% if (err('pincode')) { %><p class="text-[13px] text-maroon"><%= err('pincode') %></p><% } %>
+        </div>
+
+        <div class="col-span-2 sm:col-span-4">
+          <label class="<%= labelCls %>">Measurements / stitching notes</label>
+          <textarea name="notes" rows="2" placeholder="Bust 34, waist 28, blouse length 15 — anything we should know"
+                    class="<%= inputCls %> border-line"><%= v('notes') %></textarea>
+        </div>
+
+        <!-- Business purchase: collapsed, because almost every customer is retail
+             and an empty GSTIN box on a bridal checkout is just friction. Opens
+             itself if a GSTIN was already entered or came back with an error. -->
+        <div class="col-span-2 sm:col-span-4"
+             x-data="{ open: <%= (v('gstin') || err('gstin') || err('businessName')) ? 'true' : 'false' %> }">
+          <button type="button" x-show="!open" @click="open = true"
+                  class="text-[10px] uppercase tracking-[0.14em] text-muted underline underline-offset-4 hover:text-maroon">
+            Buying for a business? Add GSTIN
+          </button>
+
+          <div x-show="open" x-cloak class="border border-line bg-cream/40 p-3">
+            <p class="text-[13.5px] leading-relaxed text-muted">
+              We'll put your GSTIN on the tax invoice so you can claim input credit.
+            </p>
+            <div class="mt-2 grid grid-cols-2 gap-3">
+              <div>
+                <label class="<%= labelCls %>" for="gstin">GSTIN</label>
+                <input id="gstin" name="gstin" maxlength="15" value="<%= v('gstin') %>"
+                       placeholder="27AABCA1234A1ZJ" autocomplete="off"
+                       class="<%= inputCls %> font-mono text-[13px] uppercase <%= err('gstin') ? 'border-maroon' : 'border-line' %>">
+                <% if (err('gstin')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('gstin') %></p><% } %>
+              </div>
+              <div>
+                <label class="<%= labelCls %>" for="businessName">Registered business name</label>
+                <input id="businessName" name="businessName" value="<%= v('businessName') %>"
+                       placeholder="As on your GST certificate"
+                       class="<%= inputCls %> <%= err('businessName') ? 'border-maroon' : 'border-line' %>">
+                <% if (err('businessName')) { %><p class="mt-1 text-[13px] text-maroon"><%= err('businessName') %></p><% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <%- include('./checkout-aside', {
+      primaryLabel: 'Continue to delivery',
+      primaryPost: '/checkout/step/2',
+      busyLabel: null,
+      backLabel: 'Back to bag',
+      backHref: '/cart',
+      note: null
+    }) %>
+  </div>
+
+<% } else if (step === 2) { %>
+
+  <%
+    /* Options depend on the destination, not just the store. A shop that delivers
+       across its own city today should offer that; a customer three states away
+       should never see it. Zone rules and cut-offs live in src/delivery.js so the
+       product page and the checkout answer identically. */
+    const methods = delivery.methodsFor(config, {
+      pincode: v('pincode'),
+      city: v('city'),
+      subtotal: cartSummary.subtotal
+    });
+    const chosen = v('deliveryMethod', methods.length ? methods[0].id : 'standard');
+    const wrapCharge = (config.shipping || {}).giftWrapCharge || 0;
+    const localMethods = methods.filter((m) => m.fulfilment !== 'courier');
+  %>
+
+  <% if (localMethods.length) { %>
+    <!-- Worth saying out loud: this is the shop's own people, not a courier. -->
+    <p class="mt-1 border border-gold/40 bg-gold/5 px-4 py-2.5 text-[13px] leading-relaxed text-ink">
+      <span class="text-gold">●</span>
+      We deliver in <%= localMethods[0].zoneLabel || 'your area' %> ourselves — faster, and free.
+    </p>
+  <% } %>
+
+  <div class="grid gap-x-10 gap-y-8 lg:grid-cols-12">
+  <form id="step-form" class="lg:col-span-7">
+    <input type="hidden" name="_from" value="2">
+
+    <div class="flex items-start justify-between gap-4 border border-line bg-cream/50 px-4 py-3">
+      <div class="text-[15px]">
+        <p class="text-[10px] uppercase tracking-luxe text-muted">Delivering to</p>
+        <p class="mt-1 text-ink"><%= v('fullName') %> · <%= v('phone') %></p>
+        <p class="text-muted"><%= v('address1') %><%= v('address2') ? ', ' + v('address2') : '' %>, <%= v('city') %> <%= v('pincode') %></p>
+      </div>
+      <button type="button" hx-post="/checkout/step/1" hx-include="#step-form" hx-target="#checkout-body" hx-swap="innerHTML"
+              class="shrink-0 text-[10px] uppercase tracking-[0.14em] text-maroon underline underline-offset-4">Change</button>
+    </div>
+
+    <h2 class="mt-6 font-serif text-xl">Delivery method</h2>
+    <div class="mt-4 space-y-3">
+      <% methods.forEach(function (m) { %>
+        <%
+          // What this option actually costs today: a flat charge, or whatever the
+          // free-above rules make standard shipping for this cart.
+          const price = m.charge === null ? cartSummary.shipping : m.charge;
+        %>
+        <label class="flex cursor-pointer items-center gap-4 border px-4 py-4 transition has-[:checked]:border-maroon has-[:checked]:bg-cream/40 <%= chosen === m.id ? 'border-maroon' : 'border-line' %>">
+          <input type="radio" name="deliveryMethod" value="<%= m.id %>" <%= chosen === m.id ? 'checked' : '' %>
+                 hx-post="/checkout/quote" hx-include="#step-form" hx-target="#order-summary" hx-swap="outerHTML"
+                 class="h-4 w-4 appearance-none rounded-full border border-line checked:border-[5px] checked:border-maroon">
+          <span class="flex-1">
+            <span class="block text-[15px] text-ink">
+              <%= m.title %>
+              <% if (m.fulfilment === 'own') { %>
+                <span class="ml-1 border border-gold/60 bg-gold/10 px-1.5 py-0.5 text-[9px] uppercase tracking-luxe text-gold">By us</span>
+              <% } else if (m.fulfilment === 'pickup') { %>
+                <span class="ml-1 border border-line px-1.5 py-0.5 text-[9px] uppercase tracking-luxe text-muted">Pickup</span>
+              <% } %>
+            </span>
+            <span class="block text-[13px] text-muted">
+              <%= m.note %><% if (m.cutoffNote) { %> · <span class="text-maroon"><%= m.cutoffNote %></span><% } %>
+            </span>
+          </span>
+          <span class="text-[15px]"><%= price ? money(price) : 'Complimentary' %></span>
+        </label>
+      <% }); %>
+    </div>
+
+    <%
+      /* Time slot, only for the option that has them. Someone delivering by hand
+         needs to know when the customer is home; a courier does not. */
+      const chosenMethod = methods.find((m) => m.id === chosen);
+    %>
+    <% if (chosenMethod && chosenMethod.slots && chosenMethod.slots.length) { %>
+      <div class="mt-4">
+        <p class="text-[10px] uppercase tracking-luxe text-muted">Preferred time</p>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <% chosenMethod.slots.forEach(function (slot, i) { %>
+            <label class="cursor-pointer border px-3 py-2 text-[13px] transition has-[:checked]:border-maroon has-[:checked]:bg-cream/40 <%= (v('deliverySlot') || chosenMethod.slots[0]) === slot ? 'border-maroon text-ink' : 'border-line text-muted' %>">
+              <input type="radio" name="deliverySlot" value="<%= slot %>" class="hidden"
+                     <%= (v('deliverySlot') || chosenMethod.slots[0]) === slot ? 'checked' : '' %>>
+              <%= slot %>
+            </label>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <label class="mt-5 flex cursor-pointer items-start gap-3 text-[15px] text-muted">
+      <input type="checkbox" name="giftWrap" value="yes" <%= v('giftWrap') === 'yes' ? 'checked' : '' %>
+             hx-post="/checkout/quote" hx-include="#step-form" hx-target="#order-summary" hx-swap="outerHTML"
+             class="mt-0.5 h-[15px] w-[15px] appearance-none border border-line checked:border-maroon checked:bg-maroon">
+      Add signature gift packaging with a handwritten note
+      <%= wrapCharge ? '· ' + money(wrapCharge) : '' %>
+    </label>
+  </form>
+
+  <%- include('./checkout-aside', {
+    primaryLabel: 'Continue to payment',
+    primaryPost: '/checkout/step/3',
+    busyLabel: null,
+    backLabel: 'Back to address',
+    backPost: '/checkout/step/1',
+    note: null
+  }) %>
+  </div>
+
+<% } else { %>
+
+  <%
+    const pays = [
+      { id: 'upi', title: 'UPI', note: 'GPay · PhonePe · Paytm' },
+      { id: 'card', title: 'Credit / Debit card', note: 'Visa, Mastercard, Amex, RuPay' },
+      { id: 'netbanking', title: 'Net banking', note: 'All major Indian banks' },
+      { id: 'emi', title: 'EMI', note: 'No-cost EMI on orders above ₹50,000' }
+    ];
+
+    // COD options depend on the delivery pincode and what the owner has opened.
+    if (codCheck.partialAllowed) {
+      pays.push({
+        id: 'cod-partial',
+        title: 'Partial COD',
+        note: 'Pay ' + money(codCheck.advance) + ' now, ' + money(codCheck.dueOnDelivery) + ' in cash on delivery',
+        badge: 'Popular'
+      });
+    }
+    if (codCheck.fullAllowed) {
+      pays.push({ id: 'cod', title: 'Cash on delivery', note: 'Pay the full ' + money(cartSummary.total) + ' when it arrives' });
+    }
+    const pchosen = v('paymentMethod', 'upi');
+  %>
+
+  <div class="grid gap-x-10 gap-y-8 lg:grid-cols-12">
+  <form id="step-form" class="lg:col-span-7">
+    <input type="hidden" name="_from" value="3">
+
+    <h2 class="font-serif text-xl">Payment method</h2>
+    <div class="mt-4 space-y-3">
+      <% pays.forEach(function (m) { %>
+        <label class="flex cursor-pointer items-center gap-4 border px-4 py-4 transition <%= pchosen === m.id ? 'border-maroon bg-cream/40' : 'border-line' %>">
+          <input type="radio" name="paymentMethod" value="<%= m.id %>" <%= pchosen === m.id ? 'checked' : '' %>
+                 class="h-4 w-4 appearance-none rounded-full border border-line checked:border-[5px] checked:border-maroon">
+          <span class="flex-1">
+            <span class="block text-[15px] text-ink">
+              <%= m.title %>
+              <% if (m.badge) { %><span class="ml-2 border border-gold/60 bg-gold/10 px-1.5 py-0.5 text-[9px] uppercase tracking-luxe text-gold"><%= m.badge %></span><% } %>
+            </span>
+            <span class="block text-[13px] text-muted"><%= m.note %></span>
+          </span>
+        </label>
+      <% }); %>
+    </div>
+
+    <!-- why COD isn't offered, when it isn't -->
+    <% if (codCheck.reason) { %>
+      <p class="mt-3 border border-line bg-cream/50 px-4 py-3 text-[13px] leading-relaxed text-muted">
+        <span class="text-ink">Cash on delivery:</span> <%= codCheck.reason %>
+        <% if (codCheck.pincode) { %> <span class="text-muted">(pincode <%= codCheck.pincode %>)</span><% } %>
+      </p>
+    <% } %>
+
+    <!-- partial COD breakdown, so there are no surprises at the door -->
+    <% if (codCheck.partialAllowed) { %>
+      <div x-data x-show="document.querySelector('input[name=paymentMethod]:checked')?.value?.startsWith('cod')" x-cloak
+           class="mt-3 border border-gold/40 bg-gold/5 px-4 py-3 text-[13px]">
+        <p class="text-[10px] uppercase tracking-luxe text-gold">How partial COD works</p>
+        <dl class="mt-2 space-y-1">
+          <div class="flex justify-between"><dt class="text-muted">Pay online now</dt><dd class="text-ink"><%= money(codCheck.advance) %></dd></div>
+          <div class="flex justify-between"><dt class="text-muted">Cash on delivery</dt><dd class="text-ink"><%= money(codCheck.dueOnDelivery) %></dd></div>
+          <div class="flex justify-between border-t border-gold/30 pt-1"><dt>Order total</dt><dd><%= money(cartSummary.total) %></dd></div>
+        </dl>
+      </div>
+    <% } %>
+    <% if (err('paymentMethod')) { %><p class="mt-2 text-[13px] text-maroon">Please choose a payment method.</p><% } %>
+  </form>
+
+  <%- include('./checkout-aside', {
+    primaryLabel: 'Place order · ' + money(cartSummary.total),
+    primaryPost: '/checkout/place-order',
+    busyLabel: 'Placing order…',
+    backLabel: 'Back to delivery',
+    backPost: '/checkout/step/2',
+    note: 'You’ll get an order confirmation and GST invoice by email.'
+  }) %>
+  </div>
+
+<% } %>

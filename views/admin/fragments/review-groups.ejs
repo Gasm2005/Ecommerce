@@ -1,0 +1,101 @@
+<% if (!groups.length) { %>
+  <div class="card py-12 text-center">
+    <p class="font-serif text-lg">No reviews match</p>
+    <p class="mt-1 text-[12.5px] text-muted">Reviews arrive from the product page and land in moderation.</p>
+  </div>
+<% } %>
+
+<div class="space-y-3">
+  <% groups.forEach(function (g) { %>
+    <div class="card" x-data="{ open: <%= g.pending > 0 ? 'true' : 'false' %> }">
+      <button @click="open = !open" class="flex w-full items-center gap-4 px-4 py-3 text-left">
+        <% if (g.product) { %>
+          <img src="<%= g.product.images[0] %>" alt="" class="h-12 w-9 shrink-0 object-cover" loading="lazy">
+        <% } %>
+        <span class="min-w-0 flex-1">
+          <span class="block truncate text-ink"><%= g.name %></span>
+          <span class="block text-[11px] text-muted">
+            <%= g.average ? g.average + '★ from ' + g.approvedCount : 'no approved reviews' %>
+            · <%= g.count %> total
+          </span>
+        </span>
+        <% if (g.pending) { %><span class="pill pill-warning shrink-0"><%= g.pending %> pending</span><% } %>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             :class="open ? 'rotate-45' : ''" class="shrink-0 text-muted transition"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+
+      <div x-show="open" x-cloak class="border-t border-line">
+        <% g.reviews.forEach(function (r) { %>
+          <%
+            const tone = r.status === 'approved' ? 'good' : (r.status === 'pending' ? 'warning' : 'critical');
+            const vals = JSON.stringify({ token: adminToken || undefined, q: filters.q || undefined, status: filters.status || undefined });
+          %>
+          <div class="border-b border-line/60 px-4 py-3.5 last:border-b-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-gold"><%= '★'.repeat(r.rating) %><span class="text-line"><%= '★'.repeat(5 - r.rating) %></span></span>
+              <span class="text-[12.5px] text-ink"><%= r.title %></span>
+              <span class="pill pill-<%= tone %>"><%= r.status %></span>
+              <% if (r.verified) { %><span class="pill pill-info">Verified buyer</span><% } %>
+              <span class="ml-auto text-[10.5px] text-muted">
+                <%= r.author %> · <%= r.location || '—' %> · <%= new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) %>
+                <% if (r.orderId) { %> · <a href="/admin/orders/<%= r.orderId %><%= tokenQs %>" class="text-maroon"><%= r.orderId %></a><% } %>
+              </span>
+            </div>
+
+            <p class="mt-2 text-[12.5px] leading-relaxed text-muted"><%= r.body %></p>
+
+            <% if (r.media && r.media.length) { %>
+              <ul class="mt-2 flex flex-wrap gap-2">
+                <% r.media.forEach(function (m) { %>
+                  <li>
+                    <% if (m.type === 'video') { %>
+                      <video src="<%= m.src %>" controls preload="metadata" class="h-20 w-16 bg-cream object-cover"></video>
+                    <% } else { %>
+                      <a href="<%= m.src %>" target="_blank" rel="noopener">
+                        <img src="<%= m.src %>" alt="" loading="lazy" class="h-20 w-16 bg-cream object-cover">
+                      </a>
+                    <% } %>
+                  </li>
+                <% }); %>
+              </ul>
+              <p class="mt-1 text-[10px] uppercase tracking-[0.12em] text-gold"><%= r.media.length %> customer <%= r.media.length === 1 ? 'file' : 'files' %> — check before approving</p>
+            <% } %>
+
+            <% if (r.reply) { %>
+              <div class="mt-3 border-l-2 border-gold/50 pl-3">
+                <p class="text-[10px] uppercase tracking-[0.12em] text-gold">Your reply</p>
+                <p class="mt-1 text-[12.5px] leading-relaxed"><%= r.reply.body %></p>
+              </div>
+            <% } %>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <% if (r.status !== 'approved') { %>
+                <button class="adm-btn adm-btn-sm" hx-post="/admin/reviews/<%= r.id %>/status"
+                        hx-target="#review-groups" hx-swap="innerHTML"
+                        hx-vals='<%- JSON.stringify({ status: 'approved', token: adminToken || undefined, q: filters.q || undefined, status_filter: undefined }) %>'>Approve</button>
+              <% } %>
+              <% if (r.status !== 'rejected') { %>
+                <button class="adm-btn adm-btn-ghost adm-btn-sm" hx-post="/admin/reviews/<%= r.id %>/status"
+                        hx-target="#review-groups" hx-swap="innerHTML"
+                        hx-vals='<%- JSON.stringify({ status: 'rejected', token: adminToken || undefined, q: filters.q || undefined }) %>'>Reject</button>
+              <% } %>
+
+              <form class="flex flex-1 flex-wrap items-center gap-2" hx-post="/admin/reviews/<%= r.id %>/reply"
+                    hx-target="#review-groups" hx-swap="innerHTML">
+                <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+                <input type="hidden" name="q" value="<%= filters.q %>">
+                <input name="reply" class="adm-input min-w-[180px] flex-1" placeholder="<%= r.reply ? 'Edit your reply' : 'Reply publicly…' %>" value="<%= r.reply ? r.reply.body : '' %>">
+                <button class="adm-btn adm-btn-ghost adm-btn-sm">Save reply</button>
+              </form>
+
+              <button class="adm-btn adm-btn-danger adm-btn-sm" hx-post="/admin/reviews/<%= r.id %>/delete"
+                      hx-target="#review-groups" hx-swap="innerHTML" hx-trigger="confirmed"
+                      hx-vals='<%- vals %>'
+                      data-confirm="This review will be permanently removed." data-confirm-title="Delete review?" data-confirm-cta="Delete">Delete</button>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  <% }); %>
+</div>

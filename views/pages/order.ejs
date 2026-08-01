@@ -1,0 +1,54 @@
+<%- include('../partials/document-open', { title: 'Order confirmed' }) %>
+
+<div class="mx-auto max-w-2xl px-4 py-16 text-center lg:py-24">
+  <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-gold text-gold">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 13 4 4L19 7"/></svg>
+  </div>
+
+  <p class="mt-7 text-[10px] uppercase tracking-luxe text-gold">Order confirmed</p>
+  <h1 class="mt-3 font-serif text-4xl">Thank you<%= state.fullName ? ', ' + String(state.fullName).split(' ')[0] : '' %></h1>
+  <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted">
+    Your order <strong class="text-ink"><%= orderId %></strong> is with our atelier. You’ll receive a confirmation
+    <%= state.email ? 'at ' + state.email : 'by SMS' %>, and a stitching update within 48 hours.
+  </p>
+
+  <dl class="mx-auto mt-10 max-w-md divide-y divide-line border-y border-line text-left text-sm">
+    <div class="flex justify-between py-3"><dt class="text-muted">Order number</dt><dd><%= orderId %></dd></div>
+    <% if (placed) { %>
+      <div class="flex justify-between py-3"><dt class="text-muted">Items</dt><dd><%= money(placed.subtotal - (placed.discount || 0)) %></dd></div>
+      <div class="flex justify-between py-3">
+        <dt class="text-muted"><%= placed.deliveryTitle ? placed.deliveryTitle + ' delivery' : 'Shipping' %></dt>
+        <dd><%= placed.shipping ? money(placed.shipping) : 'Complimentary' %></dd>
+      </div>
+      <% if (placed.giftWrapCharge) { %>
+        <div class="flex justify-between py-3"><dt class="text-muted">Gift packaging</dt><dd><%= money(placed.giftWrapCharge) %></dd></div>
+      <% } %>
+      <div class="flex justify-between py-3">
+        <dt>Amount paid</dt>
+        <dd class="font-serif text-base"><%= money(placed.total) %></dd>
+      </div>
+      <% if (placed.gstAmount) { %>
+        <div class="flex justify-between py-3 text-xs"><dt class="text-muted">Includes GST</dt><dd class="text-muted"><%= money(placed.gstAmount) %></dd></div>
+      <% } %>
+    <% } else if (order && order.total) { %>
+      <div class="flex justify-between py-3"><dt class="text-muted">Amount</dt><dd><%= money(order.total) %></dd></div>
+    <% } %>
+    <% if (state.paymentMethod) { %>
+      <div class="flex justify-between py-3"><dt class="text-muted">Payment</dt><dd class="uppercase"><%= state.paymentMethod %></dd></div>
+    <% } %>
+    <% if (state.city) { %>
+      <div class="flex justify-between py-3"><dt class="text-muted">Delivering to</dt><dd><%= state.city %> <%= state.pincode || '' %></dd></div>
+    <% } %>
+  </dl>
+
+  <div class="mt-10 flex flex-wrap justify-center gap-3">
+    <a href="/" class="bg-maroon px-8 py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">Back to home</a>
+    <a href="/category/all?sort=new" class="border border-ink px-8 py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon">Continue shopping</a>
+    <% if (placed) { %>
+      <a href="/order/<%= placed.id %>/invoice?print=1" target="_blank"
+         class="border border-line px-8 py-4 text-[11px] uppercase tracking-luxe text-muted transition hover:border-maroon hover:text-maroon">Download invoice</a>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/document-close') %>

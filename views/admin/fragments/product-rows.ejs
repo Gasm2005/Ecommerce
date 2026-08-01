@@ -1,0 +1,49 @@
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[1000px]">
+      <thead>
+        <tr>
+          <th>Product</th><th>Categories</th><th class="num">Price</th><th class="num">Cost</th>
+          <th class="num">Margin</th><th class="num">Stock</th><th class="num">Units 12m</th>
+          <th class="num">Revenue 12m</th><th>Rating</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!rows.length) { %>
+          <tr><td colspan="10" class="py-10 text-center text-muted">No products match these filters.</td></tr>
+        <% } %>
+        <% rows.forEach(function (p) { %>
+          <tr>
+            <td class="min-w-[220px]">
+              <div class="flex items-center gap-3">
+                <img src="<%= p.images[0] %>" alt="" class="h-12 w-9 shrink-0 object-cover" loading="lazy">
+                <span class="min-w-0">
+                  <a href="/admin/products/<%= p.id %><%= tokenQs %>" class="block truncate text-ink hover:text-maroon"><%= p.name %></a>
+                  <span class="block truncate text-[10.5px] text-muted"><%= p.sku || p.id %> · <%= p.fabric %></span>
+                </span>
+              </div>
+            </td>
+            <td class="text-[11.5px] capitalize text-muted"><%= p.categories.join(', ') %></td>
+            <td class="num"><%= money(p.price) %></td>
+            <td class="num text-muted"><%= p.cost ? money(p.cost) : '—' %></td>
+            <td class="num"><%= p.marginPercent === null ? '—' : p.marginPercent + '%' %></td>
+            <td class="num" id="stock-<%= p.id %>">
+              <%- include('./stock-cell', { p: p, threshold: threshold }) %>
+            </td>
+            <td class="num"><%= p.units %></td>
+            <td class="num"><%= p.revenue ? money(p.revenue) : '—' %></td>
+            <td class="whitespace-nowrap">
+              <% if (p.rating.count) { %>
+                <span class="text-ink"><%= p.rating.average %></span>
+                <span class="text-[10.5px] text-muted">(<%= p.rating.count %>)</span>
+              <% } else { %><span class="text-muted">—</span><% } %>
+            </td>
+            <td class="num">
+              <a href="/admin/products/<%= p.id %><%= tokenQs %>" class="text-[10.5px] uppercase tracking-[0.12em] text-maroon">Edit</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>

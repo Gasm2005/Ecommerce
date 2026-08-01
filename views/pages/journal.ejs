@@ -1,0 +1,52 @@
+<%- include('../partials/document-open', { title: 'Journal' }) %>
+
+<div class="mx-auto max-w-[1200px] px-4 lg:px-8">
+  <header class="border-b border-line py-10 text-center lg:py-14">
+    <p class="text-[10px] uppercase tracking-luxe text-gold">The Journal</p>
+    <h1 class="mt-3 font-serif text-3xl lg:text-5xl">Notes from the atelier</h1>
+    <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted">
+      Guides to choosing, wearing and caring for handcrafted Indian couture — written by the people who make it.
+    </p>
+  </header>
+
+  <% if (tags.length) { %>
+    <nav class="flex flex-wrap items-center justify-center gap-2 py-6">
+      <a href="/journal" class="border px-3.5 py-2 text-[10px] uppercase tracking-luxe <%= !tag ? 'border-maroon bg-maroon text-ivory' : 'border-line text-muted' %>">All</a>
+      <% tags.forEach(function (t) { %>
+        <a href="/journal?tag=<%= encodeURIComponent(t.tag) %>"
+           class="border px-3.5 py-2 text-[10px] uppercase tracking-luxe <%= tag === t.tag ? 'border-maroon bg-maroon text-ivory' : 'border-line text-muted' %>">
+          <%= t.tag %> <span class="opacity-60"><%= t.count %></span>
+        </a>
+      <% }); %>
+    </nav>
+  <% } %>
+
+  <% if (!posts.length) { %>
+    <p class="py-20 text-center text-sm text-muted">Nothing published yet.</p>
+  <% } %>
+
+  <div class="grid gap-10 py-8 lg:grid-cols-2 lg:gap-x-12 lg:gap-y-14">
+    <% posts.forEach(function (p, i) { %>
+      <article class="group <%= i === 0 ? 'lg:col-span-2' : '' %>">
+        <a href="/journal/<%= p.slug %>" class="block">
+          <div class="overflow-hidden bg-cream">
+            <img loading="lazy" decoding="async"
+                 src="<%= p.cover || ('/ph.svg?seed=jrn' + p.slug + '&w=1200&h=' + (i === 0 ? 620 : 760) + '&kind=hero&label=' + encodeURIComponent((p.tags || [])[0] || 'Journal')) %>"
+                 alt="<%= p.title %>"
+                 class="w-full object-cover transition duration-700 group-hover:scale-[1.03] <%= i === 0 ? 'aspect-[16/7]' : 'aspect-[4/3]' %>">
+          </div>
+          <p class="mt-4 text-[10px] uppercase tracking-luxe text-gold">
+            <%= (p.tags || []).join(' · ') || 'Journal' %> · <%= p.readingMinutes %> min read
+          </p>
+          <h2 class="mt-2 font-serif leading-snug transition group-hover:text-maroon <%= i === 0 ? 'text-2xl lg:text-3xl' : 'text-xl' %>"><%= p.title %></h2>
+          <p class="mt-2 max-w-xl text-sm leading-relaxed text-muted"><%= p.excerpt %></p>
+          <p class="mt-3 text-[10px] uppercase tracking-luxe text-muted">
+            <%= new Date(p.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+          </p>
+        </a>
+      </article>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('../partials/document-close') %>

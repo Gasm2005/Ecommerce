@@ -1,0 +1,62 @@
+<%- include('./partials/open', {
+  active: 'categories',
+  adminTitle: 'Categories',
+  adminSubtitle: nav.length + ' in the storefront menu' + (orphans.length ? ' · ' + orphans.length + ' unlisted' : ''),
+  adminActions: '<a href="/" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">See menu</a>'
+}) %>
+
+<div class="grid gap-3 xl:grid-cols-3">
+  <div class="xl:col-span-2">
+    <div id="category-rows" class="adm-swap">
+      <%- include('./fragments/category-rows') %>
+    </div>
+  </div>
+
+  <div class="space-y-3">
+    <div class="card p-4">
+      <h2 class="font-serif text-base">Add a category</h2>
+      <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+        Adding one puts it in the storefront navigation, its mega-menu and <code class="bg-cream px-1">/category/&lt;slug&gt;</code> immediately.
+      </p>
+      <form class="mt-3 space-y-3" hx-post="/admin/categories" hx-swap="none">
+        <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+        <div>
+          <label class="adm-label" for="label">Label *</label>
+          <input id="label" name="label" class="adm-input" required placeholder="Menswear">
+        </div>
+        <div>
+          <label class="adm-label" for="slug">Slug</label>
+          <input id="slug" name="slug" class="adm-input" placeholder="menswear — auto from the label">
+        </div>
+        <div>
+          <label class="adm-label" for="subtitle">Mega-menu subtitle</label>
+          <input id="subtitle" name="subtitle" class="adm-input" placeholder="Sherwanis & bandhgalas">
+        </div>
+        <div>
+          <label class="adm-label" for="links">Sub-links <span class="text-muted">(one per line)</span></label>
+          <textarea id="links" name="links" rows="4" class="adm-textarea" placeholder="Sherwanis&#10;Bandhgalas&#10;Kurta sets"></textarea>
+        </div>
+        <button class="adm-btn adm-btn-primary w-full justify-center">Add category</button>
+      </form>
+    </div>
+
+    <% if (orphans.length) { %>
+      <div class="card p-4">
+        <h2 class="font-serif text-base">Not in the menu</h2>
+        <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+          Products carry these slugs but no menu entry points at them — they're only reachable by direct URL.
+        </p>
+        <ul class="mt-3 space-y-2 text-[12.5px]">
+          <% orphans.forEach(function (o) { %>
+            <li class="flex items-center justify-between">
+              <span><code class="bg-cream px-1"><%= o.slug %></code> <span class="text-muted">· <%= o.productCount %> products</span></span>
+              <a href="/category/<%= o.slug %>" target="_blank" class="text-[10.5px] uppercase tracking-[0.12em] text-maroon">View</a>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('./partials/close') %>

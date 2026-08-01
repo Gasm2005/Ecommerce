@@ -1,0 +1,492 @@
+<%- include('./partials/open', {
+  active: 'settings',
+  adminTitle: 'Settings',
+  adminSubtitle: 'Writes config/site.config.json — every save backs it up first',
+  adminActions: null
+}) %>
+
+<% if (saved) { %>
+  <p class="mb-4 border border-good/40 bg-good/5 px-4 py-3 text-[12.5px] text-good">Saved. The storefront picks it up on the next request.</p>
+<% } %>
+
+<!-- ============ connections: gateway + messaging (client's own accounts) ============ -->
+<div id="connection-panels" class="mb-3">
+  <%- include('./fragments/connection-panels') %>
+</div>
+
+<div class="grid gap-3 xl:grid-cols-2">
+
+  <!-- ------------------------------------------------------ finance ---- -->
+  <div class="card p-4 xl:col-span-2">
+    <h2 class="font-serif text-base">Finance model — every cost, your numbers</h2>
+    <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+      Product prices are <strong class="text-ink">GST-inclusive</strong>, so tax is extracted from the price, never added.
+      Per-SKU cost and GST on the product page beat the category default, which beats the store default —
+      so you decide the margin, nothing is guessed.
+    </p>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+      <!-- defaults + category table -->
+      <form method="post" action="/admin/settings/finance<%= tokenQs %>">
+        <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+
+        <p class="adm-label">Store fallbacks</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="adm-label" for="gstPercentDefault">GST % default</label>
+            <input id="gstPercentDefault" name="gstPercentDefault" class="adm-input" value="<%= cfg.finance.gstPercentDefault %>">
+          </div>
+          <div>
+            <label class="adm-label" for="defaultCogsPercent">COGS % when no cost entered</label>
+            <input id="defaultCogsPercent" name="defaultCogsPercent" class="adm-input" value="<%= cfg.finance.defaultCogsPercent %>">
+          </div>
+        </div>
+
+        <p class="adm-label mt-4">Fixed monthly overheads</p>
+        <p class="mb-2 text-[10.5px] text-muted">Prorated to whatever window the dashboard shows.</p>
+        <div class="grid grid-cols-2 gap-3">
+          <% ['marketing', 'salaries', 'rentAndUtilities', 'software', 'other'].forEach(function (k) { %>
+            <div>
+              <label class="adm-label" for="m_<%= k %>"><%= k.replace(/([A-Z])/g, ' $1').toLowerCase() %> ₹</label>
+              <input id="m_<%= k %>" name="monthly_<%= k %>" class="adm-input" value="<%= (cfg.finance.monthlyCosts || {})[k] || 0 %>">
+            </div>
+          <% }); %>
+          <div class="self-end text-[11px] text-muted">
+            Total <strong class="text-ink"><%= money(['marketing','salaries','rentAndUtilities','software','other'].reduce(function (s, k) { return s + ((cfg.finance.monthlyCosts || {})[k] || 0); }, 0)) %></strong>/month
+          </div>
+        </div>
+
+        <p class="adm-label mt-4">Per order</p>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="adm-label" for="po_packaging">packaging ₹</label><input id="po_packaging" name="perOrder_packaging" class="adm-input" value="<%= (cfg.finance.perOrderCosts || {}).packaging || 0 %>"></div>
+          <div><label class="adm-label" for="po_shippingCost">shipping ₹</label><input id="po_shippingCost" name="perOrder_shippingCost" class="adm-input" value="<%= (cfg.finance.perOrderCosts || {}).shippingCost || 0 %>"></div>
+          <div><label class="adm-label" for="po_codHandling">COD handling ₹</label><input id="po_codHandling" name="perOrder_codHandling" class="adm-input" value="<%= (cfg.finance.perOrderCosts || {}).codHandling || 0 %>"></div>
+        </div>
+
+        <p class="adm-label mt-4">Percentage of order value</p>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="adm-label" for="pc_paymentGateway">gateway %</label><input id="pc_paymentGateway" name="percent_paymentGateway" class="adm-input" value="<%= (cfg.finance.percentCosts || {}).paymentGateway || 0 %>"></div>
+          <div><label class="adm-label" for="pc_marketplaceOrPlatform">platform %</label><input id="pc_marketplaceOrPlatform" name="percent_marketplaceOrPlatform" class="adm-input" value="<%= (cfg.finance.percentCosts || {}).marketplaceOrPlatform || 0 %>"></div>
+          <div><label class="adm-label" for="pc_returnsProvision">returns provision %</label><input id="pc_returnsProvision" name="percent_returnsProvision" class="adm-input" value="<%= (cfg.finance.percentCosts || {}).returnsProvision || 0 %>"></div>
+        </div>
+
+        <p class="adm-label mt-4">Below EBITDA — what the business earns vs what you keep</p>
+        <p class="mt-1 text-[10.5px] leading-relaxed text-muted">
+          These are not operating costs, so they sit below EBITDA. Leave them at zero
+          and profit in hand equals EBITDA. Fill them and it becomes your actual take-home.
+        </p>
+        <div class="mt-2 grid grid-cols-3 gap-3">
+          <div>
+            <label class="adm-label" for="depreciationMonthly">depreciation ₹/mo</label>
+            <input id="depreciationMonthly" name="depreciationMonthly" class="adm-input" value="<%= cfg.finance.depreciationMonthly || 0 %>">
+          </div>
+          <div>
+            <label class="adm-label" for="interestMonthly">loan interest ₹/mo</label>
+            <input id="interestMonthly" name="interestMonthly" class="adm-input" value="<%= cfg.finance.interestMonthly || 0 %>">
+          </div>
+          <div>
+            <label class="adm-label" for="incomeTaxPercent">income tax %</label>
+            <input id="incomeTaxPercent" name="incomeTaxPercent" class="adm-input" value="<%= cfg.finance.incomeTaxPercent || 0 %>">
+          </div>
+        </div>
+
+        <button class="adm-btn adm-btn-primary mt-4">Save finance model</button>
+      </form>
+
+      <!-- per-category defaults -->
+      <form method="post" action="/admin/settings/category-finance<%= tokenQs %>">
+        <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+        <p class="adm-label">Per-category defaults</p>
+        <p class="mb-2 text-[10.5px] leading-relaxed text-muted">
+          Sarees at 5% GST, stitched garments at 12% — set it once per category instead of per product.
+        </p>
+        <table class="adm-table">
+          <thead><tr><th>Category</th><th class="num">GST %</th><th class="num">COGS %</th><th class="num">Products</th></tr></thead>
+          <tbody>
+            <% (cfg.nav || []).forEach(function (n) { %>
+              <% const d = (cfg.finance.categoryDefaults || {})[n.slug] || {}; %>
+              <tr>
+                <td class="text-ink"><%= n.label %><span class="block font-mono text-[10px] text-muted"><%= n.slug %></span></td>
+                <td class="num"><input name="gst_<%= n.slug %>" class="adm-input w-16 text-right" value="<%= d.gstPercent === undefined ? '' : d.gstPercent %>" placeholder="<%= cfg.finance.gstPercentDefault %>"></td>
+                <td class="num"><input name="cogs_<%= n.slug %>" class="adm-input w-16 text-right" value="<%= d.cogsPercent === undefined ? '' : d.cogsPercent %>" placeholder="<%= cfg.finance.defaultCogsPercent %>"></td>
+                <td class="num text-muted"><%= catalog.inCategory(n.slug).length %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <button class="adm-btn adm-btn-primary mt-3">Save category defaults</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------ COD ---- -->
+  <form method="post" action="/admin/settings/cod<%= tokenQs %>" class="card p-4 xl:col-span-2">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Cash on delivery</h2>
+    <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+      Full COD carries the entire RTO risk, so it's off until you switch it on. Partial COD takes an advance
+      online and the rest at the door — most stores run this instead.
+    </p>
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+      <div>
+        <div class="space-y-2 text-[12.5px]">
+          <label class="flex items-start gap-2">
+            <input type="checkbox" name="enabled" class="mt-0.5" <%= cod.enabled ? 'checked' : '' %>>
+            <span>Offer cash on delivery at all</span>
+          </label>
+          <label class="flex items-start gap-2">
+            <input type="checkbox" name="partialEnabled" class="mt-0.5" <%= cod.partialEnabled ? 'checked' : '' %>>
+            <span>Partial COD — advance online, rest on delivery</span>
+          </label>
+          <label class="flex items-start gap-2 border border-warning/50 bg-warning/5 px-2 py-1.5">
+            <input type="checkbox" name="fullEnabled" class="mt-0.5" <%= cod.fullEnabled ? 'checked' : '' %>>
+            <span>Full COD — nothing paid upfront
+              <span class="block text-[11px] text-muted">Higher conversion, but every RTO costs you shipping both ways.</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <div>
+            <label class="adm-label" for="advanceType">Advance type</label>
+            <select id="advanceType" name="advanceType" class="adm-select">
+              <option value="percent" <%= cod.advanceType === 'percent' ? 'selected' : '' %>>% of order</option>
+              <option value="flat" <%= cod.advanceType === 'flat' ? 'selected' : '' %>>Flat ₹</option>
+            </select>
+          </div>
+          <div>
+            <label class="adm-label" for="advancePercent">Advance %</label>
+            <input id="advancePercent" name="advancePercent" class="adm-input" value="<%= cod.advancePercent %>">
+          </div>
+          <div>
+            <label class="adm-label" for="advanceFlat">Advance ₹ (flat)</label>
+            <input id="advanceFlat" name="advanceFlat" class="adm-input" value="<%= cod.advanceFlat %>">
+          </div>
+          <div>
+            <label class="adm-label" for="maxOrder">COD max order ₹</label>
+            <input id="maxOrder" name="maxOrder" class="adm-input" value="<%= cod.maxOrder %>">
+          </div>
+          <div>
+            <label class="adm-label" for="minOrder">COD min order ₹</label>
+            <input id="minOrder" name="minOrder" class="adm-input" value="<%= cod.minOrder %>">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="adm-label" for="pincodeMode">Pincode rule</label>
+        <select id="pincodeMode" name="pincodeMode" class="adm-select">
+          <option value="block-list" <%= cod.pincodeMode === 'block-list' ? 'selected' : '' %>>COD everywhere except the blocked list</option>
+          <option value="allow-list" <%= cod.pincodeMode === 'allow-list' ? 'selected' : '' %>>COD only at the allowed pincodes</option>
+        </select>
+
+        <div class="mt-3">
+          <label class="adm-label" for="blockedPincodes">Blocked pincodes <span class="text-muted">(comma or newline)</span></label>
+          <textarea id="blockedPincodes" name="blockedPincodes" rows="3" class="adm-textarea font-mono text-[11.5px]"><%= (cod.blockedPincodes || []).join(', ') %></textarea>
+        </div>
+        <div class="mt-3">
+          <label class="adm-label" for="blockedPrefixes">Blocked regions by prefix</label>
+          <input id="blockedPrefixes" name="blockedPrefixes" class="adm-input font-mono text-[11.5px]" value="<%= (cod.blockedPrefixes || []).join(', ') %>" placeholder="19, 79">
+          <p class="mt-1 text-[10.5px] text-muted">A prefix blocks a whole region — “19” covers 19xxxx.</p>
+        </div>
+        <div class="mt-3">
+          <label class="adm-label" for="allowedPincodesOnly">Allowed pincodes <span class="text-muted">(allow-list mode)</span></label>
+          <textarea id="allowedPincodesOnly" name="allowedPincodesOnly" rows="3" class="adm-textarea font-mono text-[11.5px]" placeholder="400050, 560001, 1100"><%= (cod.allowedPincodesOnly || []).join(', ') %></textarea>
+          <p class="mt-1 text-[10.5px] text-muted">Short entries act as prefixes, so “1100” covers 1100xx.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+      <p class="text-[11.5px] text-muted">
+        Outstanding cash to collect on delivery right now:
+        <strong class="text-ink"><%= money(codOutstanding) %></strong>
+      </p>
+      <button class="adm-btn adm-btn-primary">Save COD rules</button>
+    </div>
+  </form>
+
+  <!-- --------------------------------------- business & tax invoice ---- -->
+  <%
+    /* These are the fields a GST invoice is legally required to carry, so the
+       card leads with what's still missing rather than hiding it in a tooltip. */
+    const biz = invoiceReadiness.business;
+  %>
+  <form method="post" action="/admin/settings/business<%= tokenQs %>" class="card p-4 xl:col-span-2">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 class="font-serif text-base">Business &amp; tax invoice</h2>
+      <% if (invoiceReadiness.ok) { %>
+        <span class="pill pill-good">Invoices ready</span>
+      <% } else { %>
+        <span class="pill pill-critical">Missing: <%= invoiceReadiness.missing.join(', ') %></span>
+      <% } %>
+    </div>
+    <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+      Printed on every tax invoice. Prices stay GST-inclusive — the invoice extracts the tax
+      rather than adding it. Buyer in your own state gets CGST + SGST; any other state gets IGST.
+    </p>
+
+    <div class="mt-3 grid gap-3 md:grid-cols-2">
+      <div>
+        <label class="adm-label" for="legalName">Registered legal name</label>
+        <input id="legalName" name="legalName" class="adm-input" value="<%= biz.legalName %>" placeholder="Aanya Couture Private Limited">
+      </div>
+      <div>
+        <label class="adm-label" for="tradeName">Trade name (on the invoice header)</label>
+        <input id="tradeName" name="tradeName" class="adm-input" value="<%= biz.tradeName %>">
+      </div>
+      <div>
+        <label class="adm-label" for="gstin">GSTIN</label>
+        <input id="gstin" name="gstin" class="adm-input font-mono text-[11.5px] uppercase" value="<%= biz.gstin %>" placeholder="27AABCA1234A1Z5" maxlength="15">
+      </div>
+      <div>
+        <label class="adm-label" for="pan">PAN</label>
+        <input id="pan" name="pan" class="adm-input font-mono text-[11.5px] uppercase" value="<%= biz.pan %>" placeholder="AABCA1234A" maxlength="10">
+      </div>
+      <div class="md:col-span-2">
+        <label class="adm-label" for="addressLines">Registered address — one line per row</label>
+        <textarea id="addressLines" name="addressLines" rows="3" class="adm-textarea"><%= biz.addressLines.join('\n') %></textarea>
+      </div>
+      <div>
+        <label class="adm-label" for="state">State (place of supply origin)</label>
+        <input id="state" name="state" class="adm-input" list="gst-states" value="<%= biz.state %>">
+        <datalist id="gst-states">
+          <% stateNames.forEach(function (s) { %><option value="<%= s.replace(/\b\w/g, function (m) { return m.toUpperCase(); }) %>"></option><% }); %>
+        </datalist>
+      </div>
+      <div>
+        <label class="adm-label" for="stateCode">State code</label>
+        <input id="stateCode" name="stateCode" class="adm-input font-mono text-[11.5px]" value="<%= biz.stateCode %>" placeholder="auto from state" maxlength="2">
+        <p class="mt-1 text-[10.5px] text-muted">Leave blank to derive it from the state name.</p>
+      </div>
+      <div>
+        <label class="adm-label" for="bizPhone">Phone on invoice</label>
+        <input id="bizPhone" name="phone" class="adm-input" value="<%= biz.phone %>">
+      </div>
+      <div>
+        <label class="adm-label" for="bizEmail">Email on invoice</label>
+        <input id="bizEmail" name="email" class="adm-input" value="<%= biz.email %>">
+      </div>
+      <div>
+        <label class="adm-label" for="invoicePrefix">Invoice number prefix</label>
+        <input id="invoicePrefix" name="invoicePrefix" class="adm-input font-mono text-[11.5px] uppercase" value="<%= biz.invoicePrefix %>">
+        <p class="mt-1 text-[10.5px] text-muted">
+          Series: <code><%= biz.invoicePrefix %>/<%= biz.financialYear %>/0001</code> — sequential, resets each April.
+          Changing the prefix starts a new series; already-issued numbers never change.
+        </p>
+      </div>
+      <div>
+        <label class="adm-label" for="defaultHsn">Default HSN code</label>
+        <input id="defaultHsn" name="defaultHsn" class="adm-input font-mono text-[11.5px]" value="<%= biz.defaultHsn %>" placeholder="6211">
+        <p class="mt-1 text-[10.5px] text-muted">Used for any product without its own HSN.</p>
+      </div>
+      <div class="md:col-span-2">
+        <label class="adm-label" for="signatureName">Signature block</label>
+        <input id="signatureName" name="signatureName" class="adm-input" value="<%= biz.signatureName %>" placeholder="For Aanya Couture Private Limited">
+      </div>
+      <div class="md:col-span-2">
+        <label class="adm-label" for="termsLines">Invoice terms — one per row</label>
+        <textarea id="termsLines" name="termsLines" rows="3" class="adm-textarea"><%= biz.termsLines.join('\n') %></textarea>
+      </div>
+    </div>
+
+    <div class="mt-4 border-t border-line pt-4">
+      <p class="adm-label">Bank details (optional — shown on the invoice)</p>
+      <div class="mt-2 grid gap-3 md:grid-cols-5">
+        <div><label class="adm-label" for="bankName">Bank</label><input id="bankName" name="bankName" class="adm-input" value="<%= (biz.bank || {}).name || '' %>"></div>
+        <div><label class="adm-label" for="bankAccountName">Account name</label><input id="bankAccountName" name="bankAccountName" class="adm-input" value="<%= (biz.bank || {}).accountName || '' %>"></div>
+        <div><label class="adm-label" for="bankAccountNumber">Account no.</label><input id="bankAccountNumber" name="bankAccountNumber" class="adm-input font-mono text-[11.5px]" value="<%= (biz.bank || {}).accountNumber || '' %>"></div>
+        <div><label class="adm-label" for="bankIfsc">IFSC</label><input id="bankIfsc" name="bankIfsc" class="adm-input font-mono text-[11.5px] uppercase" value="<%= (biz.bank || {}).ifsc || '' %>"></div>
+        <div><label class="adm-label" for="bankUpi">UPI</label><input id="bankUpi" name="bankUpi" class="adm-input font-mono text-[11.5px]" value="<%= (biz.bank || {}).upi || '' %>"></div>
+      </div>
+    </div>
+
+    <button class="adm-btn adm-btn-primary mt-4">Save business details</button>
+  </form>
+
+  <!-- ------------------------------------------------------ shipping ---- -->
+  <form method="post" action="/admin/settings/shipping<%= tokenQs %>" class="card p-4">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Shipping & returns</h2>
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      <div><label class="adm-label" for="freeAbove">Free shipping above ₹</label><input id="freeAbove" name="freeAbove" class="adm-input" value="<%= cfg.shipping.freeAbove %>"></div>
+      <div><label class="adm-label" for="standardCharge">Standard charge ₹</label><input id="standardCharge" name="standardCharge" class="adm-input" value="<%= cfg.shipping.standardCharge %>"></div>
+      <div><label class="adm-label" for="estimateDaysMetro">Metro days</label><input id="estimateDaysMetro" name="estimateDaysMetro" class="adm-input" value="<%= cfg.shipping.estimateDaysMetro %>"></div>
+      <div><label class="adm-label" for="estimateDaysOther">Other days</label><input id="estimateDaysOther" name="estimateDaysOther" class="adm-input" value="<%= cfg.shipping.estimateDaysOther %>"></div>
+      <div><label class="adm-label" for="returnWindowDays">Return window (days)</label><input id="returnWindowDays" name="returnWindowDays" class="adm-input" value="<%= cfg.shipping.returnWindowDays %>"></div>
+    </div>
+    <label class="mt-3 flex items-center gap-2 text-[12.5px]">
+      <input type="checkbox" name="codAvailable" <%= cfg.shipping.codAvailable ? 'checked' : '' %>> Offer cash on delivery
+    </label>
+    <button class="adm-btn adm-btn-primary mt-4">Save shipping</button>
+  </form>
+
+  <!-- ------------------------------------------------------ inventory ---- -->
+  <form method="post" action="/admin/settings/inventory<%= tokenQs %>" class="card p-4">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Inventory</h2>
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      <div><label class="adm-label" for="lowStockThreshold">Low stock at or below</label><input id="lowStockThreshold" name="lowStockThreshold" class="adm-input" value="<%= cfg.inventory.lowStockThreshold %>"></div>
+      <div>
+        <label class="adm-label" for="outOfStockBehaviour">When out of stock</label>
+        <select id="outOfStockBehaviour" name="outOfStockBehaviour" class="adm-select">
+          <% ['hide-buy-button','allow-backorder','hide-product'].forEach(function (o) { %>
+            <option value="<%= o %>" <%= cfg.inventory.outOfStockBehaviour === o ? 'selected' : '' %>><%= o.replace(/-/g, ' ') %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+    <button class="adm-btn adm-btn-primary mt-4">Save inventory</button>
+  </form>
+
+  <!-- ------------------------------------------------------ features ---- -->
+  <form method="post" action="/admin/settings/features<%= tokenQs %>" class="card p-4">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Storefront features</h2>
+    <div class="mt-3 space-y-2 text-[12.5px]">
+      <% [
+        ['guestCheckout', 'Guest checkout (no account required)'],
+        ['wishlist', 'Wishlist'],
+        ['quickView', 'Quick view on product cards'],
+        ['infiniteScroll', 'Infinite scroll on listing pages'],
+        ['showMrpStrikethrough', 'Show MRP struck through']
+      ].forEach(function (f) { %>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" name="<%= f[0] %>" <%= cfg.features[f[0]] ? 'checked' : '' %>> <%= f[1] %>
+        </label>
+      <% }); %>
+      <div class="pt-2">
+        <label class="adm-label" for="productsPerPage">Products per page</label>
+        <input id="productsPerPage" name="productsPerPage" class="adm-input w-24" value="<%= cfg.features.productsPerPage %>">
+      </div>
+    </div>
+    <button class="adm-btn adm-btn-primary mt-4">Save features</button>
+  </form>
+
+  <!-- ------------------------------------------------------ reviews ---- -->
+  <form method="post" action="/admin/settings/reviews<%= tokenQs %>" class="card p-4">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Reviews & Google</h2>
+
+    <div class="mt-2 border border-line bg-cream/40 p-3 text-[11.5px] leading-relaxed text-muted">
+      <p><strong class="text-ink">Two different things, worth keeping straight:</strong></p>
+      <p class="mt-1">
+        <strong class="text-ink">Google Business reviews</strong> belong to the business, not a product
+        (Places API, max 5 + the aggregate). Good for the testimonials rail and a store badge.
+      </p>
+      <p class="mt-1">
+        <strong class="text-ink">Per-product stars in Google Shopping</strong> work the other way — you publish
+        your own reviews to Google via
+        <a href="/feeds/product-reviews.xml" target="_blank" class="text-maroon underline underline-offset-2">/feeds/product-reviews.xml</a>
+        and submit that URL in Merchant Center.
+      </p>
+    </div>
+
+    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+      <div>
+        <label class="adm-label" for="source">Testimonials source</label>
+        <select id="source" name="source" class="adm-select">
+          <% [['local','Own reviews / config testimonials'],['google','Live Google reviews'],['both','Google, falling back to own']].forEach(function (o) { %>
+            <option value="<%= o[0] %>" <%= cfg.reviews.source === o[0] ? 'selected' : '' %>><%= o[1] %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="adm-label" for="cacheMinutes">Cache (minutes)</label>
+        <input id="cacheMinutes" name="cacheMinutes" class="adm-input" value="<%= cfg.reviews.cacheMinutes %>">
+      </div>
+      <div class="sm:col-span-2">
+        <label class="adm-label" for="googlePlaceId">Google place id</label>
+        <input id="googlePlaceId" name="googlePlaceId" class="adm-input font-mono text-[11.5px]" value="<%= cfg.reviews.googlePlaceId %>" placeholder="ChIJ…">
+        <p class="mt-1 text-[10.5px] text-muted">
+          Find it with Google's Place ID Finder. The API key goes in the
+          <code class="bg-cream px-1">GOOGLE_PLACES_API_KEY</code> environment variable — never in this file,
+          since the config is served to the browser.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-3 space-y-2 text-[12.5px]">
+      <label class="flex items-start gap-2">
+        <input type="checkbox" name="requirePurchase" class="mt-0.5" <%= cfg.reviews.requirePurchase ? 'checked' : '' %>>
+        <span>Only verified customers can review<span class="block text-[11px] text-muted">Order number + the email/phone on it must match, and the order must contain the product.</span></span>
+      </label>
+      <label class="flex items-start gap-2">
+        <input type="checkbox" name="allowMedia" class="mt-0.5" <%= cfg.reviews.allowMedia ? 'checked' : '' %>>
+        <span>Allow photo &amp; video with reviews<span class="block text-[11px] text-muted">Uploads compress on arrival — photos to WebP, video to 720p MP4.</span></span>
+      </label>
+      <label class="flex items-center gap-2"><input type="checkbox" name="showStoreBadge" <%= cfg.reviews.showStoreBadge ? 'checked' : '' %>> Show the Google store rating badge</label>
+      <label class="flex items-center gap-2"><input type="checkbox" name="merchantFeed" <%= cfg.reviews.merchantFeed ? 'checked' : '' %>> Publish the Merchant Center reviews feed</label>
+    </div>
+
+    <div class="mt-3 border-t border-line pt-3 text-[11.5px]">
+      <p class="adm-label mb-1">Compression</p>
+      <% const comp = media.available(); %>
+      <p class="<%= comp.images ? 'text-good' : 'text-critical' %>">
+        Photos: <%= comp.images ? 'WebP, max ' + comp.settings.imageMaxEdge + 'px, thumbnails on' : 'unavailable (' + comp.imagesError + ')' %>
+      </p>
+      <p class="<%= comp.video ? 'text-good' : 'text-critical' %>">
+        Video: <%= comp.video ? 'H.264 MP4, max ' + comp.settings.videoMaxHeight + 'p, CRF ' + comp.settings.videoCrf + ', poster frame' : 'unavailable (' + comp.videoError + ')' %>
+      </p>
+    </div>
+
+    <div class="mt-3 border-t border-line pt-3 text-[11.5px]">
+      <% if (googleStatus.ok) { %>
+        <p class="text-good">Connected · <%= googleStatus.count %> cached review<%= googleStatus.count === 1 ? '' : 's' %><%= googleStatus.cachedAt ? ' · fetched ' + new Date(googleStatus.cachedAt).toLocaleString('en-IN') : '' %></p>
+        <% if (googleStatus.error) { %><p class="mt-1 text-critical">Last error: <%= googleStatus.error %></p><% } %>
+      <% } else { %>
+        <p class="text-muted">Not connected — <%= googleStatus.reason %></p>
+      <% } %>
+    </div>
+
+    <button class="adm-btn adm-btn-primary mt-4">Save reviews</button>
+  </form>
+
+  <!-- ------------------------------------------------------ brand ---- -->
+  <form method="post" action="/admin/settings/brand<%= tokenQs %>" class="card p-4">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Brand</h2>
+    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+      <div><label class="adm-label" for="name">Name</label><input id="name" name="name" class="adm-input" value="<%= cfg.brand.name %>"></div>
+      <div><label class="adm-label" for="logoText">Logo text</label><input id="logoText" name="logoText" class="adm-input" value="<%= cfg.brand.logoText %>"></div>
+      <div><label class="adm-label" for="logoSubtext">Logo subtext</label><input id="logoSubtext" name="logoSubtext" class="adm-input" value="<%= cfg.brand.logoSubtext %>"></div>
+      <div><label class="adm-label" for="monogram">Monogram</label><input id="monogram" name="monogram" class="adm-input" value="<%= cfg.brand.monogram %>"></div>
+      <div><label class="adm-label" for="supportPhone">Support phone</label><input id="supportPhone" name="supportPhone" class="adm-input" value="<%= cfg.brand.supportPhone %>"></div>
+      <div><label class="adm-label" for="supportEmail">Support email</label><input id="supportEmail" name="supportEmail" class="adm-input" value="<%= cfg.brand.supportEmail %>"></div>
+      <div class="sm:col-span-2"><label class="adm-label" for="tagline">Tagline</label><input id="tagline" name="tagline" class="adm-input" value="<%= cfg.brand.tagline %>"></div>
+      <div class="sm:col-span-2"><label class="adm-label" for="announcement">Announcement bar</label><input id="announcement" name="announcement" class="adm-input" value="<%= cfg.brand.announcement %>"></div>
+      <div class="sm:col-span-2"><label class="adm-label" for="logoImage">Logo image URL</label><input id="logoImage" name="logoImage" class="adm-input" value="<%= cfg.brand.logoImage || '' %>" placeholder="Leave blank to use the text logo"></div>
+    </div>
+    <button class="adm-btn adm-btn-primary mt-4">Save brand</button>
+  </form>
+
+  <!-- ------------------------------------------------------ theme ---- -->
+  <form method="post" action="/admin/settings/theme<%= tokenQs %>" class="card p-4">
+    <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+    <h2 class="font-serif text-base">Theme</h2>
+    <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+      These feed straight into Tailwind, so changing one repaints the whole storefront.
+    </p>
+    <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <% Object.keys(cfg.theme.colors).forEach(function (key) { %>
+        <div>
+          <label class="adm-label" for="color_<%= key %>"><%= key %></label>
+          <div class="flex items-center gap-2">
+            <input type="color" name="color_<%= key %>" id="color_<%= key %>" value="<%= cfg.theme.colors[key] %>"
+                   class="h-9 w-9 shrink-0 cursor-pointer border border-line bg-panel p-0.5">
+            <input class="adm-input font-mono text-[11px]" value="<%= cfg.theme.colors[key] %>" readonly aria-hidden="true" tabindex="-1">
+          </div>
+        </div>
+      <% }); %>
+    </div>
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      <div><label class="adm-label" for="headingFont">Heading font</label><input id="headingFont" name="headingFont" class="adm-input" value="<%= cfg.theme.fonts.heading %>"></div>
+      <div><label class="adm-label" for="bodyFont">Body font</label><input id="bodyFont" name="bodyFont" class="adm-input" value="<%= cfg.theme.fonts.body %>"></div>
+    </div>
+    <button class="adm-btn adm-btn-primary mt-4">Save theme</button>
+  </form>
+</div>
+
+<%- include('./partials/close') %>

@@ -1,0 +1,259 @@
+<%- include('./partials/open', {
+  active: 'reports',
+  adminTitle: 'Reports & exports',
+  adminSubtitle: s.range.label + ' · ' + s.from.toDateString().slice(4) + ' → ' + s.to.toDateString().slice(4),
+  adminActions: null
+}) %>
+
+<!-- window picker: any preset, or an exact from/to -->
+<form method="get" action="/admin/reports" class="card mb-4 flex flex-wrap items-end gap-x-2 gap-y-3 p-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+  <div class="flex flex-wrap items-center gap-2">
+    <% analytics.RANGES.forEach(function (r) { %>
+      <label class="cursor-pointer">
+        <input type="radio" name="range" value="<%= r.id %>" class="peer sr-only"
+               <%= (s.range.id === r.id && !s.range.custom) ? 'checked' : '' %>
+               onchange="this.form.querySelectorAll('input[type=date]').forEach(function(d){d.value='';}); this.form.submit()">
+        <span class="block border border-line bg-panel px-3 py-1.5 text-[10.5px] uppercase tracking-[0.12em] text-muted transition peer-checked:border-maroon peer-checked:bg-maroon peer-checked:text-ivory"><%= r.label %></span>
+      </label>
+    <% }); %>
+  </div>
+  <div class="ml-auto flex flex-wrap items-end gap-2 border-l border-line pl-3">
+    <div><label class="adm-label" for="from">From</label><input id="from" type="date" name="from" value="<%= s.range.custom ? s.from.toISOString().slice(0,10) : '' %>" class="adm-input"></div>
+    <div><label class="adm-label" for="to">To</label><input id="to" type="date" name="to" value="<%= s.range.custom ? s.to.toISOString().slice(0,10) : '' %>" class="adm-input"></div>
+    <button class="adm-btn adm-btn-primary adm-btn-sm mb-[1px]">Apply</button>
+  </div>
+</form>
+
+<!-- ============================ downloads ============================ -->
+<div class="card mb-4 p-4">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h2 class="font-serif text-base">Download this period</h2>
+    <span class="text-[11px] text-muted"><%= s.orderCount %> orders · <%= money(s.netSales) %> net · profit in hand <%= money(s.profitInHand) %></span>
+  </div>
+  <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+    Every export respects the window above — pick “7 days”, or set exact dates for a campaign period, then download.
+  </p>
+  <div class="mt-3 flex flex-wrap gap-2">
+    <a href="/admin/reports/export/orders.csv<%= exportQs || (adminToken ? '?token=' + adminToken : '') %><%= exportQs && adminToken ? '&token=' + adminToken : '' %>" class="adm-btn adm-btn-ghost adm-btn-sm">Orders in this period</a>
+    <a href="/admin/reports/export/pnl.csv<%= exportQs || (adminToken ? '?token=' + adminToken : '') %><%= exportQs && adminToken ? '&token=' + adminToken : '' %>" class="adm-btn adm-btn-ghost adm-btn-sm">Full P&amp;L ladder</a>
+    <a href="/admin/reports/export/skus.csv<%= exportQs || (adminToken ? '?token=' + adminToken : '') %><%= exportQs && adminToken ? '&token=' + adminToken : '' %>" class="adm-btn adm-btn-ghost adm-btn-sm">Per-SKU profitability</a>
+    <a href="/admin/reports/export/monthly.csv<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm">Monthly P&amp;L (12 months)</a>
+    <a href="/admin/returns/export.csv<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm">Returns</a>
+    <a href="/admin/customers/export.csv<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm">Customers</a>
+    <a href="/admin/products/export.csv<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm">Products</a>
+  </div>
+</div>
+
+<!-- ============================ period P&L ============================ -->
+<div class="mb-4 grid gap-3 xl:grid-cols-3">
+  <div class="card p-4">
+    <h2 class="font-serif text-base">This period</h2>
+    <dl class="mt-3 divide-y divide-line/70 text-[12.5px]">
+      <%
+        /* The full ladder. EBITDA and profit in hand are separate rows because
+           they are separate numbers: EBITDA is how the business performs, profit
+           in hand is what the owner keeps after the loan and the tax man.
+           Depreciation / interest / tax rows only appear when they are non-zero,
+           so a store with none sees the shorter, honest version. */
+        const ladder = [
+          ['Gross sales', s.gross], ['Refunds', -s.refunds], ['Net sales', s.netSales],
+          ['GST', -s.gst], ['Revenue ex-GST', s.revenue], ['COGS', -s.cogs],
+          ['Gross profit', s.grossProfit], ['Variable costs', -s.variableCosts],
+          ['Contribution', s.contribution], ['Fixed costs', -s.opex],
+          ['EBITDA', s.ebitda]
+        ];
+        if (s.depreciation) ladder.push(['Depreciation', -s.depreciation], ['EBIT', s.ebit]);
+        if (s.interest) ladder.push(['Loan interest', -s.interest]);
+        if (s.depreciation || s.interest) ladder.push(['Profit before tax', s.pbt]);
+        if (s.incomeTax) ladder.push([`Income tax at ${s.incomeTaxPercent}%`, -s.incomeTax]);
+        ladder.push(['Profit in hand', s.profitInHand]);
+      %>
+      <% ladder.forEach(function (row, i) { %>
+        <div class="flex justify-between py-[6px] <%= row[0] === 'Profit in hand' ? 'border-t-2 border-line pt-2' : '' %>">
+          <dt class="<%= /Net sales|Revenue|Gross profit|Contribution|EBITDA|EBIT$|Profit before tax|Profit in hand/.test(row[0]) ? 'text-ink' : 'text-muted' %>"><%= row[0] %></dt>
+          <dd class="tabular-nums <%= row[1] < 0 ? 'text-critical' : (row[0] === 'Profit in hand' ? 'font-serif text-[15px]' : '') %>">
+            <%= row[1] < 0 ? '− ' + money(Math.abs(row[1])) : money(row[1]) %>
+          </dd>
+        </div>
+      <% }); %>
+    </dl>
+  </div>
+
+  <div class="card p-4">
+    <h2 class="font-serif text-base">Coupons vs full price</h2>
+    <table class="adm-table mt-3">
+      <thead><tr><th></th><th class="num">Orders</th><th class="num">Net</th><th class="num">Margin</th><th class="num">Returns</th></tr></thead>
+      <tbody>
+        <% [couponSplit.withCoupon, couponSplit.fullPrice].forEach(function (row) { %>
+          <tr>
+            <td class="text-ink"><%= row.label %></td>
+            <td class="num"><%= row.orders %></td>
+            <td class="num"><%= compact(row.netSales) %></td>
+            <td class="num"><%= row.marginPercent %>%</td>
+            <td class="num text-muted"><%= row.returnRatePercent %>%</td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="mt-3 border-t border-line pt-3 text-[11.5px] leading-relaxed text-muted">
+      Discounted orders carry an <code class="bg-cream px-1">ORD-C-</code> number, so the two families stay
+      separable in every export.
+    </p>
+  </div>
+
+  <div class="card p-4">
+    <h2 class="font-serif text-base">Returns</h2>
+    <dl class="mt-3 space-y-1.5 text-[12.5px]">
+      <div class="flex justify-between"><dt class="text-muted">Open requests</dt><dd><%= returnsOverview.open %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">Value at risk</dt><dd><%= money(returnsOverview.pendingValue) %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">Refunded to date</dt><dd><%= money(returnsOverview.refundedValue) %></dd></div>
+      <div class="flex justify-between"><dt class="text-muted">Return rate, this period</dt><dd><%= s.returnRatePercent %>%</dd></div>
+    </dl>
+    <% if (returnsOverview.byReason.length) { %>
+      <p class="adm-label mt-4">Why pieces come back</p>
+      <ul class="space-y-1 text-[12px]">
+        <% returnsOverview.byReason.sort(function (a, b) { return b.count - a.count; }).slice(0, 5).forEach(function (r) { %>
+          <li class="flex justify-between"><span class="text-muted"><%= r.reason %></span><span><%= r.count %></span></li>
+        <% }); %>
+      </ul>
+    <% } %>
+    <a href="/admin/returns<%= tokenQs %>" class="mt-3 inline-block text-[10.5px] uppercase tracking-[0.12em] text-maroon">Manage returns →</a>
+  </div>
+</div>
+
+<!-- ============================ monthly ============================ -->
+<div class="card mb-3">
+  <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-4 py-3">
+    <h2 class="font-serif text-base">Month by month — profit after refunds</h2>
+    <a href="/admin/reports/export/monthly.csv<%= tokenQs %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">Download CSV</a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[1140px]">
+      <thead>
+        <tr>
+          <th>Month</th><th class="num">Orders</th><th class="num">Net sales</th><th class="num">Refunds</th>
+          <th class="num">GST</th><th class="num">Revenue</th><th class="num">COGS</th><th class="num">Gross profit</th>
+          <th class="num">Margin</th><th class="num">Variable</th><th class="num">Marketing</th>
+          <th class="num">Fixed</th><th class="num">Profit in hand</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% monthly.forEach(function (m) { %>
+          <tr>
+            <td class="whitespace-nowrap text-ink"><%= m.key %></td>
+            <td class="num"><%= m.orderCount %></td>
+            <td class="num"><%= money(m.netSales) %></td>
+            <td class="num <%= m.refunds ? 'text-critical' : 'text-muted' %>"><%= m.refunds ? '− ' + money(m.refunds) : '—' %></td>
+            <td class="num text-muted"><%= money(m.gst) %></td>
+            <td class="num"><%= money(m.revenue) %></td>
+            <td class="num text-muted"><%= money(m.cogs) %></td>
+            <td class="num"><%= money(m.grossProfit) %></td>
+            <td class="num"><%= m.marginPercent %>%</td>
+            <td class="num text-muted"><%= money(m.variableCosts) %></td>
+            <td class="num text-muted"><%= money(m.marketing) %></td>
+            <td class="num text-muted"><%= money(m.fixed) %></td>
+            <td class="num <%= m.profitInHand < 0 ? 'text-critical' : 'text-ink' %>"><%= money(m.profitInHand) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+      <tfoot>
+        <% const sum = (k) => monthly.reduce(function (t, m) { return t + (m[k] || 0); }, 0); %>
+        <tr class="border-t-2 border-line font-medium">
+          <td class="text-ink">12 months</td>
+          <td class="num"><%= sum('orderCount') %></td>
+          <td class="num"><%= money(sum('netSales')) %></td>
+          <td class="num text-critical">− <%= money(sum('refunds')) %></td>
+          <td class="num"><%= money(sum('gst')) %></td>
+          <td class="num"><%= money(sum('revenue')) %></td>
+          <td class="num"><%= money(sum('cogs')) %></td>
+          <td class="num"><%= money(sum('grossProfit')) %></td>
+          <td class="num"><%= sum('revenue') ? (sum('grossProfit') / sum('revenue') * 100).toFixed(1) : 0 %>%</td>
+          <td class="num"><%= money(sum('variableCosts')) %></td>
+          <td class="num"><%= money(sum('marketing')) %></td>
+          <td class="num"><%= money(sum('fixed')) %></td>
+          <td class="num <%= sum('profitInHand') < 0 ? 'text-critical' : '' %>"><%= money(sum('profitInHand')) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- ============================ per SKU ============================ -->
+<div class="card mb-3">
+  <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-4 py-3">
+    <h2 class="font-serif text-base">Per-SKU profitability · <%= s.range.label %></h2>
+    <a href="/admin/reports/export/skus.csv<%= exportQs || tokenQs %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">Download CSV</a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[860px]">
+      <thead>
+        <tr><th>SKU</th><th>Product</th><th class="num">Price</th><th class="num">Unit cost</th><th class="num">GST</th>
+            <th class="num">Units</th><th class="num">Revenue</th><th class="num">Profit</th><th class="num">Margin</th><th class="num">Stock</th></tr>
+      </thead>
+      <tbody>
+        <% if (!skus.length) { %>
+          <tr><td colspan="10" class="py-6 text-center text-muted">No sales in this window.</td></tr>
+        <% } %>
+        <% skus.forEach(function (r) { %>
+          <tr>
+            <td class="font-mono text-[11px] text-muted"><%= r.sku %></td>
+            <td><a href="/admin/products/<%= r.productId %><%= tokenQs %>" class="text-ink hover:text-maroon"><%= r.name %></a></td>
+            <td class="num"><%= r.price ? money(r.price) : '—' %></td>
+            <td class="num text-muted"><%= r.unitCost ? money(r.unitCost) : '—' %></td>
+            <td class="num text-muted"><%= r.gstPercent === null ? '—' : r.gstPercent + '%' %></td>
+            <td class="num"><%= r.units %></td>
+            <td class="num"><%= money(r.revenue) %></td>
+            <td class="num <%= r.profit < 0 ? 'text-critical' : '' %>"><%= money(r.profit) %></td>
+            <td class="num"><%= r.marginPercent %>%</td>
+            <td class="num text-muted"><%= r.stock === null ? '—' : r.stock %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid gap-3 xl:grid-cols-2">
+  <div class="card p-4">
+    <div class="mb-3 flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Restock list</h2>
+      <a href="/admin/products?stock=low<%= adminToken ? '&token=' + adminToken : '' %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">Manage →</a>
+    </div>
+    <% if (!lowStock.length) { %>
+      <p class="text-[12.5px] text-muted">Nothing at or below the low-stock threshold.</p>
+    <% } %>
+    <table class="adm-table">
+      <tbody>
+        <% lowStock.forEach(function (p) { %>
+          <tr>
+            <td><a href="/admin/products/<%= p.id %><%= tokenQs %>" class="text-ink hover:text-maroon"><%= p.name %></a></td>
+            <td class="num"><span class="pill pill-<%= p.outOfStock ? 'critical' : 'warning' %>"><%= p.outOfStock ? 'Out' : p.stock %></span></td>
+            <td class="num text-muted"><%= money(p.price) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card p-4">
+    <h2 class="font-serif text-base">No sales in 12 months</h2>
+    <p class="mt-1 text-[11.5px] text-muted">Dead stock ties up cash. Consider a coupon or delisting.</p>
+    <% if (!deadStock.length) { %>
+      <p class="mt-3 text-[12.5px] text-good">Every product sold at least once.</p>
+    <% } %>
+    <table class="adm-table mt-2">
+      <tbody>
+        <% deadStock.forEach(function (p) { %>
+          <tr>
+            <td><a href="/admin/products/<%= p.id %><%= tokenQs %>" class="text-ink hover:text-maroon"><%= p.name %></a></td>
+            <td class="num text-muted"><%= money(p.price) %></td>
+            <td class="num text-muted"><%= Number.isFinite(p.stock) ? p.stock + ' in stock' : '—' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('./partials/close') %>

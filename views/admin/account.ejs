@@ -1,0 +1,130 @@
+<%- include('./partials/open', {
+  active: 'account',
+  adminTitle: 'Your account',
+  adminSubtitle: user.email + ' · ' + user.role,
+  adminActions: '<a href="/admin/logout" class="adm-btn adm-btn-ghost adm-btn-sm">Sign out</a>'
+}) %>
+
+<% if (saved) { %>
+  <p class="mb-4 border border-good/40 bg-good/5 px-4 py-3 text-[12.5px] text-good">Saved.</p>
+<% } %>
+<% if (error) { %>
+  <p class="mb-4 border border-critical/40 bg-critical/5 px-4 py-3 text-[12.5px] text-critical"><%= error %></p>
+<% } %>
+
+<div class="grid gap-3 xl:grid-cols-2">
+
+  <form method="post" action="/admin/account" class="card p-4">
+    <h2 class="font-serif text-base">Your details</h2>
+    <div class="mt-3 space-y-3">
+      <div>
+        <label class="adm-label" for="name">Name</label>
+        <input id="name" name="name" class="adm-input" value="<%= user.name %>">
+      </div>
+      <div>
+        <label class="adm-label" for="email">Email</label>
+        <input id="email" class="adm-input" value="<%= user.email %>" disabled>
+        <p class="mt-1 text-[10.5px] text-muted">Sign-in email can't be changed here — an owner can add a new account instead.</p>
+      </div>
+      <div>
+        <label class="adm-label" for="role">Role</label>
+        <input id="role" class="adm-input capitalize" value="<%= user.role %>" disabled>
+        <p class="mt-1 text-[10.5px] text-muted">
+          <%= (roles.find(function (r) { return r.id === user.role; }) || {}).hint %>
+        </p>
+      </div>
+    </div>
+    <button class="adm-btn adm-btn-primary mt-4">Save details</button>
+  </form>
+
+  <form method="post" action="/admin/account/password" class="card p-4">
+    <h2 class="font-serif text-base">Change password</h2>
+    <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+      At least 10 characters, mixed case, with a number. Changing it invalidates any outstanding
+      reset link.
+    </p>
+    <div class="mt-3 space-y-3">
+      <div>
+        <label class="adm-label" for="current">Current password</label>
+        <input id="current" name="current" type="password" class="adm-input" required autocomplete="current-password">
+      </div>
+      <div>
+        <label class="adm-label" for="password">New password</label>
+        <input id="password" name="password" type="password" class="adm-input" required minlength="10" autocomplete="new-password">
+      </div>
+    </div>
+    <button class="adm-btn adm-btn-primary mt-4">Change password</button>
+  </form>
+
+  <!-- ---------------------------------------------------- staff (owner) ---- -->
+  <% if (can('settings')) { %>
+    <div class="card p-4 xl:col-span-2">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 class="font-serif text-base">Staff accounts</h2>
+        <span class="text-[11px] text-muted"><%= staff.length %> account<%= staff.length === 1 ? '' : 's' %></span>
+      </div>
+
+      <div class="mt-3 overflow-x-auto">
+        <table class="adm-table min-w-[640px]">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last signed in</th><th></th></tr></thead>
+          <tbody>
+            <% staff.forEach(function (u) { %>
+              <tr>
+                <td class="text-ink"><%= u.name %><%= u.id === user.id ? ' (you)' : '' %></td>
+                <td class="text-[11.5px] text-muted"><%= u.email %></td>
+                <td>
+                  <% if (u.id === user.id) { %>
+                    <span class="pill pill-info capitalize"><%= u.role %></span>
+                  <% } else { %>
+                    <form class="flex items-center gap-2" hx-post="/admin/users/<%= u.id %>/role" hx-target="#staff-rows" hx-swap="innerHTML">
+                      <select name="role" class="adm-select w-28 text-[11.5px]" onchange="htmx.trigger(this.form, 'submit')">
+                        <% roles.forEach(function (r) { %>
+                          <option value="<%= r.id %>" <%= u.role === r.id ? 'selected' : '' %>><%= r.label %></option>
+                        <% }); %>
+                      </select>
+                    </form>
+                  <% } %>
+                </td>
+                <td class="whitespace-nowrap text-[11.5px] text-muted">
+                  <%= u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'never' %>
+                  <% if (!u.active) { %><span class="pill pill-critical ml-1">Disabled</span><% } %>
+                </td>
+                <td class="num whitespace-nowrap">
+                  <% if (u.id !== user.id) { %>
+                    <button class="text-[10.5px] uppercase tracking-[0.12em] text-critical"
+                            hx-post="/admin/users/<%= u.id %>/delete" hx-target="#staff-rows" hx-swap="innerHTML"
+                            hx-trigger="confirmed"
+                            data-confirm="<%= u.name %> loses access immediately. Their past actions stay in the activity log."
+                            data-confirm-title="Remove this account?" data-confirm-cta="Remove">Remove</button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <div id="staff-rows" class="hidden"></div>
+
+      <form method="post" action="/admin/users" class="mt-4 flex flex-wrap items-end gap-2 border-t border-line pt-4">
+        <div class="w-40"><label class="adm-label" for="newName">Name</label><input id="newName" name="name" class="adm-input" required></div>
+        <div class="min-w-[200px] flex-1"><label class="adm-label" for="newEmail">Email</label><input id="newEmail" name="email" type="email" class="adm-input" required></div>
+        <div class="w-36">
+          <label class="adm-label" for="newRole">Role</label>
+          <select id="newRole" name="role" class="adm-select">
+            <% roles.filter(function (r) { return r.id !== 'owner'; }).forEach(function (r) { %>
+              <option value="<%= r.id %>"><%= r.label %></option>
+            <% }); %>
+            <option value="owner">Owner</option>
+          </select>
+        </div>
+        <div class="w-44"><label class="adm-label" for="newPassword">Temporary password</label><input id="newPassword" name="password" class="adm-input" required minlength="10"></div>
+        <button class="adm-btn adm-btn-primary adm-btn-sm mb-[1px]">Add account</button>
+      </form>
+      <p class="mt-2 text-[10.5px] leading-relaxed text-muted">
+        Roles: <% roles.forEach(function (r, i) { %><strong class="text-ink"><%= r.label %></strong> — <%= r.hint %><%= i < roles.length - 1 ? ' · ' : '' %><% }); %>
+      </p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('./partials/close') %>

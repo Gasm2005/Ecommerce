@@ -1,0 +1,54 @@
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[720px]">
+      <thead>
+        <tr><th>Order</th><th>Category</th><th>Slug</th><th class="num">Products</th><th class="num">Menu links</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% nav.forEach(function (n, i) { %>
+          <tr x-data="{ edit: false }">
+            <td class="whitespace-nowrap">
+              <button class="border border-line px-1.5 leading-none text-muted hover:border-maroon hover:text-maroon"
+                      hx-post="/admin/categories/<%= n.slug %>/move" hx-target="#category-rows" hx-swap="innerHTML"
+                      hx-vals='<%- JSON.stringify({ direction: 'up', token: adminToken || undefined }) %>'
+                      <%= i === 0 ? 'disabled class="opacity-30 border border-line px-1.5"' : '' %> aria-label="Move up">↑</button>
+              <button class="border border-line px-1.5 leading-none text-muted hover:border-maroon hover:text-maroon"
+                      hx-post="/admin/categories/<%= n.slug %>/move" hx-target="#category-rows" hx-swap="innerHTML"
+                      hx-vals='<%- JSON.stringify({ direction: 'down', token: adminToken || undefined }) %>'
+                      <%= i === nav.length - 1 ? 'disabled class="opacity-30 border border-line px-1.5"' : '' %> aria-label="Move down">↓</button>
+            </td>
+            <td>
+              <div x-show="!edit">
+                <span class="text-ink"><%= n.label %></span>
+                <% if (n.featured && n.featured.subtitle) { %>
+                  <span class="block text-[10.5px] text-muted"><%= n.featured.subtitle %></span>
+                <% } %>
+              </div>
+              <form x-show="edit" x-cloak class="flex flex-wrap items-end gap-2"
+                    hx-post="/admin/categories/<%= n.slug %>/rename" hx-target="#category-rows" hx-swap="innerHTML"
+                    @htmx:after-request="edit = false">
+                <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+                <input name="label" value="<%= n.label %>" class="adm-input w-32" aria-label="Label">
+                <input name="newSlug" value="<%= n.slug %>" class="adm-input w-32" aria-label="Slug">
+                <input name="subtitle" value="<%= n.featured ? (n.featured.subtitle || '') : '' %>" class="adm-input w-40" aria-label="Subtitle">
+                <button class="adm-btn adm-btn-primary adm-btn-sm">Save</button>
+              </form>
+            </td>
+            <td><code class="bg-cream px-1 text-[11.5px]"><%= n.slug %></code></td>
+            <td class="num"><%= n.productCount %></td>
+            <td class="num text-muted"><%= n.linkCount %></td>
+            <td class="num whitespace-nowrap">
+              <button @click="edit = !edit" class="text-[10.5px] uppercase tracking-[0.12em] text-maroon">Rename</button>
+              <a href="/category/<%= n.slug %>" target="_blank" class="ml-3 text-[10.5px] uppercase tracking-[0.12em] text-muted">View</a>
+              <button class="ml-3 text-[10.5px] uppercase tracking-[0.12em] text-critical"
+                      hx-post="/admin/categories/<%= n.slug %>/delete" hx-target="#category-rows" hx-swap="innerHTML"
+                      hx-trigger="confirmed" hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'
+                      data-confirm="“<%= n.label %>” leaves the menu. <%= n.productCount %> product<%= n.productCount === 1 ? '' : 's' %> lose this tag (products left with none fall back to “festive”)."
+                      data-confirm-title="Delete category?" data-confirm-cta="Delete category">Delete</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>

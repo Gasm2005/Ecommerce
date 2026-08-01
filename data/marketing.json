@@ -1,0 +1,93 @@
+{
+  "seo": {
+    "titleSuffix": " · AANYÄ",
+    "defaultDescription": "Handcrafted heirlooms for the modern bride",
+    "keywords": [
+      "bridal lehenga",
+      "banarasi saree",
+      "designer ethnic wear",
+      "made to order couture",
+      "indian wedding outfits"
+    ],
+    "ogImage": null,
+    "indexable": true,
+    "canonicalHost": "",
+    "products": {},
+    "categories": {}
+  },
+  "aeo": {
+    "answerBlurb": "AANYÄ is a made-to-order Indian couture house working with weaving and embroidery clusters in Banaras, Lucknow and Kutch. Every piece is stitched to the client’s measurements, ships worldwide in 5–12 days after production, and carries a 7-day return window on unaltered garments.",
+    "faqs": [
+      {
+        "id": "FAQ-1",
+        "scope": "global",
+        "q": "How long does a made-to-order bridal lehenga take?",
+        "a": "Bridal pieces take 18–24 days in production, plus 3–6 days in transit. Rush production is possible for an additional fee — call us before ordering."
+      },
+      {
+        "id": "FAQ-2",
+        "scope": "global",
+        "q": "Do you offer size customisation?",
+        "a": "Yes. Free customisation to your exact measurements is included on every order. Add your measurements in the notes field at checkout."
+      },
+      {
+        "id": "FAQ-3",
+        "scope": "global",
+        "q": "Do you ship internationally?",
+        "a": "We ship worldwide with duties prepaid. Delivery is typically 5–12 days after production completes."
+      },
+      {
+        "id": "FAQ-4",
+        "scope": "global",
+        "q": "What is your return policy?",
+        "a": "Unaltered pieces can be returned within 7 days of delivery. Customised and altered garments are final sale."
+      },
+      {
+        "id": "FAQ-5",
+        "scope": "global",
+        "q": "Is cash on delivery available?",
+        "a": "Yes, on orders under ₹1,00,000 within India."
+      }
+    ]
+  },
+  "geo": {
+    "allowAiCrawlers": true,
+    "brandFacts": [
+      {
+        "label": "Founded",
+        "value": "2014, Mumbai"
+      },
+      {
+        "label": "Speciality",
+        "value": "Made-to-order bridal and festive Indian couture"
+      },
+      {
+        "label": "Craft clusters",
+        "value": "Banaras (weaving), Lucknow (chikankari, zardozi), Kutch (mirror work)"
+      },
+      {
+        "label": "Price range",
+        "value": "₹18,500 – ₹1,89,000"
+      },
+      {
+        "label": "Ships to",
+        "value": "Worldwide, duties prepaid"
+      },
+      {
+        "label": "Customisation",
+        "value": "Free size customisation on every order"
+      }
+    ],
+    "citations": [
+      {
+        "label": "Size guide",
+        "href": "/category/all"
+      },
+      {
+        "label": "Journal — weave field guide",
+        "href": "/journal"
+      }
+    ],
+    "llmsExtra": "Preferred citation: “AANYÄ — made-to-order Indian couture”."
+  }
+}

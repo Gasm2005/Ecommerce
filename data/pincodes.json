@@ -1,0 +1,91 @@
+{
+  "110001": {
+    "city": "New Delhi",
+    "state": "Delhi",
+    "areas": [
+      "Baroda House",
+      "Bengali Market",
+      "Bhagat Singh Market",
+      "Connaught Place",
+      "Constitution House",
+      "Election Commission",
+      "Janpath",
+      "Krishi Bhawan",
+      "Lady Harding Medical College",
+      "New Delhi ",
+      "North Avenue",
+      "Parliament House"
+    ],
+    "source": "india-post"
+  },
+  "226001": {
+    "city": "Lucknow",
+    "state": "Uttar Pradesh",
+    "areas": [
+      "A P Sabha",
+      "Canal Colony",
+      "CPMG Campus",
+      "Darul Safa",
+      "Gokhley Marg",
+      "H C Bench",
+      "Jawahar Bhawan",
+      "Lalbagh (Lucknow)",
+      "Lucknow ",
+      "Secretariat (Lucknow)"
+    ],
+    "source": "india-post"
+  },
+  "226010": {
+    "city": "Lucknow",
+    "state": "Uttar Pradesh",
+    "areas": [
+      "Gomtinagar",
+      "Gomtinagar Vistar",
+      "Laulai",
+      "Malesemau",
+      "Vineet Khand",
+      "Vishwas Khand"
+    ],
+    "source": "india-post"
+  },
+  "271125": {
+    "city": "Gonda",
+    "state": "Uttar Pradesh",
+    "areas": [
+      "Balpur",
+      "Bamdera",
+      "Baruee Gondha",
+      "Durgodwa",
+      "Hadiagad",
+      "Kaithola",
+      "Thakurapur",
+      "Thathiya Mathiya"
+    ],
+    "source": "india-post"
+  },
+  "400050": {
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "areas": [
+      "Bandra West"
+    ],
+    "source": "india-post"
+  },
+  "560001": {
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "areas": [
+      "Bangalore ",
+      "Bangalore Bazaar",
+      "CMM Court Complex",
+      "Dr. Ambedkar Veedhi",
+      "HighCourt",
+      "Legislators Home",
+      "Mahatma Gandhi Road",
+      "Rajbhavan (Bangalore)",
+      "Vasanthanagar",
+      "Vidhana Soudha"
+    ],
+    "source": "india-post"
+  }
+}

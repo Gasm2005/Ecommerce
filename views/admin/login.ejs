@@ -1,0 +1,129 @@
+<%
+  /* One page, three modes: first-run setup, sign in, and reset.
+     locals: mode ('setup'|'login'|'reset'), error, notice, email, token, config */
+  const c = config.theme.colors;
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= mode === 'setup' ? 'Set up your admin' : (mode === 'reset' ? 'Choose a new password' : 'Sign in') %> · <%= config.brand.name %></title>
+  <link rel="icon" href="/ph.svg?seed=admin&w=64&h=64&label=<%= encodeURIComponent(config.brand.monogram) %>">
+  <link href="https://fonts.googleapis.com/css2?family=<%= config.theme.fonts.heading.replace(/ /g,'+') %>:wght@400;500&family=<%= config.theme.fonts.body.replace(/ /g,'+') %>:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: <%- JSON.stringify(config.theme.colors) %>,
+      fontFamily: { serif: ['<%= config.theme.fonts.heading %>','Georgia','serif'], sans: ['<%= config.theme.fonts.body %>','system-ui','sans-serif'] },
+      letterSpacing: { luxe: '0.18em' }
+    } } }
+  </script>
+</head>
+<body class="flex min-h-screen items-center justify-center bg-cream px-4 py-10 font-sans text-ink">
+
+  <div class="w-full max-w-sm">
+    <div class="text-center">
+      <span class="block font-serif text-2xl tracking-[0.18em]"><%= config.brand.logoText || config.brand.name %></span>
+      <span class="mt-1 block text-[9px] tracking-luxe text-gold">ADMIN</span>
+    </div>
+
+    <div class="mt-8 border border-line bg-ivory p-6">
+
+      <% if (mode === 'setup') { %>
+        <h1 class="font-serif text-xl">Create the owner account</h1>
+        <p class="mt-2 text-[12.5px] leading-relaxed text-muted">
+          No accounts exist yet, so this first one becomes the owner — full access to settings,
+          finance and staff. There is no default password to change later.
+        </p>
+      <% } else if (mode === 'reset') { %>
+        <h1 class="font-serif text-xl">Choose a new password</h1>
+        <p class="mt-2 text-[12.5px] leading-relaxed text-muted">
+          At least 10 characters, mixed case, with a number. The link works once.
+        </p>
+      <% } else { %>
+        <h1 class="font-serif text-xl">Sign in</h1>
+        <p class="mt-2 text-[12.5px] text-muted">Manage orders, products and settings.</p>
+      <% } %>
+
+      <% if (error) { %>
+        <p class="mt-4 border border-maroon/40 bg-maroon/5 px-3 py-2.5 text-[12.5px] text-maroon"><%= error %></p>
+      <% } %>
+      <% if (notice) { %>
+        <p class="mt-4 border border-gold/50 bg-gold/5 px-3 py-2.5 text-[12.5px] text-ink"><%= notice %></p>
+      <% } %>
+
+      <!-- ============================== setup ============================== -->
+      <% if (mode === 'setup') { %>
+        <form method="post" action="/admin/setup" class="mt-5 space-y-3">
+          <div>
+            <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="name">Your name</label>
+            <input id="name" name="name" required autocomplete="name" value="<%= (typeof state !== 'undefined' && state.name) || '' %>"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="username" value="<%= email || '' %>"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="password">Password</label>
+            <input id="password" name="password" type="password" required autocomplete="new-password" minlength="10"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+            <p class="mt-1 text-[11px] text-muted">10+ characters, upper and lower case, at least one number.</p>
+          </div>
+          <button class="w-full bg-maroon py-3 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+            Create account &amp; sign in
+          </button>
+        </form>
+
+      <!-- ============================== reset ============================== -->
+      <% } else if (mode === 'reset') { %>
+        <form method="post" action="/admin/reset" class="mt-5 space-y-3">
+          <input type="hidden" name="token" value="<%= token || '' %>">
+          <div>
+            <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="password">New password</label>
+            <input id="password" name="password" type="password" required autocomplete="new-password" minlength="10" autofocus
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+          </div>
+          <button class="w-full bg-maroon py-3 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+            Save password &amp; sign in
+          </button>
+        </form>
+
+      <!-- ============================== login ============================== -->
+      <% } else { %>
+        <form method="post" action="/admin/login" class="mt-5 space-y-3">
+          <% if (typeof next !== 'undefined' && next) { %><input type="hidden" name="next" value="<%= next %>"><% } %>
+          <div>
+            <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="username" autofocus value="<%= email || '' %>"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+          </div>
+          <div>
+            <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="password">Password</label>
+            <input id="password" name="password" type="password" required autocomplete="current-password"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+          </div>
+          <button class="w-full bg-maroon py-3 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+            Sign in
+          </button>
+        </form>
+
+        <form method="post" action="/admin/forgot" class="mt-4 border-t border-line pt-4">
+          <input type="hidden" name="email" value="">
+          <p class="text-[11.5px] leading-relaxed text-muted">
+            Forgotten it? Enter your email above, then
+            <button class="text-maroon underline underline-offset-2"
+                    onclick="this.form.email.value = document.getElementById('email').value">send a reset link</button>.
+          </p>
+        </form>
+      <% } %>
+    </div>
+
+    <p class="mt-6 text-center text-[11px] text-muted">
+      <a href="/" class="hover:text-maroon">← Back to the storefront</a>
+    </p>
+  </div>
+</body>
+</html>

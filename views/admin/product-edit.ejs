@@ -1,0 +1,262 @@
+<%
+  const isNew = !product;
+  const p = product || {};
+  const val = (k, d) => (p[k] === undefined || p[k] === null ? (d === undefined ? '' : d) : p[k]);
+  const list = (k) => (Array.isArray(p[k]) ? p[k].join(' | ') : '');
+%>
+<%- include('./partials/open', {
+  active: 'products',
+  adminTitle: isNew ? 'Add product' : p.name,
+  adminSubtitle: isNew ? 'New catalogue entry' : (p.sku || p.id) + ' · /product/' + p.slug,
+  adminActions: isNew ? null
+    : '<a href="/product/' + p.slug + '" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">View on store</a>'
+      + '<a href="/admin/products' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">All products</a>'
+}) %>
+
+<% if (error) { %>
+  <p class="mb-4 border border-critical/40 bg-critical/5 px-4 py-3 text-[12.5px] text-critical"><%= error %></p>
+<% } %>
+<% if (typeof saved !== 'undefined' && saved) { %>
+  <p class="mb-4 border border-good/40 bg-good/5 px-4 py-3 text-[12.5px] text-good">Saved.</p>
+<% } %>
+
+<form method="post" action="/admin/products<%= isNew ? '' : '/' + p.id %><%= tokenQs %>" class="grid gap-3 xl:grid-cols-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+
+  <!-- ------------------------------------------------------ main ---- -->
+  <div class="space-y-3 xl:col-span-2">
+    <div class="card p-4">
+      <h2 class="mb-3 font-serif text-base">Basics</h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="adm-label" for="name">Name *</label>
+          <input id="name" name="name" class="adm-input" required value="<%= val('name') %>">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="adm-label" for="subtitle">Subtitle</label>
+          <input id="subtitle" name="subtitle" class="adm-input" value="<%= val('subtitle') %>" placeholder="Hand-embroidered raw silk with dupatta">
+        </div>
+        <div>
+          <label class="adm-label" for="slug">Slug<%= isNew ? ' (auto)' : '' %></label>
+          <input id="slug" name="slug" class="adm-input" value="<%= val('slug') %>">
+        </div>
+        <div>
+          <label class="adm-label" for="sku">SKU</label>
+          <input id="sku" name="sku" class="adm-input" value="<%= val('sku') %>">
+        </div>
+        <div>
+          <label class="adm-label" for="fabric">Fabric</label>
+          <input id="fabric" name="fabric" class="adm-input" value="<%= val('fabric') %>" list="fabric-list">
+          <datalist id="fabric-list">
+            <% facets.fabric.forEach(function (f) { %><option value="<%= f.value %>"></option><% }); %>
+          </datalist>
+        </div>
+        <div>
+          <label class="adm-label" for="badge">Badge</label>
+          <input id="badge" name="badge" class="adm-input" value="<%= val('badge') %>" placeholder="Bestseller / New / Handloom">
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <h2 class="mb-3 font-serif text-base">Copy</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="adm-label" for="description">Description</label>
+          <textarea id="description" name="description" rows="4" class="adm-textarea"><%= val('description') %></textarea>
+        </div>
+        <div>
+          <label class="adm-label" for="fabricDetails">Fabric & craft</label>
+          <textarea id="fabricDetails" name="fabricDetails" rows="3" class="adm-textarea"><%= val('fabricDetails') %></textarea>
+        </div>
+        <div>
+          <label class="adm-label" for="care">Care</label>
+          <input id="care" name="care" class="adm-input" value="<%= val('care') %>">
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <h2 class="mb-1 font-serif text-base">Variants & taxonomy</h2>
+      <p class="mb-3 text-[11px] text-muted">Separate multiple values with <code class="bg-cream px-1">|</code></p>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label class="adm-label" for="categories">Categories *</label>
+          <input id="categories" name="categories" class="adm-input" value="<%= list('categories') %>" placeholder="bridal | lehengas">
+          <p class="mt-1 text-[10.5px] text-muted">Available: <%= categories.map(function (c) { return c.slug; }).join(', ') %></p>
+        </div>
+        <div>
+          <label class="adm-label" for="occasion">Occasions</label>
+          <input id="occasion" name="occasion" class="adm-input" value="<%= list('occasion') %>" placeholder="Wedding | Reception">
+        </div>
+        <div>
+          <label class="adm-label" for="colors">Colours</label>
+          <input id="colors" name="colors" class="adm-input" value="<%= list('colors') %>" placeholder="Rani Pink | Maroon">
+        </div>
+        <div>
+          <label class="adm-label" for="sizes">Sizes</label>
+          <input id="sizes" name="sizes" class="adm-input" value="<%= list('sizes') %>" placeholder="XS | S | M | L">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="adm-label" for="images">Image URLs</label>
+          <textarea id="images" name="images" rows="3" class="adm-textarea" placeholder="/static/img/front.jpg | https://cdn…/back.jpg"><%= list('images') %></textarea>
+          <p class="mt-1 text-[10.5px] text-muted">Leave empty to fall back to generated placeholder art. Any number of images is fine.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <h2 class="mb-3 font-serif text-base">Search appearance</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="adm-label" for="seoTitle">Meta title <span class="text-muted">(≤ 60 chars)</span></label>
+          <input id="seoTitle" name="seoTitle" class="adm-input" value="<%= seo.title || '' %>" placeholder="<%= val('name') %>">
+        </div>
+        <div>
+          <label class="adm-label" for="seoDescription">Meta description <span class="text-muted">(120–155 chars)</span></label>
+          <textarea id="seoDescription" name="seoDescription" rows="2" class="adm-textarea" placeholder="Auto-generated from the description"><%= seo.description || '' %></textarea>
+        </div>
+        <label class="flex items-center gap-2 text-[12.5px]">
+          <input type="checkbox" name="seoIndexable" <%= seo.indexable === false ? '' : 'checked' %>>
+          Allow search engines to index this product
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------ side ---- -->
+  <div class="space-y-3">
+    <div class="card p-4">
+      <h2 class="mb-3 font-serif text-base">Price, stock & selling</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="adm-label" for="price">Selling price *</label>
+          <input id="price" name="price" class="adm-input" required value="<%= val('price') %>" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="mrp">MRP <span class="text-muted">(struck through)</span></label>
+          <input id="mrp" name="mrp" class="adm-input" value="<%= val('mrp') %>" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="stock">Stock</label>
+          <input id="stock" name="stock" class="adm-input" value="<%= val('stock', 0) %>" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="deliveryDays">Production days</label>
+          <input id="deliveryDays" name="deliveryDays" class="adm-input" value="<%= val('deliveryDays', 10) %>" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="popularity">Popularity (0–100)</label>
+          <input id="popularity" name="popularity" class="adm-input" value="<%= val('popularity', 50) %>" inputmode="numeric">
+        </div>
+        <div>
+          <label class="adm-label" for="createdAt">Listed on</label>
+          <input id="createdAt" name="createdAt" class="adm-input" value="<%= val('createdAt') %>" placeholder="YYYY-MM-DD">
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ admin-only economics ============ -->
+    <div class="card border-l-2 border-l-maroon p-4">
+      <div class="flex items-start justify-between gap-2">
+        <h2 class="font-serif text-base">Cost & tax <span class="text-[11px] font-sans text-muted">— internal</span></h2>
+        <span class="pill pill-info shrink-0">Never shown to customers</span>
+      </div>
+      <p class="mt-1 text-[11px] leading-relaxed text-muted">
+        Your actual purchase cost per piece. Nothing on the storefront reads these fields — they exist so
+        profit and loss are real numbers, not estimates.
+      </p>
+
+      <div class="mt-3 grid grid-cols-2 gap-3">
+        <div>
+          <label class="adm-label" for="cost">Purchase cost / unit</label>
+          <input id="cost" name="cost" class="adm-input" value="<%= val('cost') %>" inputmode="numeric" placeholder="what it costs you">
+          <p class="mt-1 text-[10.5px] text-muted">
+            Blank → <%= (config.finance.categoryDefaults && p.categories && config.finance.categoryDefaults[p.categories[0]]) ? config.finance.categoryDefaults[p.categories[0]].cogsPercent + '% (category default)' : config.finance.defaultCogsPercent + '% of price' %>
+          </p>
+        </div>
+        <div>
+          <label class="adm-label" for="gstPercent">GST %</label>
+          <input id="gstPercent" name="gstPercent" class="adm-input" value="<%= val('gstPercent') %>" inputmode="numeric" placeholder="e.g. 5 or 12">
+          <p class="mt-1 text-[10.5px] text-muted">
+            Blank → <%= economics.gstPercent %>% <%= (p.categories && config.finance.categoryDefaults && config.finance.categoryDefaults[p.categories[0]]) ? '(category)' : '(store default)' %>
+          </p>
+        </div>
+        <div class="col-span-2">
+          <label class="adm-label" for="hsn">HSN code</label>
+          <input id="hsn" name="hsn" class="adm-input font-mono text-[11.5px]" value="<%= val('hsn') %>" placeholder="<%= (config.business || {}).defaultHsn || '6211' %>">
+          <p class="mt-1 text-[10.5px] text-muted">
+            Printed on the tax invoice. Blank → <%= (config.business || {}).defaultHsn || '6211' %> (business default).
+          </p>
+        </div>
+      </div>
+
+      <% if (economics.price) { %>
+        <dl class="mt-4 space-y-1.5 border-t border-line pt-3 text-[12px]">
+          <div class="flex justify-between"><dt class="text-muted">Selling price (GST-inclusive)</dt><dd class="tabular-nums"><%= money(economics.price) %></dd></div>
+          <div class="flex justify-between"><dt class="text-muted">− GST at <%= economics.gstPercent %>%</dt><dd class="tabular-nums text-critical">− <%= money(economics.tax) %></dd></div>
+          <div class="flex justify-between"><dt class="text-ink">Net price you keep</dt><dd class="tabular-nums"><%= money(economics.netPrice) %></dd></div>
+          <div class="flex justify-between"><dt class="text-muted">− purchase cost</dt><dd class="tabular-nums text-critical">− <%= money(economics.cost) %></dd></div>
+          <div class="flex justify-between border-t border-line pt-1.5">
+            <dt class="font-serif">Gross profit / unit</dt>
+            <dd class="font-serif tabular-nums <%= economics.grossProfit < 0 ? 'text-critical' : '' %>"><%= money(economics.grossProfit) %></dd>
+          </div>
+          <div class="flex justify-between"><dt class="text-muted">Margin on net</dt><dd class="tabular-nums"><%= economics.marginPercent %>%</dd></div>
+          <% if (economics.markupMultiple) { %>
+            <div class="flex justify-between"><dt class="text-muted">Markup</dt><dd class="tabular-nums"><%= economics.markupMultiple %>× cost</dd></div>
+          <% } %>
+          <% if (!isNew) { %>
+            <div class="flex justify-between border-t border-line pt-1.5"><dt class="text-muted">Stock at cost</dt><dd class="tabular-nums"><%= money((p.stock || 0) * economics.cost) %></dd></div>
+            <div class="flex justify-between"><dt class="text-muted">Profit if stock sells out</dt><dd class="tabular-nums"><%= money((p.stock || 0) * economics.grossProfit) %></dd></div>
+          <% } %>
+        </dl>
+        <p class="mt-2 text-[10.5px] leading-relaxed text-muted">
+          Order-level costs (packaging, shipping, gateway fees) and overheads come off in
+          <a href="/admin<%= tokenQs %>" class="text-maroon underline underline-offset-2">the dashboard P&amp;L</a>, not here.
+        </p>
+      <% } %>
+    </div>
+
+    <div class="card sticky top-[76px] p-4">
+      <button class="adm-btn adm-btn-primary w-full justify-center"><%= isNew ? 'Create product' : 'Save changes' %></button>
+      <% if (!isNew) { %>
+        <button type="button" class="adm-btn adm-btn-danger adm-btn-sm mt-2 w-full justify-center"
+                hx-post="/admin/products/<%= p.id %>/delete" hx-trigger="confirmed"
+                hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'
+                data-confirm="“<%= p.name %>” will be removed from the catalogue. Past orders keep their snapshot of it."
+                data-confirm-title="Delete this product?" data-confirm-cta="Delete product">
+          Delete product
+        </button>
+      <% } %>
+    </div>
+
+    <% if (!isNew) { %>
+      <div class="card p-4">
+        <h2 class="mb-3 font-serif text-base">Performance (12m)</h2>
+        <% if (perf) { %>
+          <dl class="space-y-1.5 text-[12.5px]">
+            <div class="flex justify-between"><dt class="text-muted">Units sold</dt><dd class="tabular-nums"><%= perf.units %></dd></div>
+            <div class="flex justify-between"><dt class="text-muted">Revenue</dt><dd class="tabular-nums"><%= money(perf.revenue) %></dd></div>
+            <div class="flex justify-between"><dt class="text-muted">Profit</dt><dd class="tabular-nums"><%= money(perf.profit) %></dd></div>
+            <div class="flex justify-between"><dt class="text-muted">Margin</dt><dd class="tabular-nums"><%= perf.marginPercent %>%</dd></div>
+          </dl>
+        <% } else { %>
+          <p class="text-[12.5px] text-muted">No sales recorded in the last 12 months.</p>
+        <% } %>
+
+        <% if (typeof reviewStats !== 'undefined' && reviewStats.count) { %>
+          <div class="mt-3 border-t border-line pt-3 text-[12.5px]">
+            <p class="text-muted">Rating <span class="text-ink"><%= reviewStats.average %></span> from <%= reviewStats.count %> review<%= reviewStats.count > 1 ? 's' : '' %></p>
+            <a href="/admin/reviews?q=<%= encodeURIComponent(p.name) %><%= adminToken ? '&token=' + adminToken : '' %>" class="mt-1 inline-block text-[10.5px] uppercase tracking-[0.12em] text-maroon">Moderate reviews</a>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="card p-4">
+        <%- include('./fragments/product-gallery', { p: p, error: null }) %>
+      </div>
+    <% } %>
+  </div>
+</form>
+
+<%- include('./partials/close') %>

@@ -1,0 +1,54 @@
+<%
+  const c = config.theme.colors;
+  const money = (n) => config.currency.symbol + Number(n || 0).toLocaleString(config.currency.locale || 'en-IN');
+  const first = String(order.customer.name || '').split(' ')[0] || 'there';
+  const partial = order.codPlan && order.codPlan.dueOnDelivery;
+%>
+<%- include('./_head', { config, brand, settings, title: 'Order ' + order.id + ' confirmed', preheader: 'We have your order ' + order.id + ' — ' + money(order.total) }) %>
+
+<p style="margin:0 0 6px; font-family:Georgia,serif; font-size:22px; color:<%= c.ink %>;">Thank you, <%= first %></p>
+
+<p style="margin:0 0 4px; font-size:14px; line-height:1.7; color:<%= c.muted %>;">
+  We have your order <strong style="color:<%= c.ink %>;"><%= order.id %></strong> and it's with our team now.
+  <% if (partial) { %>
+    You've paid <%= money(order.codPlan.advancePaid) %> online; <%= money(order.codPlan.dueOnDelivery) %> is due in cash when it arrives.
+  <% } else if (order.paymentStatus === 'pending') { %>
+    You'll pay <%= money(order.total) %> in cash on delivery.
+  <% } else { %>
+    Payment received in full.
+  <% } %>
+</p>
+
+<%- include('./_order-table', { config, order }) %>
+
+<table role="presentation" width="100%" style="margin:22px 0 0;">
+  <tr><td style="padding:14px 16px; background:<%= c.cream %>; border:1px solid <%= c.line %>;">
+    <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:<%= c.gold %>;">Delivering to</div>
+    <div style="margin-top:6px; font-size:13px; line-height:1.6; color:<%= c.ink %>;">
+      <%= order.customer.name %><br>
+      <%= order.address.address1 %><br>
+      <%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %><br>
+      <%= order.customer.phone %>
+    </div>
+  </td></tr>
+</table>
+
+<% if (order.notes) { %>
+  <p style="margin:16px 0 0; font-size:12px; line-height:1.6; color:<%= c.muted %>;">
+    <strong style="color:<%= c.ink %>;">Your note:</strong> <%= order.notes %>
+  </p>
+<% } %>
+
+<p style="margin:22px 0 0; font-size:13px; line-height:1.7; color:<%= c.muted %>;">
+  Made to order — we'll email you the moment it ships. Need to change something? Reply to this email today.
+</p>
+
+<% if (locals.origin) { %>
+  <p style="margin:14px 0 0; font-size:12px; line-height:1.7; color:<%= c.muted %>;">
+    Your GST tax invoice is ready —
+    <a href="<%= origin %>/returns?invoice=<%= order.id %>" style="color:<%= c.maroon %>;">download it here</a>.
+    You'll confirm your email or phone first, so only you can open it.
+  </p>
+<% } %>
+
+<%- include('./_foot', { config, brand, settings }) %>

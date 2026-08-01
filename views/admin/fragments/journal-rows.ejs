@@ -1,0 +1,39 @@
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[720px]">
+      <thead><tr><th>Post</th><th>Tags</th><th>Status</th><th class="num">Read</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        <% if (!posts.length) { %>
+          <tr><td colspan="6" class="py-10 text-center text-muted">No posts yet.</td></tr>
+        <% } %>
+        <% posts.forEach(function (p) { %>
+          <tr>
+            <td class="min-w-[260px]">
+              <a href="/admin/journal/<%= p.id %><%= tokenQs %>" class="block text-ink hover:text-maroon"><%= p.title %></a>
+              <span class="block truncate text-[10.5px] text-muted">/journal/<%= p.slug %></span>
+            </td>
+            <td class="text-[11.5px] text-muted"><%= (p.tags || []).join(', ') || '—' %></td>
+            <td><span class="pill pill-<%= p.status === 'published' ? 'good' : 'info' %>"><%= p.status %></span></td>
+            <td class="num text-muted"><%= p.readingMinutes %>m</td>
+            <td class="whitespace-nowrap text-muted"><%= new Date(p.publishedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) %></td>
+            <td class="num whitespace-nowrap">
+              <a href="/admin/journal/<%= p.id %><%= tokenQs %>" class="text-[10.5px] uppercase tracking-[0.12em] text-maroon">Edit</a>
+              <button class="ml-3 text-[10.5px] uppercase tracking-[0.12em] text-muted"
+                      hx-post="/admin/journal/<%= p.id %>/status" hx-target="#journal-rows" hx-swap="innerHTML"
+                      hx-vals='<%- JSON.stringify({ status: p.status === 'published' ? 'draft' : 'published', token: adminToken || undefined }) %>'>
+                <%= p.status === 'published' ? 'Unpublish' : 'Publish' %>
+              </button>
+              <% if (p.status === 'published') { %>
+                <a href="/journal/<%= p.slug %>" target="_blank" class="ml-3 text-[10.5px] uppercase tracking-[0.12em] text-muted">View</a>
+              <% } %>
+              <button class="ml-3 text-[10.5px] uppercase tracking-[0.12em] text-critical"
+                      hx-post="/admin/journal/<%= p.id %>/delete" hx-target="#journal-rows" hx-swap="innerHTML"
+                      hx-trigger="confirmed" hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'
+                      data-confirm="“<%= p.title %>” will be permanently deleted." data-confirm-title="Delete post?" data-confirm-cta="Delete post">Delete</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>

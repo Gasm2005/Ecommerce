@@ -1,0 +1,18 @@
+<% const c = config.theme.colors; %>
+        </td></tr>
+
+        <tr>
+          <td style="padding:20px 24px 26px; border-top:1px solid <%= c.line %>; background:<%= c.cream %>;">
+            <p style="margin:0 0 8px; font-size:12px; line-height:1.6; color:<%= c.muted %>;">
+              Questions? Reply to this email<% if (settings.storePhone) { %> or call <%= settings.storePhone %><% } %>.
+            </p>
+            <p style="margin:0; font-size:11px; line-height:1.6; color:<%= c.muted %>;">
+              <%= brand.name %><% if (config.footer && config.footer.copyright) { %> · <%= config.footer.copyright.replace('© ', '') %><% } %>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

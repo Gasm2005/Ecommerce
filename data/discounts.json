@@ -1,0 +1,57 @@
+[
+  {
+    "code": "FIRST10",
+    "type": "percent",
+    "value": 10,
+    "minOrder": 20000,
+    "expiresAt": "2026-12-31",
+    "usageLimit": 500,
+    "used": 64,
+    "active": true,
+    "note": "First-time buyers"
+  },
+  {
+    "code": "BRIDE5",
+    "type": "percent",
+    "value": 5,
+    "minOrder": 100000,
+    "expiresAt": "2027-03-31",
+    "usageLimit": 200,
+    "used": 21,
+    "active": true,
+    "note": "Bridal trousseau"
+  },
+  {
+    "code": "TRUNKSHOW",
+    "type": "flat",
+    "value": 5000,
+    "minOrder": 60000,
+    "expiresAt": "2026-09-30",
+    "usageLimit": 100,
+    "used": 34,
+    "active": true,
+    "note": "Trunk show attendees"
+  },
+  {
+    "code": "FREESHIP",
+    "type": "freeship",
+    "value": 0,
+    "minOrder": 0,
+    "expiresAt": "2026-12-31",
+    "usageLimit": 0,
+    "used": 12,
+    "active": true,
+    "note": "Always-on shipping waiver"
+  },
+  {
+    "code": "DIWALI24",
+    "type": "percent",
+    "value": 12,
+    "minOrder": 30000,
+    "expiresAt": "2025-11-15",
+    "usageLimit": 300,
+    "used": 288,
+    "active": false,
+    "note": "Expired festive campaign"
+  }
+]

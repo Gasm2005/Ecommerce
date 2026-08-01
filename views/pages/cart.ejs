@@ -1,0 +1,14 @@
+<%- include('../partials/document-open', { title: 'Shopping Bag' }) %>
+
+<div class="mx-auto max-w-[1400px] px-4 py-8 lg:px-8 lg:py-12">
+  <div class="border-b border-line pb-6">
+    <p class="text-[10px] uppercase tracking-luxe text-gold">Your selection</p>
+    <h1 class="mt-2 font-serif text-3xl lg:text-4xl">Shopping Bag</h1>
+  </div>
+
+  <div id="cart-page" class="pt-8">
+    <%- include('../fragments/cart-page') %>
+  </div>
+</div>
+
+<%- include('../partials/document-close') %>

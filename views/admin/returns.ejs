@@ -1,0 +1,46 @@
+<%- include('./partials/open', {
+  active: 'returns',
+  adminTitle: 'Returns & refunds',
+  adminSubtitle: overview.open + ' open · ' + money(overview.pendingValue) + ' at risk · ' + money(overview.refundedValue) + ' refunded to date',
+  adminActions: '<a href="/admin/returns/export.csv' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">Export CSV</a>'
+}) %>
+
+<div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <%- include('./partials/kpi', { label: 'Awaiting decision', value: overview.requested, delta: null, hint: 'Customers waiting on you', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Open requests', value: overview.open, delta: null, hint: money(overview.pendingValue) + ' could come back', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Refunded', value: money(overview.refundedValue), delta: null, hint: overview.refundedCount + ' request' + (overview.refundedCount === 1 ? '' : 's') + ' settled', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Top reason', value: overview.byReason.length ? overview.byReason.sort(function (a, b) { return b.count - a.count; })[0].reason : '—', delta: null, hint: 'Fix the cause, not the refund', spark: null }) %>
+</div>
+
+<!-- status tabs -->
+<div class="mb-4 flex flex-wrap gap-2">
+  <a href="/admin/returns<%= tokenQs %>"
+     class="border px-3.5 py-2 text-[10.5px] uppercase tracking-[0.12em] <%= !filters.status ? 'border-maroon bg-maroon text-ivory' : 'border-line bg-panel text-muted' %>">
+    All <span class="opacity-70"><%= overview.total %></span>
+  </a>
+  <% statuses.forEach(function (s) { %>
+    <% const n = rows.filter(function (r) { return r.status === s.id; }).length; %>
+    <a href="/admin/returns?status=<%= s.id %><%= adminToken ? '&token=' + adminToken : '' %>"
+       class="border px-3.5 py-2 text-[10.5px] uppercase tracking-[0.12em] <%= filters.status === s.id ? 'border-maroon bg-maroon text-ivory' : 'border-line bg-panel text-muted' %>">
+      <%= s.label %><% if (filters.status === s.id) { %> <span class="opacity-70"><%= n %></span><% } %>
+    </a>
+  <% }); %>
+</div>
+
+<form hx-get="/admin/returns/rows" hx-target="#return-rows" hx-swap="innerHTML" data-auto-submit
+      class="card mb-4 flex flex-wrap items-end gap-3 p-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+  <input type="hidden" name="status" value="<%= filters.status %>">
+  <div class="min-w-[220px] flex-1">
+    <label class="adm-label" for="q">Search</label>
+    <input id="q" name="q" value="<%= filters.q %>" class="adm-input" placeholder="Return id, order id, customer, product"
+           hx-get="/admin/returns/rows" hx-target="#return-rows" hx-trigger="keyup changed delay:300ms" hx-include="closest form">
+  </div>
+  <a href="/admin/returns<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Reset</a>
+</form>
+
+<div id="return-rows" class="adm-swap">
+  <%- include('./fragments/return-rows') %>
+</div>
+
+<%- include('./partials/close') %>

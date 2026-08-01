@@ -1,0 +1,81 @@
+<%- include('../partials/document-open', { title: heading }) %>
+
+<div class="mx-auto max-w-[1600px] px-4 lg:px-8">
+
+  <!-- breadcrumb + page head -->
+  <nav class="flex items-center gap-2 pt-6 text-[11px] text-muted" aria-label="Breadcrumb">
+    <a href="/" class="hover:text-maroon">Home</a><span>/</span>
+    <span class="text-ink"><%= heading %></span>
+  </nav>
+
+  <header class="border-b border-line pb-7 pt-5 lg:pt-7">
+    <h1 class="font-serif text-3xl lg:text-[2.75rem]"><%= heading %></h1>
+    <% if (navEntry && navEntry.featured) { %>
+      <p class="mt-2 max-w-xl text-sm text-muted"><%= navEntry.featured.subtitle %> — made to order in our atelier, with free size customisation.</p>
+    <% } else if (filters.q) { %>
+      <p class="mt-2 text-sm text-muted">Showing pieces matching your search.</p>
+    <% } else { %>
+      <p class="mt-2 max-w-xl text-sm text-muted">Every piece is made to order. Delivery estimates are shown on each product.</p>
+    <% } %>
+  </header>
+
+  <div class="flex gap-10 py-7 lg:gap-14">
+
+    <!-- ============================ filters ============================ -->
+    <div x-cloak x-show="$store.ui.filters" x-transition.opacity
+         @click="$store.ui.filters = false" class="fixed inset-0 z-[84] bg-ink/40 lg:hidden"></div>
+
+    <aside class="fixed inset-y-0 left-0 z-[85] w-[88%] max-w-xs overflow-y-auto bg-ivory p-5 pb-28 shadow-2xl transition-transform duration-300 lg:static lg:z-auto lg:block lg:w-60 lg:shrink-0 lg:translate-x-0 lg:overflow-visible lg:bg-transparent lg:p-0 lg:shadow-none"
+           :class="$store.ui.filters ? 'translate-x-0' : '-translate-x-full'">
+      <div class="mb-4 flex items-center justify-between lg:hidden">
+        <span class="font-serif text-lg">Filters</span>
+        <button @click="$store.ui.filters = false" class="p-1 text-2xl leading-none text-muted" aria-label="Close filters">&times;</button>
+      </div>
+
+      <div class="lg:sticky lg:top-[190px]">
+        <%- include('../partials/filters') %>
+      </div>
+
+      <div class="fixed inset-x-0 bottom-0 border-t border-line bg-ivory p-4 lg:hidden">
+        <button @click="$store.ui.filters = false"
+                class="w-full bg-maroon py-3.5 text-[11px] uppercase tracking-luxe text-ivory">Show results</button>
+      </div>
+    </aside>
+
+    <!-- ============================ results ============================ -->
+    <section class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+        <div class="flex items-center gap-3">
+          <button @click="$store.ui.filters = true"
+                  class="inline-flex items-center gap-2 border border-line px-3.5 py-2 text-[11px] uppercase tracking-[0.14em] lg:hidden">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+            Filters<% if (activeCount) { %> (<%= activeCount %>)<% } %>
+          </button>
+          <p id="result-count" class="text-xs text-muted"><%= result.total %> <%= result.total === 1 ? 'piece' : 'pieces' %></p>
+        </div>
+
+        <label class="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-muted">
+          <span class="hidden sm:inline">Sort</span>
+          <select name="sort"
+                  hx-get="/fragments/products/<%= slug %>"
+                  hx-include="#filter-form"
+                  hx-target="#product-grid"
+                  hx-swap="innerHTML swap:170ms"
+                  class="border border-line bg-ivory py-2 pl-3 pr-8 text-[11px] uppercase tracking-[0.14em] text-ink focus:border-maroon focus:outline-none">
+            <% sorts.forEach(function (s) { %>
+              <option value="<%= s.id %>" <%= filters.sort === s.id ? 'selected' : '' %>><%= s.label %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+
+      <div class="pt-4"><%- include('../partials/active-chips', { oob: false }) %></div>
+
+      <div id="product-grid" class="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 transition-opacity duration-150 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12 xl:grid-cols-4">
+        <%- include('../fragments/grid-items', { append: false }) %>
+      </div>
+    </section>
+  </div>
+</div>
+
+<%- include('../partials/document-close') %>

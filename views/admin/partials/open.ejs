@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= adminTitle %> · <%= config.brand.name %> Admin</title>
+  <link rel="icon" href="/ph.svg?seed=admin&w=64&h=64&label=<%= encodeURIComponent(config.brand.monogram) %>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=<%= config.theme.fonts.heading.replace(/ /g,'+') %>:wght@400;500;600&family=<%= config.theme.fonts.body.replace(/ /g,'+') %>:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: Object.assign(<%- JSON.stringify(config.theme.colors) %>, {
+            /* chart + status roles — validated for CVD separation and contrast */
+            series1: '#A32B41', series2: '#A98436',
+            good: '#0ca30c', warning: '#fab219', serious: '#ec835a', critical: '#d03b3b',
+            panel: '#ffffff', shell: '#F7F4EE'
+          }),
+          fontFamily: {
+            serif: ['<%= config.theme.fonts.heading %>', 'Georgia', 'serif'],
+            sans: ['<%= config.theme.fonts.body %>', 'system-ui', 'sans-serif']
+          },
+          letterSpacing: { luxe: '0.18em' }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/app.css?v=<%= v %>">
+  <link rel="stylesheet" href="/static/css/admin.css?v=<%= v %>">
+
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  <script src="/static/js/admin.js?v=<%= v %>" defer></script>
+  <script src="https://unpkg.com/@alpinejs/collapse@3.14.1/dist/cdn.min.js" defer></script>
+  <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+</head>
+<body x-data class="bg-shell font-sans text-[13.5px] text-ink antialiased">
+
+<div class="flex min-h-screen">
+
+  <!-- ============================== sidebar ============================== -->
+  <div x-cloak x-show="$store.admin.nav" @click="$store.admin.nav = false"
+       class="fixed inset-0 z-30 bg-ink/40 lg:hidden"></div>
+
+  <aside class="fixed inset-y-0 left-0 z-40 w-60 shrink-0 overflow-y-auto border-r border-line bg-panel transition-transform duration-200 lg:static lg:translate-x-0"
+         :class="$store.admin.nav ? 'translate-x-0' : '-translate-x-full'">
+    <div class="flex items-center justify-between border-b border-line px-5 py-4">
+      <a href="/admin" class="leading-none">
+        <span class="block font-serif text-lg tracking-[0.16em]"><%= config.brand.logoText %></span>
+        <span class="mt-0.5 block text-[9px] tracking-luxe text-gold">ADMIN</span>
+      </a>
+      <button @click="$store.admin.nav = false" class="p-1 text-xl leading-none text-muted lg:hidden" aria-label="Close">&times;</button>
+    </div>
+
+    <nav class="px-3 py-4">
+      <% const groups = [
+        { title: 'Overview', items: [
+          { href: '/admin', label: 'Dashboard', key: 'dashboard' },
+          { href: '/admin/reports', label: 'Reports & exports', key: 'reports' },
+          { href: '/admin/export', label: 'Export data · GST', key: 'export' }
+        ]},
+        { title: 'Sell', items: [
+          { href: '/admin/orders', label: 'Orders', key: 'orders', badge: pendingOrders },
+          { href: '/admin/returns', label: 'Returns & refunds', key: 'returns', badge: openReturns, tone: 'warning' },
+          { href: '/admin/customers', label: 'Customers', key: 'customers' },
+          { href: '/admin/discounts', label: 'Discounts', key: 'discounts' }
+        ]},
+        { title: 'Catalogue', items: [
+          { href: '/admin/products', label: 'Products', key: 'products' },
+          { href: '/admin/products?stock=low', label: 'Low stock', key: 'lowstock', badge: lowStockCount, tone: 'warning' },
+          { href: '/admin/categories', label: 'Categories', key: 'categories' },
+          { href: '/admin/import', label: 'Bulk upload', key: 'import' }
+        ]},
+        { title: 'Content', items: [
+          { href: '/admin/reviews', label: 'Reviews', key: 'reviews', badge: pendingReviews, tone: 'warning' },
+          { href: '/admin/journal', label: 'Journal', key: 'journal' },
+          { href: '/admin/marketing', label: 'Marketing · SEO', key: 'marketing' }
+        ]},
+        { title: 'Store', items: [
+          { href: '/admin/settings', label: 'Settings', key: 'settings' },
+          { href: '/admin/plan', label: 'Plan & features', key: 'plan' },
+          { href: '/admin/license', label: 'Licence', key: 'license' },
+          { href: '/admin/activity', label: 'Activity log', key: 'activity' }
+        ]}
+      ]; %>
+
+      <%
+        /* Two different reasons a link may not work, shown differently:
+           · no permission → hidden entirely (it isn't this person's job)
+           · not in the plan → shown with a padlock (it IS the platform's job,
+             the store just hasn't bought it) */
+      %>
+      <% groups.forEach(function (g) { %>
+        <% const visible = g.items.filter(function (it) { return can(it.key === 'lowstock' ? 'products' : it.key); }); %>
+        <% if (!visible.length) return; %>
+        <p class="px-3 pb-2 pt-4 text-[9px] uppercase tracking-luxe text-muted/70"><%= g.title %></p>
+        <ul class="space-y-0.5">
+          <% visible.forEach(function (it) { %>
+            <% const open = unlocked(it.key === 'lowstock' ? 'products' : it.key); %>
+            <li>
+              <a href="<%= it.href %><%= adminToken ? (it.href.includes('?') ? '&' : '?') + 'token=' + adminToken : '' %>"
+                 <%= open ? '' : 'title="Not included in your plan"' %>
+                 class="flex items-center justify-between rounded px-3 py-2 transition
+                        <%= active === it.key ? 'bg-maroon text-ivory' : (open ? 'text-ink hover:bg-cream' : 'text-muted/60 hover:bg-cream') %>">
+                <span><%= it.label %></span>
+                <% if (!open) { %>
+                  <span class="ml-2 text-[11px] leading-none opacity-60" aria-label="locked">🔒</span>
+                <% } else if (it.badge) { %>
+                  <span class="ml-2 min-w-[20px] rounded-full px-1.5 text-center text-[10px] leading-[18px]
+                    <%= active === it.key ? 'bg-ivory/25 text-ivory' : (it.tone === 'warning' ? 'bg-warning/25 text-ink' : 'bg-maroon text-ivory') %>"><%= it.badge %></span>
+                <% } %>
+              </a>
+            </li>
+          <% }); %>
+        </ul>
+      <% }); %>
+
+      <div class="mt-6 space-y-3 border-t border-line px-3 pt-4">
+        <a href="/" target="_blank" class="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-maroon">
+          View storefront
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+
+        <% if (typeof plan !== 'undefined' && plan && can('settings')) { %>
+          <a href="/admin/plan" class="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-muted hover:text-maroon">
+            <span><%= plan.label %> plan</span>
+            <span class="text-[10px] normal-case tracking-normal">view</span>
+          </a>
+        <% } %>
+
+        <%
+          /* Licence warning. Shown early and quietly — the first a client hears
+             about a renewal should not be the day the admin locks. */
+          const lic = typeof licence !== 'undefined' ? licence : null;
+          const nag = lic && ['expiring', 'grace', 'invalid', 'mismatch', 'expired'].includes(lic.state);
+        %>
+        <% if (nag && can('settings')) { %>
+          <a href="/admin/license"
+             class="block border px-3 py-2 text-[11px] leading-relaxed
+                    <%= lic.state === 'expiring' ? 'border-warning/50 bg-warning/5 text-ink' : 'border-critical/50 bg-critical/5 text-critical' %>">
+            <span class="block text-[9px] uppercase tracking-luxe opacity-70">Licence</span>
+            <%= lic.state === 'expiring' ? `Renews in ${lic.daysLeft} day${lic.daysLeft === 1 ? '' : 's'}`
+                : lic.state === 'grace' ? `Expired · ${lic.graceDaysLeft} day${lic.graceDaysLeft === 1 ? '' : 's'} of grace left`
+                : lic.state === 'mismatch' ? 'Wrong domain for this licence'
+                : lic.state === 'invalid' ? 'Key is not valid' : 'Expired' %>
+          </a>
+        <% } %>
+
+        <% if (typeof user !== 'undefined' && user) { %>
+          <div class="border-t border-line pt-3">
+            <p class="truncate text-[12px] text-ink"><%= user.name %></p>
+            <p class="truncate text-[10px] uppercase tracking-[0.12em] text-muted"><%= user.role %></p>
+            <div class="mt-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.12em]">
+              <a href="/admin/account" class="text-maroon">Account</a>
+              <a href="/admin/logout" class="text-muted hover:text-maroon">Sign out</a>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ============================== main ============================== -->
+  <div class="min-w-0 flex-1">
+    <header class="sticky top-0 z-20 border-b border-line bg-panel/95 backdrop-blur">
+      <div class="flex items-center gap-3 px-4 py-3 lg:px-8">
+        <button @click="$store.admin.nav = true" class="-ml-1 p-2 lg:hidden" aria-label="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+
+        <div class="min-w-0 flex-1">
+          <h1 class="truncate font-serif text-xl lg:text-2xl"><%= adminTitle %></h1>
+          <% if (typeof adminSubtitle !== 'undefined' && adminSubtitle) { %>
+            <p class="truncate text-xs text-muted"><%= adminSubtitle %></p>
+          <% } %>
+        </div>
+
+        <% if (typeof adminActions !== 'undefined' && adminActions) { %>
+          <div class="flex shrink-0 items-center gap-2"><%- adminActions %></div>
+        <% } %>
+      </div>
+    </header>
+
+    <main class="px-4 py-6 lg:px-8 lg:py-8">

@@ -1,0 +1,169 @@
+<% const wishCount = wishlistIds.length; %>
+
+<% if (config.brand.announcement) { %>
+<div x-data="{show:true}" x-show="show" x-cloak class="bg-maroon text-ivory">
+  <div class="relative mx-auto flex max-w-[1600px] items-center justify-center gap-3 px-9 py-2 text-[10px] uppercase tracking-luxe sm:text-[11px]">
+    <span class="text-center"><%= config.brand.announcement %></span>
+    <button @click="show=false" class="absolute right-3 text-ivory/60 hover:text-ivory" aria-label="Dismiss">&times;</button>
+  </div>
+</div>
+<% } %>
+
+<header class="sticky top-0 z-50 border-b border-line bg-ivory/95 backdrop-blur supports-[backdrop-filter]:bg-ivory/80">
+  <div class="mx-auto max-w-[1600px] px-4 lg:px-8">
+
+    <!-- row 1 : logo · search · actions -->
+    <div class="flex items-center gap-3 py-3 lg:gap-8 lg:py-4">
+
+      <button class="-ml-1 p-2 lg:hidden" @click="$store.ui.menu = true" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+
+      <a href="/" class="mx-auto shrink-0 text-center leading-none lg:mx-0 lg:text-left">
+        <% if (config.brand.logoImage) { %>
+          <img src="<%= config.brand.logoImage %>" alt="<%= config.brand.name %>" class="h-8 w-auto lg:h-10">
+        <% } else { %>
+          <span class="block font-serif text-xl tracking-[0.18em] text-ink lg:text-2xl"><%= config.brand.logoText %></span>
+          <% if (config.brand.logoSubtext) { %>
+            <span class="mt-0.5 block text-[8px] tracking-luxe text-gold lg:text-[9px]"><%= config.brand.logoSubtext %></span>
+          <% } %>
+        <% } %>
+      </a>
+
+
+      <!-- phone/tablet: account only — bag, saved and search live in the bottom tab bar -->
+      <a href="/checkout" class="-mr-1 p-2 text-ink lg:hidden" aria-label="Account">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/></svg>
+      </a>
+
+      <nav class="ml-auto hidden items-center gap-1 lg:flex lg:gap-2">
+        <!-- lens only: the field expands below the header on click (or "/") -->
+        <button @click="$store.ui.toggleDeskSearch()" class="rounded-btn p-2 text-ink transition hover:text-maroon"
+                :class="$store.ui.deskSearch ? 'text-maroon' : ''" aria-label="Search">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+
+        <a href="/wishlist" class="relative rounded-btn p-2 text-ink transition hover:text-maroon" aria-label="Wishlist">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 20.5s-7.5-4.6-7.5-9.7A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 3.2c0 5.1-7.5 9.7-7.5 9.7Z"/></svg>
+          <span id="wish-count" class="<%= wishCount ? '' : 'hidden ' %>absolute -right-0.5 -top-0.5 min-w-[17px] rounded-full bg-gold px-1 text-center text-[10px] font-medium leading-[17px] text-ivory"><%= wishCount %></span>
+        </a>
+
+        <button @click="$store.ui.cart = true" class="relative rounded-btn p-2 text-ink transition hover:text-maroon" aria-label="Shopping bag">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <span id="cart-count" class="<%= cartSummary.count ? '' : 'hidden ' %>absolute -right-0.5 -top-0.5 min-w-[17px] rounded-full bg-maroon px-1 text-center text-[10px] font-medium leading-[17px] text-ivory"><%= cartSummary.count %></span>
+        </button>
+
+        <a href="/checkout" class="ml-1 hidden items-center gap-2 border border-line px-4 py-2 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon lg:inline-flex">Login</a>
+      </nav>
+    </div>
+
+    <!-- row 1b (desktop) : slim search, collapsed until the lens is clicked -->
+    <div class="hidden lg:block">
+      <div x-cloak x-show="$store.ui.deskSearch" x-collapse>
+        <div class="mx-auto max-w-2xl pb-4">
+          <%- include('./search', { sid: 'd' }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- row 2 (phone/tablet) : full-width tap-to-search, opens the app search sheet -->
+    <div class="pb-3 lg:hidden">
+      <button type="button" @click="$store.ui.openAppSearch()"
+              class="flex w-full items-center gap-3 border border-line bg-cream/50 px-4 py-3 text-left text-sm text-muted">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="shrink-0"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="truncate"><%= (typeof filters !== 'undefined' && filters.q) ? filters.q : 'Search lehengas, sarees, occasions…' %></span>
+      </button>
+    </div>
+
+    <!-- row 3 : categories + mega menu -->
+    <nav class="hidden lg:block" @mouseleave="$store.ui.mega = null">
+      <ul class="flex items-center justify-center gap-9 border-t border-line/70">
+        <% config.nav.forEach(function (item) { %>
+          <li @mouseenter="$store.ui.mega = '<%= item.slug %>'">
+            <a href="/category/<%= item.slug %>"
+               class="relative block py-3.5 text-[11px] uppercase tracking-luxe text-ink transition hover:text-maroon">
+              <%= item.label %>
+              <span class="absolute inset-x-0 -bottom-px h-px bg-maroon transition-transform duration-300"
+                    :class="$store.ui.mega === '<%= item.slug %>' ? 'scale-x-100' : 'scale-x-0'"></span>
+            </a>
+          </li>
+        <% }); %>
+        <li><a href="/category/all?sort=new" class="py-3.5 text-[11px] uppercase tracking-luxe text-maroon">New In</a></li>
+      </ul>
+
+      <% config.nav.forEach(function (item) { %>
+        <div x-cloak x-show="$store.ui.mega === '<%= item.slug %>'"
+             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:leave="transition ease-in duration-100" x-transition:leave-end="opacity-0"
+             class="absolute inset-x-0 top-full border-b border-line bg-ivory shadow-[0_20px_50px_-30px_rgba(23,19,15,.4)]">
+          <div class="mx-auto grid max-w-[1600px] grid-cols-12 gap-10 px-8 py-9">
+            <div class="col-span-8 grid grid-cols-3 gap-8">
+              <% (item.columns || []).forEach(function (col) { %>
+                <div>
+                  <p class="mb-4 text-[10px] uppercase tracking-luxe text-gold"><%= col.title %></p>
+                  <ul class="space-y-2.5">
+                    <% col.links.forEach(function (l) { %>
+                      <li><a href="<%= l.href %>" class="text-sm text-muted transition hover:text-maroon"><%= l.label %></a></li>
+                    <% }); %>
+                  </ul>
+                </div>
+              <% }); %>
+            </div>
+            <% if (item.featured) { %>
+              <a href="<%= item.featured.href %>" class="group col-span-4 block">
+                <div class="overflow-hidden">
+                  <img loading="lazy" class="h-56 w-full object-cover transition duration-700 group-hover:scale-105"
+                       src="<%= item.featured.image || ('/ph.svg?seed=mega' + item.slug + '&w=800&h=520&kind=hero&label=' + encodeURIComponent(item.featured.title)) %>"
+                       alt="<%= item.featured.title %>">
+                </div>
+                <p class="mt-3 font-serif text-lg"><%= item.featured.title %></p>
+                <p class="text-xs text-muted"><%= item.featured.subtitle %></p>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% }); %>
+    </nav>
+  </div>
+</header>
+
+<!-- mobile slide-in menu -->
+<div x-cloak x-show="$store.ui.menu" class="fixed inset-0 z-[80] lg:hidden">
+  <div x-show="$store.ui.menu" x-transition.opacity @click="$store.ui.menu=false" class="absolute inset-0 bg-ink/40"></div>
+  <aside x-show="$store.ui.menu"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-end="-translate-x-full"
+         class="relative flex h-full w-[86%] max-w-sm flex-col bg-ivory">
+    <div class="flex items-center justify-between border-b border-line px-5 py-4">
+      <span class="font-serif text-lg tracking-[0.18em]"><%= config.brand.logoText %></span>
+      <button @click="$store.ui.menu=false" class="p-1 text-2xl leading-none text-muted" aria-label="Close">&times;</button>
+    </div>
+    <nav class="flex-1 overflow-y-auto px-5 py-4" x-data="{ open: null }">
+      <% config.nav.forEach(function (item, i) { %>
+        <div class="border-b border-line/70">
+          <button @click="open = open === <%= i %> ? null : <%= i %>"
+                  class="flex w-full items-center justify-between py-3.5 text-left text-sm uppercase tracking-[0.14em]">
+            <%= item.label %>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 :class="open === <%= i %> ? 'rotate-45' : ''" class="transition"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div x-show="open === <%= i %>" x-collapse class="pb-3">
+            <a href="/category/<%= item.slug %>" class="block py-2 text-sm text-maroon">Shop all <%= item.label %></a>
+            <% (item.columns || []).forEach(function (col) { %>
+              <% col.links.forEach(function (l) { %>
+                <a href="<%= l.href %>" class="block py-2 text-sm text-muted"><%= l.label %></a>
+              <% }); %>
+            <% }); %>
+          </div>
+        </div>
+      <% }); %>
+      <a href="/category/all?sort=new" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em] text-maroon">New In</a>
+      <a href="/wishlist" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em]">Wishlist</a>
+      <a href="/checkout" class="block py-3.5 text-sm uppercase tracking-[0.14em]">Login</a>
+    </nav>
+    <div class="border-t border-line px-5 py-4 text-xs text-muted">
+      <p><%= config.brand.supportPhone %></p>
+      <p><%= config.brand.supportEmail %></p>
+    </div>
+  </aside>
+</div>

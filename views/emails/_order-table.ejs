@@ -1,0 +1,68 @@
+<%
+  /* Order line items + totals, shared by the customer and store emails. */
+  const c = config.theme.colors;
+  const money = (n) => config.currency.symbol + Number(n || 0).toLocaleString(config.currency.locale || 'en-IN');
+%>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 0; font-size:14px;">
+  <% order.items.forEach(function (it) { %>
+    <tr>
+      <td style="padding:10px 0; border-bottom:1px solid <%= c.line %>;">
+        <div style="color:<%= c.ink %>;"><%= it.name %></div>
+        <div style="font-size:12px; color:<%= c.muted %>; margin-top:2px;">
+          <%= it.size %><%= it.color ? ' · ' + it.color : '' %> · Qty <%= it.qty %>
+        </div>
+      </td>
+      <td align="right" style="padding:10px 0; border-bottom:1px solid <%= c.line %>; white-space:nowrap; color:<%= c.ink %>;">
+        <%= money(it.price * it.qty) %>
+      </td>
+    </tr>
+  <% }); %>
+
+  <tr>
+    <td style="padding:10px 0 3px; font-size:13px; color:<%= c.muted %>;">Subtotal</td>
+    <td align="right" style="padding:10px 0 3px; font-size:13px; color:<%= c.ink %>;"><%= money(order.subtotal) %></td>
+  </tr>
+
+  <% if (order.discount) { %>
+    <tr>
+      <td style="padding:3px 0; font-size:13px; color:<%= c.muted %>;">Coupon <%= order.discountCode || '' %></td>
+      <td align="right" style="padding:3px 0; font-size:13px; color:<%= c.maroon %>;">− <%= money(order.discount) %></td>
+    </tr>
+  <% } %>
+
+  <tr>
+    <td style="padding:3px 0; font-size:13px; color:<%= c.muted %>;"><%= order.deliveryTitle ? order.deliveryTitle + ' delivery' : 'Shipping' %></td>
+    <td align="right" style="padding:3px 0; font-size:13px; color:<%= c.ink %>;"><%= order.shipping ? money(order.shipping) : 'Free' %></td>
+  </tr>
+
+  <% if (order.giftWrapCharge) { %>
+    <tr>
+      <td style="padding:3px 0; font-size:13px; color:<%= c.muted %>;">Gift packaging</td>
+      <td align="right" style="padding:3px 0; font-size:13px; color:<%= c.ink %>;"><%= money(order.giftWrapCharge) %></td>
+    </tr>
+  <% } %>
+
+  <tr>
+    <td style="padding:10px 0 0; border-top:1px solid <%= c.line %>; font-family:Georgia,serif; font-size:16px; color:<%= c.ink %>;">Total</td>
+    <td align="right" style="padding:10px 0 0; border-top:1px solid <%= c.line %>; font-family:Georgia,serif; font-size:16px; color:<%= c.ink %>;"><%= money(order.total) %></td>
+  </tr>
+
+  <% if (order.gstAmount) { %>
+    <!-- Inclusive prices: disclosure, not an addition. -->
+    <tr>
+      <td style="padding:2px 0 0; font-size:11px; color:<%= c.muted %>;">Includes GST</td>
+      <td align="right" style="padding:2px 0 0; font-size:11px; color:<%= c.muted %>;"><%= money(order.gstAmount) %></td>
+    </tr>
+  <% } %>
+
+  <% if (order.codPlan && order.codPlan.dueOnDelivery) { %>
+    <tr>
+      <td style="padding:8px 0 0; font-size:13px; color:<%= c.muted %>;">Paid online</td>
+      <td align="right" style="padding:8px 0 0; font-size:13px; color:<%= c.ink %>;"><%= money(order.codPlan.advancePaid) %></td>
+    </tr>
+    <tr>
+      <td style="padding:3px 0 0; font-size:13px; color:<%= c.ink %>;"><strong>Pay in cash on delivery</strong></td>
+      <td align="right" style="padding:3px 0 0; font-size:13px; color:<%= c.maroon %>;"><strong><%= money(order.codPlan.dueOnDelivery) %></strong></td>
+    </tr>
+  <% } %>
+</table>

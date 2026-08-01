@@ -1,0 +1,42 @@
+<%
+  /* One uploaded + compressed file. Carries its token as a hidden input, so the
+     review form submits instantly — the work is already done.
+     locals: item {token, descriptor} | null, error */
+%>
+<% if (error) { %>
+  <div class="w-full border border-maroon/40 bg-maroon/5 px-3 py-2 text-[11px] text-maroon"><%= error %></div>
+<% } else if (item && item.error) { %>
+  <div class="w-full border border-maroon/40 bg-maroon/5 px-3 py-2 text-[11px] text-maroon"><%= item.error %></div>
+<% } else if (item && item.descriptor) { %>
+  <% const d = item.descriptor; %>
+  <div class="relative w-[86px] shrink-0">
+    <input type="hidden" name="mediaTokens" value="<%= item.token %>">
+
+    <div class="relative h-[104px] w-full overflow-hidden border border-line bg-cream">
+      <% if (d.type === 'video') { %>
+        <% if (d.thumb) { %>
+          <img src="<%= d.thumb %>" alt="" class="h-full w-full object-cover">
+        <% } else { %>
+          <video src="<%= d.src %>" muted preload="metadata" class="h-full w-full object-cover"></video>
+        <% } %>
+        <span class="absolute left-1 top-1 bg-ink/75 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.1em] text-ivory">Video</span>
+      <% } else { %>
+        <img src="<%= d.thumb || d.src %>" alt="" class="h-full w-full object-cover">
+      <% } %>
+
+      <button type="button"
+              hx-post="/uploads/review-media/<%= item.token %>/delete"
+              hx-target="closest div.relative.w-\[86px\]" hx-swap="outerHTML"
+              class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center bg-ivory/90 text-[13px] leading-none text-ink transition hover:bg-maroon hover:text-ivory"
+              aria-label="Remove file">&times;</button>
+    </div>
+
+    <p class="mt-1 text-center text-[9px] leading-tight text-muted">
+      <% if (d.compressed && d.savedPercent > 0) { %>
+        <span class="text-gold">−<%= d.savedPercent %>%</span> · <%= (d.bytes / 1048576).toFixed(1) %>MB
+      <% } else { %>
+        <%= (d.bytes / 1048576).toFixed(1) %>MB
+      <% } %>
+    </p>
+  </div>
+<% } %>

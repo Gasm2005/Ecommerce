@@ -1,0 +1,15 @@
+<% if (ok) { %>
+  <div class="mx-auto max-w-md border border-goldLight/50 bg-ivory/10 px-6 py-6">
+    <p class="font-serif text-xl">Welcome to the inner circle</p>
+    <p class="mt-2 text-sm text-ivory/80">We’ve added <%= email %> to the list. Look out for our next trunk show preview.</p>
+  </div>
+<% } else { %>
+  <div class="mx-auto max-w-md">
+    <form hx-post="/newsletter" hx-target="#newsletter-slot" hx-swap="innerHTML" class="flex flex-col gap-3 sm:flex-row">
+      <input type="email" name="email" required value="<%= email %>" placeholder="Your email address"
+             class="flex-1 border border-goldLight bg-transparent px-4 py-3.5 text-sm text-ivory placeholder:text-ivory/50 focus:outline-none">
+      <button type="submit" class="bg-ivory px-7 py-3.5 text-[11px] uppercase tracking-luxe text-maroon">Subscribe</button>
+    </form>
+    <p class="mt-2 text-left text-xs text-goldLight">Please enter a valid email address.</p>
+  </div>
+<% } %>

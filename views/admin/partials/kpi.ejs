@@ -1,0 +1,46 @@
+<%
+  /* locals: label, value, delta (number|null), hint, spark (array of numbers|null),
+             tone ('good'|'critical'|null — overrides delta colouring) */
+  const d = (typeof delta === 'number' && isFinite(delta)) ? delta : null;
+  const up = d !== null && d >= 0;
+  const invert = (typeof deltaInverted !== 'undefined') && deltaInverted; // e.g. refunds: up is bad
+  const good = d === null ? null : (invert ? !up : up);
+  const sparkPoints = (typeof spark !== 'undefined' && spark && spark.length > 1) ? spark : null;
+%>
+<div class="card viz px-4 py-3.5">
+  <p class="text-[9.5px] uppercase tracking-luxe text-muted"><%= label %></p>
+
+  <div class="mt-1.5 flex items-baseline gap-2">
+    <span class="font-serif text-[22px] leading-none text-ink"><%= value %></span>
+    <% if (d !== null) { %>
+      <span class="inline-flex items-center gap-0.5 text-[11px] <%= good ? 'text-good' : 'text-critical' %>">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             class="<%= up ? '' : 'rotate-180' %>"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        <%= Math.abs(d) %>%
+      </span>
+    <% } %>
+  </div>
+
+  <% if (typeof hint !== 'undefined' && hint) { %>
+    <p class="mt-1 text-[11px] leading-snug text-muted"><%= hint %></p>
+  <% } %>
+
+  <% if (sparkPoints) { %>
+    <%
+      const w = 200, h = 34;
+      const max = Math.max(...sparkPoints, 1);
+      const min = Math.min(...sparkPoints, 0);
+      const span = (max - min) || 1;
+      const step = w / (sparkPoints.length - 1);
+      const pts = sparkPoints.map((v, i) => [ (i * step).toFixed(1), (h - ((v - min) / span) * (h - 4) - 2).toFixed(1) ]);
+      const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0] + ' ' + p[1]).join(' ');
+      const area = line + ` L${w} ${h} L0 ${h} Z`;
+      const last = pts[pts.length - 1];
+    %>
+    <svg class="spark mt-2.5" viewBox="0 0 <%= w %> <%= h %>" preserveAspectRatio="none" aria-hidden="true">
+      <path d="<%= area %>" fill="var(--series-1)" opacity="0.09"/>
+      <path d="<%= line %>" class="line" stroke="var(--series-1)" vector-effect="non-scaling-stroke"/>
+      <circle cx="<%= last[0] %>" cy="<%= last[1] %>" r="2.5" fill="var(--series-1)"/>
+    </svg>
+  <% } %>
+</div>

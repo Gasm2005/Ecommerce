@@ -1,0 +1,136 @@
+<%- include('./partials/open', {
+  active: 'license',
+  adminTitle: 'Licence',
+  adminSubtitle: status.licence ? status.licence.store : 'No licence key installed',
+  adminActions: ''
+}) %>
+
+<%
+  /* Licence status and activation.
+     `wall: true` means the admin is locked and this page is all that's reachable —
+     so it has to explain the situation without any of the usual navigation help. */
+  const date = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const tone = {
+    active:     { pill: 'pill-good',     title: 'Licence active' },
+    expiring:   { pill: 'pill-warning',  title: 'Renews soon' },
+    grace:      { pill: 'pill-warning',  title: 'Expired — grace period' },
+    expired:    { pill: 'pill-critical', title: 'Licence expired' },
+    invalid:    { pill: 'pill-critical', title: 'Licence key not valid' },
+    mismatch:   { pill: 'pill-critical', title: 'Wrong domain for this licence' },
+    unlicensed: { pill: 'pill-info',     title: 'No licence installed' }
+  }[status.state] || { pill: 'pill-info', title: status.state };
+%>
+
+<% if (saved) { %>
+  <p class="mb-4 border border-good/40 bg-good/5 px-4 py-3 text-[12.5px] text-good">Licence activated.</p>
+<% } %>
+<% if (error) { %>
+  <p class="mb-4 border border-critical/40 bg-critical/5 px-4 py-3 text-[12.5px] text-critical"><%= error %></p>
+<% } %>
+
+<% if (wall) { %>
+  <div class="mb-4 border border-critical/40 bg-critical/5 px-4 py-3">
+    <p class="text-[13px] text-critical">The admin is locked until this licence is renewed.</p>
+    <p class="mt-1 text-[12px] leading-relaxed text-muted">
+      Your storefront is still open and still taking orders — customers are unaffected.
+      Only these admin pages are restricted.
+    </p>
+  </div>
+<% } %>
+
+<div class="grid gap-3 xl:grid-cols-2">
+
+  <!-- ---------------------------------------------------------- status ---- -->
+  <div class="card p-4">
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 class="font-serif text-base"><%= tone.title %></h2>
+      <span class="pill <%= tone.pill %>"><%= status.state %></span>
+    </div>
+
+    <% if (status.reason) { %>
+      <p class="mt-2 text-[12.5px] leading-relaxed text-muted"><%= status.reason %></p>
+    <% } %>
+
+    <% if (status.licence) { %>
+      <dl class="mt-4 space-y-2 border-t border-line pt-3 text-[12.5px]">
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Store</dt><dd class="text-ink"><%= status.licence.store %></dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Plan</dt><dd class="text-ink capitalize"><%= status.licence.plan %></dd>
+        </div>
+        <% if ((status.licence.extras || []).length) { %>
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">Extras</dt><dd class="text-ink"><%= status.licence.extras.join(', ') %></dd>
+          </div>
+        <% } %>
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Valid until</dt>
+          <dd class="text-ink">
+            <%= date(status.licence.expires) %>
+            <% if (status.daysLeft > 0) { %>
+              <span class="text-muted">· <%= status.daysLeft %> day<%= status.daysLeft === 1 ? '' : 's' %> left</span>
+            <% } %>
+          </dd>
+        </div>
+        <% if (status.state === 'grace') { %>
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">Grace remaining</dt>
+            <dd class="text-ink"><%= status.graceDaysLeft %> day<%= status.graceDaysLeft === 1 ? '' : 's' %></dd>
+          </div>
+        <% } %>
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Domains</dt>
+          <dd class="text-ink"><%= (status.licence.domains || []).length ? status.licence.domains.join(', ') : 'Any' %></dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Reference</dt><dd class="font-mono text-[11.5px] text-ink"><%= shortId %></dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Installed via</dt>
+          <dd class="text-muted"><%= status.source === 'env' ? 'LICENSE_KEY environment variable' : 'admin' %></dd>
+        </div>
+      </dl>
+
+      <p class="mt-3 border-t border-line pt-3 text-[11px] leading-relaxed text-muted">
+        Quote the reference above when you contact us about this licence — it identifies
+        the store without exposing the key.
+      </p>
+    <% } else { %>
+      <p class="mt-3 text-[12.5px] leading-relaxed text-muted">
+        This store has no licence key. It is running on the plan set in its configuration,
+        which is how a development or self-hosted copy behaves.
+      </p>
+    <% } %>
+  </div>
+
+  <!-- -------------------------------------------------------- activate ---- -->
+  <div class="card p-4">
+    <h2 class="font-serif text-base">Activate a key</h2>
+    <p class="mt-1 text-[12px] leading-relaxed text-muted">
+      Paste the licence key we sent you. It is checked here on the server — nothing is
+      transmitted anywhere, and a key that has been edited will be refused.
+    </p>
+
+    <form method="post" action="/admin/license<%= tokenQs %>" class="mt-3">
+      <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+      <label class="adm-label" for="key">Licence key</label>
+      <textarea id="key" name="key" rows="5" required spellcheck="false"
+                class="adm-textarea font-mono text-[11px] leading-relaxed"
+                placeholder="LIC1.eyJ2IjoxLCJpZCI6…"></textarea>
+      <button class="adm-btn adm-btn-primary mt-3">Activate</button>
+    </form>
+
+    <% if (status.licence && status.source === 'file') { %>
+      <form method="post" action="/admin/license/remove<%= tokenQs %>" class="mt-4 border-t border-line pt-4">
+        <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+        <button class="text-[10.5px] uppercase tracking-[0.12em] text-critical"
+                hx-post="/admin/license/remove<%= tokenQs %>" hx-trigger="confirmed"
+                data-confirm="The store falls back to the plan in its configuration file. Features may switch off."
+                data-confirm-title="Remove this licence key?" data-confirm-cta="Remove">Remove licence</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<%- include('./partials/close') %>

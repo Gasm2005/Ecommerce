@@ -1,0 +1,16 @@
+<% if (!geo.brandFacts.length) { %>
+  <p class="text-[12.5px] text-muted">No facts yet.</p>
+<% } %>
+<ul class="space-y-2">
+  <% geo.brandFacts.forEach(function (f, i) { %>
+    <li class="flex items-start justify-between gap-3">
+      <span class="min-w-0">
+        <span class="block text-[10px] uppercase tracking-[0.12em] text-gold"><%= f.label %></span>
+        <span class="block text-[12.5px] text-ink"><%= f.value %></span>
+      </span>
+      <button class="shrink-0 text-[10.5px] uppercase tracking-[0.12em] text-critical"
+              hx-post="/admin/marketing/fact/<%= i %>/delete" hx-target="#fact-list" hx-swap="innerHTML"
+              hx-vals='<%- JSON.stringify({ token: adminToken || undefined }) %>'>Remove</button>
+    </li>
+  <% }); %>
+</ul>

@@ -1,0 +1,9 @@
+<%
+  // Out-of-band badge refresh: header (desktop) + bottom tab bar (phone/tablet).
+  const n = cartSummary.count;
+%>
+<span id="cart-count" hx-swap-oob="true"
+      class="<%= n ? '' : 'hidden ' %>absolute -right-0.5 -top-0.5 min-w-[17px] rounded-full bg-maroon px-1 text-center text-[10px] font-medium leading-[17px] text-ivory"><%= n %></span>
+
+<span id="cart-count-tab" hx-swap-oob="true"
+      class="<%= n ? '' : 'hidden ' %>absolute right-[22%] top-1.5 min-w-[16px] rounded-full bg-maroon px-1 text-center text-[9px] font-medium leading-4 text-ivory"><%= n %></span>

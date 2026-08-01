@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- app-like chrome when installed / opened from a phone or tablet home screen -->
+  <meta name="theme-color" content="<%= config.theme.colors.ivory %>">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="<%= config.brand.name %>">
+  <link rel="manifest" href="/manifest.webmanifest">
+<%
+  /* Per-page meta comes from the route via res.locals.seo (Marketing → SEO in
+     the admin); everything falls back to the brand defaults. */
+  const pageTitle = (seo && seo.title)
+    ? seo.title
+    : ((typeof title !== 'undefined' && title) ? title + ' · ' + config.brand.name : config.brand.name + ' · ' + config.brand.tagline);
+  const pageDesc = (seo && seo.description) ? seo.description : config.brand.tagline;
+%>
+  <title><%= pageTitle %></title>
+  <meta name="description" content="<%= pageDesc %>">
+  <% if (seo && seo.keywords) { %><meta name="keywords" content="<%= seo.keywords %>"><% } %>
+  <% if (seo && seo.indexable === false) { %><meta name="robots" content="noindex, follow"><% } %>
+  <link rel="canonical" href="<%= origin %><%= currentPath %>">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="<%= config.brand.name %>">
+  <meta property="og:title" content="<%= pageTitle %>">
+  <meta property="og:description" content="<%= pageDesc %>">
+  <meta property="og:url" content="<%= origin %><%= currentPath %>">
+  <% if (seo && seo.ogImage) { %>
+    <meta property="og:image" content="<%= seo.ogImage.startsWith('http') ? seo.ogImage : origin + seo.ogImage %>">
+  <% } %>
+  <meta name="twitter:card" content="summary_large_image">
+
+  <% (jsonLd || []).forEach(function (node) { %>
+    <script type="application/ld+json"><%- JSON.stringify(node) %></script>
+  <% }); %>
+  <link rel="icon" href="/ph.svg?seed=<%= config.brand.name %>&w=64&h=64&label=<%= encodeURIComponent(config.brand.monogram) %>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=<%= config.theme.fonts.heading.replace(/ /g,'+') %>:ital,wght@0,400;0,500;0,600;1,400&family=<%= config.theme.fonts.body.replace(/ /g,'+') %>:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: <%- JSON.stringify(config.theme.colors) %>,
+          fontFamily: {
+            serif: ['<%= config.theme.fonts.heading %>', 'Georgia', 'serif'],
+            sans: ['<%= config.theme.fonts.body %>', 'system-ui', 'sans-serif']
+          },
+          borderRadius: { card: '<%= config.theme.cardRadius %>', btn: '<%= config.theme.buttonRadius %>' },
+          letterSpacing: { luxe: '0.22em' }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/app.css?v=<%= v %>">
+
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  <!-- app.js and Alpine plugins must be evaluated BEFORE Alpine core boots -->
+  <script src="/static/js/app.js?v=<%= v %>" defer></script>
+  <script src="https://unpkg.com/@alpinejs/collapse@3.14.1/dist/cdn.min.js" defer></script>
+  <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+</head>
+<!-- x-data on <body> makes the whole document one Alpine scope, so $store
+     directives work in the header, drawers, cards and injected fragments. -->
+<body x-data class="overscroll-y-none bg-ivory pb-[calc(4.4rem+env(safe-area-inset-bottom))] text-ink font-sans antialiased selection:bg-maroon selection:text-ivory lg:pb-0"
+      hx-headers='{"X-Requested-With":"htmx"}'>
+
+<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:m-3 focus:bg-maroon focus:px-4 focus:py-2 focus:text-ivory">Skip to content</a>
+
+<%- include('./header') %>
+
+<main id="main" class="min-h-[60vh]">

@@ -1,0 +1,39 @@
+<%- include('./partials/open', {
+  active: 'reviews',
+  adminTitle: 'Reviews',
+  adminSubtitle: overview.total + ' total · ' + overview.pending + ' awaiting moderation · ' + overview.average + '★ average',
+  adminActions: null
+}) %>
+
+<div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <%- include('./partials/kpi', { label: 'Average rating', value: overview.average + '★', delta: null, hint: overview.productsCovered + ' products reviewed', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Awaiting moderation', value: overview.pending, delta: null, hint: 'Nothing shows on the storefront until approved', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Low ratings (≤3★)', value: overview.lowRated, delta: null, hint: 'Reply to these first', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Rejected', value: overview.rejected, delta: null, hint: 'Hidden from the storefront', spark: null }) %>
+</div>
+
+<form hx-get="/admin/reviews/rows" hx-target="#review-groups" hx-swap="innerHTML" data-auto-submit
+      class="card mb-4 flex flex-wrap items-end gap-3 p-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+  <div class="min-w-[200px] flex-1">
+    <label class="adm-label" for="q">Product</label>
+    <input id="q" name="q" value="<%= filters.q %>" placeholder="Search by product name" class="adm-input"
+           hx-get="/admin/reviews/rows" hx-target="#review-groups" hx-trigger="keyup changed delay:300ms" hx-include="closest form">
+  </div>
+  <div>
+    <label class="adm-label" for="status">Status</label>
+    <select id="status" name="status" class="adm-select">
+      <option value="">All</option>
+      <% statuses.forEach(function (s) { %>
+        <option value="<%= s.id %>" <%= filters.status === s.id ? 'selected' : '' %>><%= s.label %></option>
+      <% }); %>
+    </select>
+  </div>
+  <a href="/admin/reviews<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Reset</a>
+</form>
+
+<div id="review-groups" class="adm-swap">
+  <%- include('./fragments/review-groups') %>
+</div>
+
+<%- include('./partials/close') %>

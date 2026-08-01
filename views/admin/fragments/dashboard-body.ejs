@@ -1,0 +1,347 @@
+<%
+  const salesSpark = trend.map((t) => t.netSales);
+  const profitSpark = trend.map((t) => t.profit);
+  const orderSpark = trend.map((t) => t.orders);
+%>
+
+<!-- The window lives inside the swapped fragment so it updates with the range. -->
+<p class="mb-3 text-[11.5px] text-muted">
+  <span class="text-ink"><%= s.range.label %></span> ·
+  <%= s.from.toDateString().slice(4) %> → <%= s.to.toDateString().slice(4) %>
+  · compared with the preceding <%= s.range.days ? s.range.days + ' days' : 'period' %>
+</p>
+
+<!-- ============================ headline P&L ============================ -->
+<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <%- include('../partials/kpi', { label: 'Net sales', value: money(s.netSales), delta: s.deltas.netSales, hint: 'Gross ' + money(s.gross) + ' − refunds ' + money(s.refunds), spark: salesSpark }) %>
+  <%- include('../partials/kpi', { label: 'Revenue (ex-GST)', value: money(s.revenue), delta: s.deltas.netSales, hint: 'GST ' + money(s.gst) + ' · shipping ' + money(s.shippingCollected), spark: null }) %>
+  <%- include('../partials/kpi', { label: 'Gross profit', value: money(s.grossProfit), delta: s.deltas.grossProfit, hint: s.marginPercent + '% margin · COGS ' + money(s.cogs), spark: profitSpark }) %>
+  <%- include('../partials/kpi', { label: 'EBITDA', value: money(s.ebitda), delta: s.deltas.ebitda, hint: s.ebitdaMarginPercent + '% of revenue · opex ' + money(s.opex), spark: null }) %>
+</div>
+
+<div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <%- include('../partials/kpi', { label: 'Orders', value: s.orderCount.toLocaleString('en-IN'), delta: s.deltas.orders, hint: s.units + ' units · AOV ' + money(s.aov), spark: orderSpark }) %>
+  <%- include('../partials/kpi', { label: 'GST collected', value: money(s.gst), delta: s.deltas.gst, hint: 'Payable to the government', spark: null }) %>
+  <%- include('../partials/kpi', { label: 'Refunds & losses', value: money(s.refunds), delta: s.deltas.refunds, deltaInverted: true, hint: s.lostCount + ' cancelled/returned · ' + s.returnRatePercent + '% of orders', spark: null }) %>
+  <%- include('../partials/kpi', { label: 'Discounts given', value: money(s.discounts), delta: null, hint: 'Payment fees ' + money(s.paymentFees) + ' · fulfilment ' + money(s.fulfilment), spark: null }) %>
+</div>
+
+<!-- ============================== trend ============================== -->
+<div class="mt-3 grid gap-3 xl:grid-cols-3">
+  <div class="card p-4 xl:col-span-2">
+    <div class="mb-1 flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Sales & profit</h2>
+      <a href="/admin/reports<%= tokenQs %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">Reports →</a>
+    </div>
+    <%- include('../partials/chart-bars', { series: trend }) %>
+  </div>
+
+  <!-- P&L as a plain statement, every line traceable to a setting -->
+  <div class="card p-4">
+    <div class="flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Profit & loss</h2>
+      <span class="text-[10.5px] text-muted"><%= s.range.label %></span>
+    </div>
+
+    <dl class="mt-3 divide-y divide-line/70 text-[12.5px]">
+      <%
+        const pnl = [
+          ['Gross sales', s.gross, null],
+          ['Refunds & returns', -s.refunds, null],
+          ['Net sales', s.netSales, 'strong'],
+          ['GST collected (not yours)', -s.gst, null],
+          ['Shipping collected', -s.shippingCollected, null],
+          ['Revenue, ex-GST', s.revenue, 'strong'],
+          ['COGS — what the pieces cost', -s.cogs, null],
+          ['Gross profit', s.grossProfit, 'strong'],
+          ['Packaging', -s.packaging, 'small'],
+          ['Shipping paid out', -s.fulfilment, 'small'],
+          ['Payment gateway & COD fees', -s.paymentFees, 'small'],
+          ['Platform / marketplace', -s.platformFees, 'small'],
+          ['Returns provision', -s.returnsProvision, 'small'],
+          ['Contribution', s.contribution, 'strong']
+        ];
+        // Fixed overheads, itemised from Settings → Finance.
+        // camelCase → sentence case: rentAndUtilities → "Rent and utilities".
+        const label = (k) => k.replace(/([A-Z])/g, function (m) { return ' ' + m.toLowerCase(); })
+          .replace(/^./, function (c) { return c.toUpperCase(); });
+        s.fixed.lines.forEach(function (l) {
+          pnl.push([label(l.key), -l.amount, 'small']);
+        });
+        pnl.push(['Profit in hand', s.profitInHand, 'total']);
+      %>
+      <% pnl.forEach(function (row) { %>
+        <div class="flex items-center justify-between py-[6px] <%= row[2] === 'total' ? 'border-t-2 border-line pt-2.5' : '' %>">
+          <dt class="<%= row[2] === 'strong' || row[2] === 'total' ? 'text-ink' : (row[2] === 'small' ? 'pl-3 text-[11.5px] text-muted' : 'text-muted') %>"><%= row[0] %></dt>
+          <dd class="tabular-nums <%= row[1] < 0 ? 'text-critical' : (row[2] === 'total' ? 'font-serif text-[15px] ' + (row[1] < 0 ? 'text-critical' : 'text-ink') : 'text-ink') %>">
+            <%= row[1] < 0 ? '− ' + money(Math.abs(row[1])) : money(row[1]) %>
+          </dd>
+        </div>
+      <% }); %>
+    </dl>
+
+    <div class="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
+      <div><p class="font-serif text-base"><%= s.marginPercent %>%</p><p class="text-[9.5px] uppercase tracking-[0.1em] text-muted">Gross margin</p></div>
+      <div><p class="font-serif text-base"><%= s.contributionMarginPercent %>%</p><p class="text-[9.5px] uppercase tracking-[0.1em] text-muted">Contribution</p></div>
+      <div><p class="font-serif text-base <%= s.ebitdaMarginPercent < 0 ? 'text-critical' : '' %>"><%= s.ebitdaMarginPercent %>%</p><p class="text-[9.5px] uppercase tracking-[0.1em] text-muted">Net margin</p></div>
+    </div>
+
+    <p class="mt-3 text-[10.5px] leading-relaxed text-muted">
+      Overheads prorated across <%= s.fixed.months %> month<%= s.fixed.months === 1 ? '' : 's' %>
+      (<%= money(s.fixed.lines.reduce(function (t, l) { return t + l.monthly; }, 0)) %>/month, marketing <%= money(config.finance.monthlyCosts.marketing) %>).
+      Every line comes from
+      <a href="/admin/settings<%= tokenQs %>" class="text-maroon underline underline-offset-2">Settings → Finance</a>
+      and per-SKU cost on each product.
+    </p>
+  </div>
+</div>
+
+<!-- ====================== products / categories / payments ====================== -->
+<div class="mt-3 grid gap-3 xl:grid-cols-3">
+  <div class="card p-4 xl:col-span-2">
+    <div class="mb-3 flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Winning products</h2>
+      <a href="/admin/products?sort=revenue<%= adminToken ? '&token=' + adminToken : '' %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">All products →</a>
+    </div>
+    <div class="-mx-4 overflow-x-auto">
+      <table class="adm-table min-w-[620px]">
+        <thead>
+          <tr><th>Product</th><th class="num">Units</th><th class="num">Revenue</th><th class="num">Profit</th><th class="num">Margin</th><th class="num">Stock</th></tr>
+        </thead>
+        <tbody>
+          <% if (!winners.length) { %>
+            <tr><td colspan="6" class="py-6 text-center text-muted">No sales in this period.</td></tr>
+          <% } %>
+          <% winners.forEach(function (w) { %>
+            <tr>
+              <td>
+                <a href="/admin/products/<%= w.productId %><%= tokenQs %>" class="text-ink hover:text-maroon"><%= w.name %></a>
+              </td>
+              <td class="num"><%= w.units %></td>
+              <td class="num"><%= money(w.revenue) %></td>
+              <td class="num"><%= money(w.profit) %></td>
+              <td class="num"><%= w.marginPercent %>%</td>
+              <td class="num">
+                <% if (w.stock === null) { %><span class="text-muted">—</span>
+                <% } else if (w.stock <= 0) { %><span class="pill pill-critical">Out</span>
+                <% } else if (w.stock <= config.inventory.lowStockThreshold) { %><span class="pill pill-warning"><%= w.stock %></span>
+                <% } else { %><%= w.stock %><% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="space-y-3">
+    <div class="card p-4">
+      <h2 class="mb-3 font-serif text-base">Revenue by category</h2>
+      <%- include('../partials/chart-barlist', { rows: categoryRows, valueFormat: 'money' }) %>
+    </div>
+
+    <div class="card p-4">
+      <div class="mb-3 flex items-baseline justify-between">
+        <h2 class="font-serif text-base">Payment mix</h2>
+        <span class="text-[11px] text-muted">COD <%= payments.codShare %>%</span>
+      </div>
+      <%- include('../partials/chart-barlist', { rows: paymentRows, valueFormat: 'money' }) %>
+      <p class="mt-3 border-t border-line pt-3 text-[10.5px] leading-relaxed text-muted">
+        COD carries a <%= money(config.finance.codFeeFlat) %> handling cost per order and a higher return rate —
+        watch it against prepaid.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ================== campaigns: where the money came from ================== -->
+<div class="mt-3 grid gap-3 xl:grid-cols-3">
+  <div class="card p-4 xl:col-span-2">
+    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+      <h2 class="font-serif text-base">Traffic sources & campaigns</h2>
+      <span class="text-[11px] text-muted">vs the previous <%= s.range.days || '—' %> day<%= s.range.days === 1 ? '' : 's' %></span>
+    </div>
+    <p class="mb-3 text-[11px] leading-relaxed text-muted">
+      Tag a link with <code class="bg-cream px-1">?utm_source=instagram&amp;utm_medium=influencer&amp;utm_campaign=name</code>
+      (or <code class="bg-cream px-1">?ref=creator</code>) and every order from it lands here — so a post either shows up as revenue or it didn't work.
+    </p>
+
+    <div class="-mx-4 overflow-x-auto">
+      <table class="adm-table min-w-[680px]">
+        <thead>
+          <tr><th>Source</th><th>Campaign</th><th class="num">Orders</th><th class="num">Revenue</th>
+              <th class="num">Share</th><th class="num">AOV</th><th class="num">vs previous</th></tr>
+        </thead>
+        <tbody>
+          <% if (!attribution.rows.length) { %>
+            <tr><td colspan="7" class="py-6 text-center text-muted">No orders in this window.</td></tr>
+          <% } %>
+          <% attribution.rows.forEach(function (r) { %>
+            <tr>
+              <td class="capitalize text-ink">
+                <%= r.source %>
+                <% if (attribution.newSources.includes(r.source)) { %>
+                  <span class="pill pill-good ml-1">New</span>
+                <% } %>
+                <% if (r.medium) { %><span class="block text-[10.5px] lowercase text-muted"><%= r.medium %></span><% } %>
+              </td>
+              <td class="text-[11.5px] text-muted"><%= r.campaign || '—' %></td>
+              <td class="num"><%= r.orders %></td>
+              <td class="num"><%= money(r.revenue) %></td>
+              <td class="num text-muted"><%= r.share %>%</td>
+              <td class="num text-muted"><%= money(r.aov) %></td>
+              <td class="num">
+                <% if (!r.previousRevenue) { %>
+                  <span class="text-good">new</span>
+                <% } else { %>
+                  <span class="<%= r.revenueDelta >= 0 ? 'text-good' : 'text-critical' %>">
+                    <%= r.revenueDelta >= 0 ? '+' : '' %><%= r.revenueDelta %>%
+                  </span>
+                  <span class="block text-[10px] text-muted">was <%= compact(r.previousRevenue) %></span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <h2 class="font-serif text-base">Coupons</h2>
+    <p class="mt-1 text-[11px] leading-relaxed text-muted">
+      Discount given <em>and</em> what came back — a code that sells then gets returned costs you twice.
+      Coupon orders carry a <code class="bg-cream px-1">ORD-C-</code> number.
+    </p>
+
+    <!-- coupon vs full price, side by side -->
+    <table class="adm-table mt-3">
+      <thead><tr><th></th><th class="num">Orders</th><th class="num">Net</th><th class="num">Margin</th><th class="num">Returns</th></tr></thead>
+      <tbody>
+        <% [couponSplit.withCoupon, couponSplit.fullPrice].forEach(function (row) { %>
+          <tr>
+            <td class="text-ink"><%= row.label %></td>
+            <td class="num"><%= row.orders %></td>
+            <td class="num"><%= compact(row.netSales) %></td>
+            <td class="num <%= row.marginPercent < couponSplit.fullPrice.marginPercent ? 'text-critical' : '' %>"><%= row.marginPercent %>%</td>
+            <td class="num text-muted"><%= row.returnRatePercent %>%</td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <% if (!codeRows.length) { %>
+      <p class="mt-4 text-[12.5px] text-muted">No coupon orders in this window.</p>
+    <% } %>
+
+    <table class="adm-table mt-3 border-t border-line">
+      <tbody>
+        <% codeRows.forEach(function (c) { %>
+          <tr>
+            <td>
+              <span class="font-mono text-[11.5px] text-ink"><%= c.code %></span>
+              <span class="block text-[10.5px] text-muted">
+                <%= c.orders %> kept<%= c.returnedOrders ? ' · ' + c.returnedOrders + ' returned' : '' %><%= c.cancelledOrders ? ' · ' + c.cancelledOrders + ' cancelled' : '' %>
+                · AOV <%= compact(c.aov) %>
+              </span>
+            </td>
+            <td class="num">
+              <%= money(c.netRevenue) %>
+              <span class="block text-[10.5px] text-muted">
+                −<%= compact(c.given) %> discount<%= c.refunded ? ', −' + compact(c.refunded) + ' refunded' : '' %>
+              </span>
+            </td>
+            <td class="num">
+              <% if (c.returnRatePercent > 0) { %>
+                <span class="pill pill-<%= c.returnRatePercent >= 25 ? 'critical' : 'warning' %>"><%= c.returnRatePercent %>%</span>
+              <% } else { %>
+                <span class="text-[10.5px] text-muted">no returns</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ====================== operations: needs attention ====================== -->
+<div class="mt-3 grid gap-3 xl:grid-cols-3">
+  <div class="card p-4">
+    <div class="mb-3 flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Needs action</h2>
+      <span class="text-[11px] text-muted">now</span>
+    </div>
+    <ul class="divide-y divide-line/70 text-[12.5px]">
+      <% const actions = [
+        { label: 'Orders awaiting confirmation', value: openOrders.pending, href: '/admin/orders?status=pending', tone: openOrders.pending ? 'warning' : 'info' },
+        { label: 'In production', value: openOrders.in_production, href: '/admin/orders?status=in_production', tone: 'info' },
+        { label: 'Shipped, not delivered', value: openOrders.shipped, href: '/admin/orders?status=shipped', tone: 'info' },
+        { label: 'COD pending collection', value: codPending, href: '/admin/orders?payment=cod&paymentStatus=pending', tone: codPending ? 'warning' : 'info' },
+        { label: 'Reviews to moderate', value: reviewStats.pending, href: '/admin/reviews?status=pending', tone: reviewStats.pending ? 'warning' : 'info' },
+        { label: 'Out of stock', value: outOfStockCount, href: '/admin/products?stock=out', tone: outOfStockCount ? 'critical' : 'info' },
+        { label: 'Low stock', value: lowStockCount, href: '/admin/products?stock=low', tone: lowStockCount ? 'warning' : 'info' },
+        { label: 'SEO issues', value: seoAudit.counts.critical + seoAudit.counts.warning, href: '/admin/marketing', tone: seoAudit.counts.critical ? 'critical' : 'info' }
+      ]; %>
+      <% actions.forEach(function (a) { %>
+        <li class="flex items-center justify-between py-2">
+          <a href="<%= a.href %><%= adminToken ? (a.href.includes('?') ? '&' : '?') + 'token=' + adminToken : '' %>" class="text-ink hover:text-maroon"><%= a.label %></a>
+          <span class="pill pill-<%= a.value ? a.tone : 'info' %>"><%= a.value %></span>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+
+  <div class="card p-4">
+    <div class="mb-3 flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Customers</h2>
+      <a href="/admin/customers<%= tokenQs %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">All →</a>
+    </div>
+    <div class="grid grid-cols-3 gap-2 border-b border-line pb-3 text-center">
+      <div><p class="font-serif text-lg"><%= custo.count %></p><p class="text-[10px] uppercase tracking-[0.1em] text-muted">Buyers</p></div>
+      <div><p class="font-serif text-lg"><%= custo.repeatRatePercent %>%</p><p class="text-[10px] uppercase tracking-[0.1em] text-muted">Repeat</p></div>
+      <div><p class="font-serif text-lg"><%= compact(custo.ltv) %></p><p class="text-[10px] uppercase tracking-[0.1em] text-muted">Avg spend</p></div>
+    </div>
+    <ul class="mt-3 space-y-2 text-[12.5px]">
+      <% custo.rows.slice(0, 6).forEach(function (c) { %>
+        <li class="flex items-center justify-between gap-3">
+          <span class="min-w-0"><span class="block truncate text-ink"><%= c.name %></span><span class="block truncate text-[10.5px] text-muted"><%= c.city %> · <%= c.orders %> order<%= c.orders > 1 ? 's' : '' %></span></span>
+          <span class="shrink-0 tabular-nums text-muted"><%= money(c.spend) %></span>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+
+  <div class="card p-4">
+    <div class="mb-3 flex items-baseline justify-between">
+      <h2 class="font-serif text-base">Recent activity</h2>
+      <a href="/admin/activity<%= tokenQs %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">Log →</a>
+    </div>
+    <% if (!activityRows.length) { %>
+      <p class="py-6 text-center text-[12px] text-muted">Nothing yet — admin actions show up here.</p>
+    <% } %>
+    <ul class="space-y-2.5 text-[12px]">
+      <% activityRows.forEach(function (a) { %>
+        <li>
+          <p class="text-ink"><%= a.message %></p>
+          <p class="text-[10.5px] text-muted"><%= a.area %> · <%= new Date(a.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) %></p>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</div>
+
+<!-- data table alternative to the charts (accessibility + copy/paste) -->
+<details class="card mt-3 p-4">
+  <summary class="cursor-pointer text-[11px] uppercase tracking-[0.12em] text-muted">View the trend as a table</summary>
+  <div class="mt-3 overflow-x-auto">
+    <table class="adm-table min-w-[420px]">
+      <thead><tr><th>Period</th><th class="num">Orders</th><th class="num">Net sales</th><th class="num">Contribution</th></tr></thead>
+      <tbody>
+        <% trend.forEach(function (t) { %>
+          <tr><td><%= t.key %></td><td class="num"><%= t.orders %></td><td class="num"><%= money(Math.round(t.netSales)) %></td><td class="num"><%= money(Math.round(t.profit)) %></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</details>

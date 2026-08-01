@@ -1,0 +1,27 @@
+<%
+  const c = config.theme.colors;
+  const money = (n) => config.currency.symbol + Number(n || 0).toLocaleString(config.currency.locale || 'en-IN');
+  const units = order.items.reduce((s, it) => s + it.qty, 0);
+  const src = order.attribution || {};
+%>
+<%- include('./_head', { config, brand, settings, title: 'New order ' + order.id, preheader: money(order.total) + ' from ' + order.customer.name }) %>
+
+<p style="margin:0 0 6px; font-family:Georgia,serif; font-size:20px; color:<%= c.ink %>;">New order — <%= money(order.total) %></p>
+
+<p style="margin:0 0 4px; font-size:13px; line-height:1.6; color:<%= c.muted %>;">
+  <%= order.id %> · <%= units %> unit<%= units === 1 ? '' : 's' %> · <%= order.paymentMethod %><% if (order.discountCode) { %> · coupon <%= order.discountCode %><% } %>
+  <% if (src.source) { %> · via <%= src.source %><% if (src.campaign) { %> / <%= src.campaign %><% } %><% } %>
+</p>
+
+<%- include('./_order-table', { config, order }) %>
+
+<table role="presentation" width="100%" style="margin:20px 0 0;">
+  <tr><td style="padding:14px 16px; background:<%= c.cream %>; border:1px solid <%= c.line %>; font-size:13px; line-height:1.7; color:<%= c.ink %>;">
+    <strong><%= order.customer.name %></strong><br>
+    <%= order.customer.phone %><% if (order.customer.email) { %> · <%= order.customer.email %><% } %><br>
+    <%= order.address.address1 %>, <%= order.address.city %>, <%= order.address.state %> <%= order.address.pincode %>
+    <% if (order.notes) { %><br><br><strong>Notes:</strong> <%= order.notes %><% } %>
+  </td></tr>
+</table>
+
+<%- include('./_foot', { config, brand, settings }) %>

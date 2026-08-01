@@ -1,0 +1,67 @@
+<%- include('./partials/open', {
+  active: filters.stock === 'low' ? 'lowstock' : 'products',
+  adminTitle: filters.stock === 'low' ? 'Low stock' : (filters.stock === 'out' ? 'Out of stock' : 'Products'),
+  adminSubtitle: rows.length + ' of ' + totals.count + ' · ' + totals.stockUnits + ' units in stock · ' + money(totals.stockValue) + ' at cost',
+  adminActions: '<a href="/admin/products/new' + tokenQs + '" class="adm-btn adm-btn-primary adm-btn-sm">Add product</a>'
+    + '<a href="/admin/import' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">Bulk upload</a>'
+    + '<a href="/admin/products/export.csv' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">Export</a>'
+}) %>
+
+<div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <%- include('./partials/kpi', { label: 'Styles', value: totals.count.toLocaleString('en-IN'), delta: null, hint: rows.length + ' shown', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Units in stock', value: totals.stockUnits.toLocaleString('en-IN'), delta: null, hint: outOfStockCount + ' out of stock · ' + lowStockCount + ' low', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Stock value (cost)', value: money(totals.stockValue), delta: null, hint: 'Retail ' + money(totals.retailValue), spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Locked-up margin', value: money(totals.retailValue - totals.stockValue), delta: null, hint: 'If everything sells at list price', spark: null }) %>
+</div>
+
+<form hx-get="/admin/products/rows" hx-target="#product-rows" hx-swap="innerHTML" data-auto-submit
+      class="card mb-4 flex flex-wrap items-end gap-3 p-3">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+
+  <div class="min-w-[200px] flex-1">
+    <label class="adm-label" for="q">Search</label>
+    <input id="q" name="q" value="<%= filters.q %>" placeholder="Name, SKU, slug, fabric" class="adm-input"
+           hx-get="/admin/products/rows" hx-target="#product-rows" hx-trigger="keyup changed delay:300ms" hx-include="closest form">
+  </div>
+
+  <div>
+    <label class="adm-label" for="category">Category</label>
+    <select id="category" name="category" class="adm-select">
+      <option value="">All</option>
+      <% categories.forEach(function (c) { %>
+        <option value="<%= c.slug %>" <%= filters.category === c.slug ? 'selected' : '' %>><%= c.label %></option>
+      <% }); %>
+    </select>
+  </div>
+
+  <div>
+    <label class="adm-label" for="stock">Stock</label>
+    <select id="stock" name="stock" class="adm-select">
+      <option value="">Any</option>
+      <option value="out" <%= filters.stock === 'out' ? 'selected' : '' %>>Out of stock</option>
+      <option value="low" <%= filters.stock === 'low' ? 'selected' : '' %>>Low (≤ <%= threshold %>)</option>
+      <option value="healthy" <%= filters.stock === 'healthy' ? 'selected' : '' %>>Healthy</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="adm-label" for="sort">Sort</label>
+    <select id="sort" name="sort" class="adm-select">
+      <option value="name" <%= filters.sort === 'name' ? 'selected' : '' %>>Name</option>
+      <option value="revenue" <%= filters.sort === 'revenue' ? 'selected' : '' %>>Revenue (12m)</option>
+      <option value="units" <%= filters.sort === 'units' ? 'selected' : '' %>>Units sold</option>
+      <option value="margin" <%= filters.sort === 'margin' ? 'selected' : '' %>>Margin</option>
+      <option value="stock" <%= filters.sort === 'stock' ? 'selected' : '' %>>Stock low→high</option>
+      <option value="price-desc" <%= filters.sort === 'price-desc' ? 'selected' : '' %>>Price high→low</option>
+      <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Newest</option>
+    </select>
+  </div>
+
+  <a href="/admin/products<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Reset</a>
+</form>
+
+<div id="product-rows" class="adm-swap">
+  <%- include('./fragments/product-rows') %>
+</div>
+
+<%- include('./partials/close') %>

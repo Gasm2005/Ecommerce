@@ -1,0 +1,77 @@
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[900px]">
+      <thead>
+        <tr>
+          <th>Order</th><th>Placed</th><th>Customer</th><th>Items</th>
+          <th>Payment</th><th>Status</th><th class="num">Total</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!result.items.length) { %>
+          <tr><td colspan="8" class="py-10 text-center text-muted">No orders match these filters.</td></tr>
+        <% } %>
+        <% result.items.forEach(function (o) { %>
+          <%
+            const st = orders.statusMeta(o.status);
+            const ps = orders.PAYMENT_STATUSES.find(function (p) { return p.id === o.paymentStatus; }) || { label: o.paymentStatus, tone: 'info' };
+            const units = o.items.reduce(function (s, it) { return s + it.qty; }, 0);
+          %>
+          <tr>
+            <td>
+              <a href="/admin/orders/<%= o.id %><%= tokenQs %>" class="font-medium text-ink hover:text-maroon"><%= o.id %></a>
+              <% if (o.discountCode) { %><span class="ml-1 text-[10px] text-gold"><%= o.discountCode %></span><% } %>
+            </td>
+            <td class="whitespace-nowrap text-muted">
+              <%= new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) %>
+            </td>
+            <td>
+              <span class="block text-ink"><%= o.customer.name %></span>
+              <span class="block text-[11px] text-muted"><%= o.address.city %> · <%= o.customer.phone %></span>
+            </td>
+            <td class="max-w-[240px]">
+              <span class="block truncate text-[12px] text-muted"><%= o.items.map(function (i) { return i.name; }).join(', ') %></span>
+              <span class="text-[10.5px] text-muted"><%= units %> unit<%= units > 1 ? 's' : '' %></span>
+            </td>
+            <td>
+              <span class="block text-[12px] text-ink"><%= orders.label(orders.PAYMENT_METHODS, o.paymentMethod) %></span>
+              <span class="pill pill-<%= ps.tone %> mt-1"><%= ps.label %></span>
+            </td>
+            <td>
+              <span class="pill pill-<%= st.tone %>"><%= st.label %></span>
+              <%# Visible in the list, so nobody books a courier for one of these. %>
+              <% if (o.fulfilment === 'own') { %>
+                <span class="pill pill-warning mt-1" title="We deliver this ourselves">By us</span>
+              <% } else if (o.fulfilment === 'pickup') { %>
+                <span class="pill pill-info mt-1" title="Customer collects from the store">Pickup</span>
+              <% } %>
+            </td>
+            <td class="num"><%= money(o.total) %></td>
+            <td class="num">
+              <a href="/admin/orders/<%= o.id %><%= tokenQs %>" class="text-[10.5px] uppercase tracking-[0.12em] text-maroon">Open</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (result.pages > 1) { %>
+    <div class="flex items-center justify-between gap-3 border-t border-line px-4 py-3 text-[12px]">
+      <span class="text-muted">Page <%= result.page %> of <%= result.pages %> · <%= result.total %> orders</span>
+      <div class="flex gap-2">
+        <% const base = '/admin/orders/rows'; %>
+        <% [['Previous', result.page - 1], ['Next', result.page + 1]].forEach(function (pair) { %>
+          <% const target = pair[1]; %>
+          <% if (target >= 1 && target <= result.pages) { %>
+            <button hx-get="<%= base %>?page=<%= target %>&status=<%= filters.status %>&payment=<%= filters.payment %>&paymentStatus=<%= filters.paymentStatus %>&q=<%= encodeURIComponent(filters.q) %>&from=<%= filters.from %>&to=<%= filters.to %>&sort=<%= filters.sort %><%= adminToken ? '&token=' + adminToken : '' %>"
+                    hx-target="#order-rows" hx-swap="innerHTML"
+                    class="adm-btn adm-btn-ghost adm-btn-sm"><%= pair[0] %></button>
+          <% } else { %>
+            <span class="adm-btn adm-btn-ghost adm-btn-sm opacity-40"><%= pair[0] %></span>
+          <% } %>
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+</div>

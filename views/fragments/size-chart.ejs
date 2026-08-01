@@ -1,0 +1,42 @@
+<%
+  const rows = [
+    ['XS', '32', '26', '35'], ['S', '34', '28', '37'], ['M', '36', '30', '39'],
+    ['L', '38', '32', '41'], ['XL', '40', '34', '43'], ['XXL', '42', '36', '45']
+  ];
+%>
+<div class="p-6 sm:p-9">
+  <p class="text-[10px] uppercase tracking-luxe text-gold">Measurements in inches</p>
+  <h2 class="mt-2 font-serif text-2xl">Size guide</h2>
+  <p class="mt-3 max-w-lg text-sm text-muted">
+    Every piece is made to order — if your measurements fall between two sizes, choose the larger and note your exact numbers at checkout. Free customisation is included.
+  </p>
+
+  <div class="mt-6 overflow-x-auto">
+    <table class="w-full min-w-[420px] border-collapse text-sm">
+      <thead>
+        <tr class="border-y border-line bg-cream/60 text-left text-[10px] uppercase tracking-[0.14em] text-muted">
+          <th class="px-3 py-3 font-normal">Size</th>
+          <th class="px-3 py-3 font-normal">Bust</th>
+          <th class="px-3 py-3 font-normal">Waist</th>
+          <th class="px-3 py-3 font-normal">Hip</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% rows.forEach(function (r) { %>
+          <tr class="border-b border-line/70">
+            <td class="px-3 py-3 text-ink"><%= r[0] %></td>
+            <td class="px-3 py-3 text-muted"><%= r[1] %></td>
+            <td class="px-3 py-3 text-muted"><%= r[2] %></td>
+            <td class="px-3 py-3 text-muted"><%= r[3] %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-7 grid gap-4 border-t border-line pt-6 text-sm text-muted sm:grid-cols-3">
+    <p><span class="block text-[10px] uppercase tracking-luxe text-gold">Blouse length</span>Standard 14"; specify at checkout.</p>
+    <p><span class="block text-[10px] uppercase tracking-luxe text-gold">Lehenga length</span>Standard 41" from waist.</p>
+    <p><span class="block text-[10px] uppercase tracking-luxe text-gold">Need help?</span>Call <%= config.brand.supportPhone %>.</p>
+  </div>
+</div>

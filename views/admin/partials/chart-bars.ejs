@@ -1,0 +1,74 @@
+<%
+  /* Grouped bars: net sales + contribution profit. Same unit (₹) so one axis —
+     never two y-scales. locals: series [{label, netSales, profit, orders}] */
+  const W = 760, H = 250;
+  const PAD = { t: 14, r: 10, b: 26, l: 52 };
+  const iw = W - PAD.l - PAD.r;
+  const ih = H - PAD.t - PAD.b;
+
+  const max = Math.max(1, ...series.map((s) => Math.max(s.netSales, s.profit)));
+  const niceMax = Math.pow(10, Math.floor(Math.log10(max))) * Math.ceil(max / Math.pow(10, Math.floor(Math.log10(max))));
+  const slot = iw / Math.max(1, series.length);
+  const barW = Math.max(3, Math.min(15, slot * 0.34));
+  const gap = 2; // 2px surface gap between adjacent fills
+  const y = (v) => PAD.t + ih - (v / niceMax) * ih;
+
+  function barPath(x, val, w) {
+    const top = y(Math.max(0, val));
+    const h = Math.max(0, PAD.t + ih - top);
+    const r = Math.min(4, w / 2, h);
+    if (h <= 0.4) return '';
+    return `M${x} ${top + h} L${x} ${top + r} Q${x} ${top} ${x + r} ${top} L${x + w - r} ${top} Q${x + w} ${top} ${x + w} ${top + r} L${x + w} ${top + h} Z`;
+  }
+
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => ({ v: niceMax * f, y: y(niceMax * f) }));
+  const peak = series.reduce((best, s, i) => (s.netSales > (series[best] ? series[best].netSales : -1) ? i : best), 0);
+%>
+
+<div class="viz relative">
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-4">
+      <span class="inline-flex items-center gap-1.5 text-[11px] text-muted">
+        <span class="h-2 w-2 rounded-sm" style="background: var(--series-1)"></span> Net sales
+      </span>
+      <span class="inline-flex items-center gap-1.5 text-[11px] text-muted">
+        <span class="h-2 w-2 rounded-sm" style="background: var(--series-2)"></span> Contribution profit
+      </span>
+    </div>
+    <span class="text-[11px] text-muted"><%= series.length %> <%= series.length && series[0].key && series[0].key.length === 7 ? 'months' : 'days' %></span>
+  </div>
+
+  <svg viewBox="0 0 <%= W %> <%= H %>" class="h-[250px] w-full" role="img"
+       aria-label="Net sales and contribution profit over time">
+    <% ticks.forEach(function (t) { %>
+      <line x1="<%= PAD.l %>" x2="<%= W - PAD.r %>" y1="<%= t.y.toFixed(1) %>" y2="<%= t.y.toFixed(1) %>" class="grid-line"/>
+      <text x="<%= PAD.l - 8 %>" y="<%= (t.y + 3.5).toFixed(1) %>" text-anchor="end" class="axis-text"><%= compact(t.v) %></text>
+    <% }); %>
+
+    <% series.forEach(function (s, i) { %>
+      <%
+        const cx = PAD.l + i * slot + slot / 2;
+        const x1 = cx - barW - gap / 2;
+        const x2 = cx + gap / 2;
+        const showLabel = series.length <= 14 || i % Math.ceil(series.length / 12) === 0;
+      %>
+      <path d="<%= barPath(x1, s.netSales, barW) %>" class="bar" fill="var(--series-1)"
+            data-label="<%= s.label %><%= s.key && s.key.length === 7 ? ' ' + s.key.slice(0,4) : '' %>"
+            data-value="Net sales <%= money(Math.round(s.netSales)) %>"
+            data-value2="Profit <%= money(Math.round(s.profit)) %> · <%= s.orders %> orders"></path>
+      <path d="<%= barPath(x2, s.profit, barW) %>" class="bar" fill="var(--series-2)"
+            data-label="<%= s.label %>"
+            data-value="Contribution <%= money(Math.round(s.profit)) %>"
+            data-value2="Net sales <%= money(Math.round(s.netSales)) %>"></path>
+
+      <% if (showLabel) { %>
+        <text x="<%= cx.toFixed(1) %>" y="<%= H - 8 %>" text-anchor="middle" class="axis-text"><%= s.label %></text>
+      <% } %>
+      <% if (i === peak && s.netSales > 0) { %>
+        <text x="<%= cx.toFixed(1) %>" y="<%= (y(s.netSales) - 6).toFixed(1) %>" text-anchor="middle" class="value-text"><%= compact(s.netSales) %></text>
+      <% } %>
+    <% }); %>
+
+    <line x1="<%= PAD.l %>" x2="<%= W - PAD.r %>" y1="<%= PAD.t + ih %>" y2="<%= PAD.t + ih %>" stroke="var(--grid)" stroke-width="1"/>
+  </svg>
+</div>

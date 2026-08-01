@@ -1,0 +1,64 @@
+<%- include('./partials/open', {
+  active: 'customers',
+  adminTitle: 'Customers',
+  adminSubtitle: data.count + ' buyers · ' + data.repeatRatePercent + '% repeat · ' + money(data.ltv) + ' average spend',
+  adminActions: '<a href="/admin/customers/export.csv' + tokenQs + '" class="adm-btn adm-btn-ghost adm-btn-sm">Export CSV</a>'
+}) %>
+
+<div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <%- include('./partials/kpi', { label: 'Buyers', value: data.count.toLocaleString('en-IN'), delta: null, hint: 'Unique email addresses', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Repeat buyers', value: data.repeatCount, delta: null, hint: data.repeatRatePercent + '% of all buyers', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Average spend', value: money(data.ltv), delta: null, hint: 'Lifetime, excluding refunds', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Top spender', value: data.rows.length ? money(data.rows[0].spend) : '—', delta: null, hint: data.rows.length ? data.rows[0].name : '', spark: null }) %>
+</div>
+
+<form class="card mb-4 flex flex-wrap items-end gap-3 p-3" method="get" action="/admin/customers">
+  <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+  <div class="min-w-[220px] flex-1">
+    <label class="adm-label" for="q">Search</label>
+    <input id="q" name="q" value="<%= filters.q %>" class="adm-input" placeholder="Name, email, phone, city">
+  </div>
+  <button class="adm-btn adm-btn-primary adm-btn-sm mb-[1px]">Search</button>
+  <a href="/admin/customers<%= tokenQs %>" class="adm-btn adm-btn-ghost adm-btn-sm mb-[1px]">Reset</a>
+</form>
+
+<div class="card">
+  <div class="overflow-x-auto">
+    <table class="adm-table min-w-[820px]">
+      <thead>
+        <tr><th>Customer</th><th>Contact</th><th>City</th><th class="num">Orders</th><th class="num">Spend</th><th>First</th><th>Last</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% if (!rows.length) { %>
+          <tr><td colspan="8" class="py-10 text-center text-muted">No customers match.</td></tr>
+        <% } %>
+        <% rows.slice(0, 200).forEach(function (c) { %>
+          <tr>
+            <td>
+              <span class="block text-ink"><%= c.name %></span>
+              <% if (c.orders > 1) { %><span class="pill pill-good mt-1">Repeat</span><% } %>
+            </td>
+            <td class="text-[11.5px] text-muted">
+              <a href="mailto:<%= c.email %>" class="block break-all hover:text-maroon"><%= c.email %></a>
+              <a href="tel:<%= c.phone %>" class="hover:text-maroon"><%= c.phone %></a>
+            </td>
+            <td class="text-muted"><%= c.city %></td>
+            <td class="num"><%= c.orders %></td>
+            <td class="num"><%= money(c.spend) %></td>
+            <td class="whitespace-nowrap text-muted"><%= c.first.slice(0, 10) %></td>
+            <td class="whitespace-nowrap text-muted"><%= c.last.slice(0, 10) %></td>
+            <td class="num">
+              <a href="/admin/orders?q=<%= encodeURIComponent(c.email) %><%= adminToken ? '&token=' + adminToken : '' %>"
+                 class="text-[10.5px] uppercase tracking-[0.12em] text-maroon">Orders</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% if (rows.length > 200) { %>
+    <p class="border-t border-line px-4 py-3 text-[11.5px] text-muted">Showing the top 200 by spend — export the CSV for the full list.</p>
+  <% } %>
+</div>
+
+<%- include('./partials/close') %>

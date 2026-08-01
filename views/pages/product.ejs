@@ -1,0 +1,532 @@
+<%- include('../partials/document-open', { title: product.name }) %>
+
+<% const p = product; const ship = config.shipping; %>
+
+<div class="mx-auto max-w-[1600px] px-4 lg:px-8">
+
+  <nav class="flex flex-wrap items-center gap-2 pt-6 text-[13.5px] text-muted" aria-label="Breadcrumb">
+    <a href="/" class="hover:text-maroon">Home</a><span>/</span>
+    <a href="/category/<%= p.categories[0] %>" class="capitalize hover:text-maroon"><%= p.categories[0] %></a><span>/</span>
+    <span class="text-ink"><%= p.name %></span>
+  </nav>
+
+  <div x-data="{ size: '<%= p.sizes[0] %>', color: '<%= p.colors[0] %>' }"
+       class="grid gap-10 py-8 lg:grid-cols-12 lg:gap-12 lg:py-12 xl:gap-16">
+
+    <!-- ============================= gallery ============================= -->
+    <div class="lg:col-span-7 xl:col-span-8">
+
+      <!-- phone/tablet: swipeable rail. Native scroll-snap, so swiping keeps
+           real momentum and there's no JS drag handling to go wrong. -->
+      <div class="lg:hidden" x-data="{ i: 0, n: <%= p.images.length %> }">
+        <div class="relative">
+          <div x-ref="rail"
+               @scroll.passive="i = Math.round($refs.rail.scrollLeft / $refs.rail.clientWidth)"
+               class="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain no-scrollbar">
+            <% p.images.forEach(function (img, i) { %>
+              <div class="w-full shrink-0 snap-center bg-cream">
+                <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
+                     <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
+                     class="aspect-[3/4] w-full object-cover">
+              </div>
+            <% }); %>
+          </div>
+
+          <span class="pointer-events-none absolute right-3 top-3 bg-ivory/85 px-2 py-1 text-[10px] tracking-[0.1em] text-muted"
+                x-text="`${i + 1} / ${n}`"></span>
+
+          <% if (p.badge) { %>
+            <span class="pointer-events-none absolute left-3 top-3 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
+          <% } %>
+        </div>
+
+        <div class="mt-3 flex items-center justify-center gap-1.5">
+          <% p.images.forEach(function (img, i) { %>
+            <button type="button" aria-label="Go to image <%= i + 1 %>"
+                    @click="$refs.rail.scrollTo({ left: $refs.rail.clientWidth * <%= i %>, behavior: 'smooth' })"
+                    :class="i === <%= i %> ? 'w-5 bg-maroon' : 'w-1.5 bg-line'"
+                    class="h-1.5 rounded-full transition-all duration-300"></button>
+          <% }); %>
+        </div>
+
+        <p class="mt-2 text-center text-[10px] uppercase tracking-[0.14em] text-muted">Swipe for more views</p>
+      </div>
+
+      <!-- desktop: two-up grid.
+           Not one giant frame: a single 3/4 image in this column is 827px tall —
+           taller than a laptop viewport — so the piece could only ever be seen one
+           view at a time, and everything else was pushed below the fold. Two
+           columns at 4/5 shows four views at once with a real gap between them,
+           which is both more of the garment and more air. Zoom per frame. -->
+      <div class="hidden grid-cols-2 gap-4 lg:grid">
+        <% p.images.forEach(function (img, i) { %>
+          <figure class="relative overflow-hidden bg-cream"
+                  x-data="{ z: false, ox: '50%', oy: '50%' }"
+                  @mouseenter="z = true" @mouseleave="z = false"
+                  @mousemove="ox = ((($event.clientX - $el.getBoundingClientRect().left) / $el.offsetWidth) * 100).toFixed(1) + '%';
+                              oy = ((($event.clientY - $el.getBoundingClientRect().top) / $el.offsetHeight) * 100).toFixed(1) + '%'"
+                  :style="`--zs: ${z ? 2 : 1}; --zx: ${ox}; --zy: ${oy}`">
+            <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
+                 <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
+                 style="transform: scale(var(--zs, 1)); transform-origin: var(--zx, 50%) var(--zy, 50%)"
+                 class="aspect-[4/5] w-full object-cover transition-transform duration-300 ease-out">
+
+            <% if (i === 0) { %>
+              <figcaption x-show="!z" x-cloak
+                          class="pointer-events-none absolute bottom-3 right-3 bg-ivory/85 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-muted">
+                Hover to zoom
+              </figcaption>
+              <% if (p.badge) { %>
+                <span class="pointer-events-none absolute left-3 top-3 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
+              <% } %>
+            <% } %>
+          </figure>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- ===================== purchase panel (sticky) ===================== -->
+    <div class="lg:col-span-5 xl:col-span-4">
+      <!-- Not sticky, and deliberately long.
+           A short sticky panel meant every other detail had to go into full-width
+           sections below, where a paragraph column left ~440px of the page empty.
+           Letting this column carry the detail — the way Myntra and Flipkart both
+           do — means the images scroll on one side, the words on the other, and no
+           band of the page is dead. Add to bag stays reachable via the bar pinned
+           to the bottom of the viewport once these buttons scroll away. -->
+      <div>
+
+        <h1 class="font-serif text-3xl leading-tight lg:text-[2.5rem]"><%= p.name %></h1>
+        <p class="mt-2 text-[15px] text-muted"><%= p.subtitle %></p>
+
+        <div class="mt-5 flex flex-wrap items-baseline gap-3">
+          <span class="font-serif text-2xl text-ink"><%= money(p.price) %></span>
+          <% if (p.mrp > p.price) { %>
+            <span class="text-[15px] text-muted line-through"><%= money(p.mrp) %></span>
+            <span class="text-xs uppercase tracking-[0.14em] text-maroon"><%= p.discount %>% off</span>
+          <% } %>
+        </div>
+        <%
+          /* The price shown must be the price paid. GST is already inside it — the
+             invoice breaks it out, the shopper never has to. The one thing that
+             CAN still be added later is delivery, so it is stated here rather than
+             appearing as a surprise at checkout.
+
+             The extra line is config copy, not a hardcoded claim: a template that
+             promises "duties prepaid" for a client who does not do that is lying
+             on their behalf. */
+          const freeAbove = ship.freeAbove || 0;
+          const deliveryNote = !ship.standardCharge
+            ? 'Free delivery'
+            : (p.price >= freeAbove
+              ? 'Free delivery on this piece'
+              : `+ ${money(ship.standardCharge)} delivery, free above ${money(freeAbove)}`);
+        %>
+        <p class="mt-1 text-[13.5px] text-muted">
+          Inclusive of all taxes · <%= deliveryNote %><%
+            %><% if (ship.priceNote) { %> · <%= ship.priceNote %><% } %>
+        </p>
+
+        <!-- Deliverability before the cart, not after: pincode in, ETA and COD
+             out. Same endpoint the checkout uses, so the two can never disagree. -->
+        <div class="mt-4 border border-line bg-cream/40 px-3 py-2.5">
+          <div class="flex flex-wrap items-end gap-2">
+            <div class="min-w-0 flex-1">
+              <label class="mb-1 block text-[10px] uppercase tracking-luxe text-muted" for="pdp-pincode">Deliver to</label>
+              <input id="pdp-pincode" name="pincode" inputmode="numeric" maxlength="6" placeholder="Enter pincode"
+                     hx-post="/product/<%= p.slug %>/deliverability" hx-trigger="keyup changed delay:400ms, change"
+                     hx-target="#pdp-delivery" hx-swap="innerHTML"
+                     class="w-full border border-line bg-ivory px-3 py-2 text-[15px] focus:border-maroon focus:outline-none">
+            </div>
+          </div>
+          <div id="pdp-delivery" class="mt-1.5 text-[13.5px] leading-relaxed text-muted">
+            <%= ship.estimateDaysMetro %>–<%= ship.estimateDaysOther %> working days after dispatch
+          </div>
+        </div>
+
+        <!-- colour — always shown, even for a single-colourway piece -->
+        <div class="mt-7">
+          <p class="text-[10px] uppercase tracking-luxe text-muted">Colour · <span class="text-ink" x-text="color"></span></p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <% p.colors.forEach(function (c) { %>
+              <button type="button" @click="color = '<%= c %>'"
+                      :class="color === '<%= c %>' ? 'border-maroon text-ink ring-1 ring-maroon' : 'border-line text-muted'"
+                      class="inline-flex items-center gap-2 border px-3.5 py-2 text-[13px] transition hover:border-gold">
+                <span class="h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-line" style="background: <%= swatch(c) %>"></span>
+                <%= c %>
+              </button>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- size -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] uppercase tracking-luxe text-muted">Size · <span class="text-ink" x-text="size"></span></p>
+            <button type="button" class="text-[10px] uppercase tracking-[0.14em] text-maroon underline underline-offset-4"
+                    @click="$store.ui.openQuick()"
+                    hx-get="/fragments/size-chart" hx-target="#quick-body" hx-swap="innerHTML">Size guide</button>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <% p.sizes.forEach(function (sz) { %>
+              <button type="button" @click="size = '<%= sz %>'"
+                      :class="size === '<%= sz %>' ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink hover:border-gold'"
+                      class="min-w-[52px] border px-3.5 py-2.5 text-[13px] transition"><%= sz %></button>
+            <% }); %>
+          </div>
+          <p class="mt-3 text-[13.5px] text-muted">Made to order — free customisation to your exact measurements at checkout.</p>
+        </div>
+
+        <!-- add to cart -->
+        <form id="atc-form" class="mt-7 flex gap-3">
+          <input type="hidden" name="id" value="<%= p.id %>">
+          <input type="hidden" name="size" :value="size">
+          <input type="hidden" name="color" :value="color">
+          <input type="hidden" name="qty" value="1">
+
+          <!-- id is the anchor the sticky bar watches: while this button is on
+               screen the bar stays hidden, so the page is never wearing two of
+               the same control at once. -->
+          <button type="button" id="atc-main"
+                  hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
+                  class="relative flex-1 bg-maroon py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+            <span class="htmx-hide-on-request">Add to bag</span>
+            <span class="htmx-show-on-request">Adding…</span>
+          </button>
+
+          <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
+            <%- include('../fragments/wishlist-button', { product: p, variant: 'pdp' }) %>
+          <% } %>
+        </form>
+
+        <button type="button"
+                hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
+                hx-on:htmx:after-request="window.location.href='/checkout'"
+                class="mt-3 w-full border border-ink py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon">
+          Buy now
+        </button>
+
+        <!-- delivery / assurance -->
+        <div class="mt-7 divide-y divide-line border-y border-line text-[15px]">
+          <div class="flex items-start gap-3 py-3.5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="mt-0.5 shrink-0 text-gold"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
+            <%
+              /* "Ships in 21 days" reads like a warning. The 21 days is the atelier
+                 stitching a piece to this customer's measurements — which is the
+                 reason to buy couture, not an apology. So it is named as what it is,
+                 and the courier time is added to it rather than left to be guessed. */
+              const makeDays = Number(p.deliveryDays) || 0;
+              const totalMin = makeDays + (Number(ship.estimateDaysMetro) || 0);
+              const totalMax = makeDays + (Number(ship.estimateDaysOther) || 0);
+            %>
+            <p>
+              <% if (makeDays > 1) { %>
+                <strong class="font-medium">Made to order</strong> — stitched to your measurements in
+                <%= makeDays %> days, in your hands in about <%= totalMin %>–<%= totalMax %> days
+              <% } else { %>
+                <strong class="font-medium">Ready to ship</strong> — delivered in
+                <%= ship.estimateDaysMetro %>–<%= ship.estimateDaysOther %> days
+              <% } %>
+            </p>
+          </div>
+          <div class="flex items-start gap-3 py-3.5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="mt-0.5 shrink-0 text-gold"><path d="M4 9h16M4 9l1.5 10h13L20 9M8 9V6a4 4 0 0 1 8 0v3"/></svg>
+            <p><%= ship.returnWindowDays %>-day return on unaltered pieces<%= ship.codAvailable ? ' · Cash on delivery available' : '' %></p>
+          </div>
+          <div class="flex items-start gap-3 py-3.5">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="mt-0.5 shrink-0 text-gold"><path d="M12 21a9 9 0 1 0-9-9v4a2 2 0 0 0 2 2h2v-5H5"/><path d="M17 12v5h-2"/></svg>
+            <p>Need help? Call <a href="tel:<%= config.brand.supportPhone %>" class="text-maroon"><%= config.brand.supportPhone %></a> or book a video styling call.</p>
+          </div>
+        </div>
+
+        <!-- ===================== the details, in this column =====================
+             Accordions on phone (where vertical space is the scarce thing), plain
+             labelled blocks on desktop (where the words should just be readable). -->
+        <%
+          const acc = [
+            { k: 'desc', label: 'Product details', body: p.description },
+            { k: 'fabric', label: 'Fabric & craft', body: p.fabricDetails },
+            { k: 'care', label: 'Care & delivery', body: p.care + ' ' + ((Number(p.deliveryDays) || 0) > 1 ? 'Made to order in ' + p.deliveryDays + ' days.' : 'Ready to ship.') + ' ' + ship.returnWindowDays + '-day return on unaltered pieces.' }
+          ];
+        %>
+        <div class="mt-9" x-data="{ open: 'desc' }">
+          <% acc.forEach(function (a) { %>
+            <div class="border-b border-line lg:border-0 lg:mb-7">
+              <button type="button" @click="open = open === '<%= a.k %>' ? null : '<%= a.k %>'"
+                      class="flex w-full items-center justify-between py-4 text-left text-[11px] uppercase tracking-[0.14em] text-gold lg:pointer-events-none lg:py-0">
+                <%= a.label %>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     :class="open === '<%= a.k %>' ? 'rotate-45' : ''" class="transition lg:hidden"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <div :class="open === '<%= a.k %>' ? 'block' : 'hidden lg:block'">
+                <p class="pb-5 text-[15px] leading-relaxed text-muted lg:pb-0 lg:pt-2.5"><%= a.body %></p>
+              </div>
+            </div>
+          <% }); %>
+
+          <!-- Specifications: two columns of short facts, the way a shopper scans
+               them. Only the fields this product actually has. -->
+          <%
+            const specs = [
+              ['Fabric', p.fabric],
+              ['Occasion', (p.occasion || []).join(', ')],
+              ['Colours', (p.colors || []).join(', ')],
+              ['Sizes', (p.sizes || []).join(', ')],
+              ['SKU', p.sku || p.id],
+              ['Made in', (config.business && config.business.state) || null]
+            ].filter(function (row) { return row[1]; });
+          %>
+          <div class="mt-7 border-t border-line pt-6">
+            <p class="text-[11px] uppercase tracking-[0.14em] text-gold">Specifications</p>
+            <dl class="mt-3 grid grid-cols-2 gap-x-8 gap-y-4">
+              <% specs.forEach(function (row) { %>
+                <div>
+                  <dt class="text-[13px] text-muted"><%= row[0] %></dt>
+                  <dd class="mt-0.5 border-b border-line pb-2 text-[14.5px] text-ink"><%= row[1] %></dd>
+                </div>
+              <% }); %>
+            </dl>
+          </div>
+
+          <button type="button" class="mt-6 text-[11px] uppercase tracking-[0.14em] text-maroon underline underline-offset-4"
+                  @click="$store.ui.openQuick()"
+                  hx-get="/fragments/size-chart" hx-target="#quick-body" hx-swap="innerHTML">View size guide</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ reviews ============================ -->
+  <section class="border-t border-line py-12 lg:py-16">
+    <div class="grid gap-10 lg:grid-cols-3 lg:gap-14">
+      <div>
+        <p class="text-[10px] uppercase tracking-luxe text-gold">Client reviews</p>
+        <h2 class="mt-2 font-serif text-2xl lg:text-3xl">
+          <% if (reviewStats.count) { %>
+            <%= reviewStats.average %> <span class="text-gold">★</span>
+          <% } else { %>
+            No reviews yet
+          <% } %>
+        </h2>
+        <% if (reviewStats.count) { %>
+          <p class="mt-1 text-[15px] text-muted">from <%= reviewStats.count %> verified <%= reviewStats.count === 1 ? 'buyer' : 'buyers' %></p>
+          <ul class="mt-5 space-y-1.5">
+            <% [5, 4, 3, 2, 1].forEach(function (star) { %>
+              <% const n = reviewStats.histogram[star - 1]; const pct = reviewStats.count ? (n / reviewStats.count) * 100 : 0; %>
+              <li class="flex items-center gap-3 text-[13px]">
+                <span class="w-6 text-muted"><%= star %>★</span>
+                <span class="h-[5px] flex-1 bg-cream"><span class="block h-full bg-gold" style="width: <%= pct.toFixed(0) %>%"></span></span>
+                <span class="w-6 text-right text-muted"><%= n %></span>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="mt-2 text-[15px] text-muted">Be the first to write one — reviews are checked before they appear.</p>
+        <% } %>
+
+        <div id="review-form-slot" class="mt-7">
+          <%- include('../fragments/review-form', { product: p, reason: null, state: {}, keptMedia: [] }) %>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2">
+        <% if (!reviewList.length) { %>
+          <p class="border border-line bg-cream/40 p-6 text-[15px] text-muted">
+            No published reviews for this piece yet.
+          </p>
+        <% } %>
+        <ul class="divide-y divide-line">
+          <% reviewList.slice(0, 8).forEach(function (r) { %>
+            <li class="py-5 first:pt-0">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="text-gold"><%= '★'.repeat(r.rating) %><span class="text-line"><%= '★'.repeat(5 - r.rating) %></span></span>
+                <span class="font-serif text-base"><%= r.title %></span>
+                <% if (r.verified) { %>
+                  <span class="border border-line px-2 py-0.5 text-[9px] uppercase tracking-luxe text-muted">Verified buyer</span>
+                <% } %>
+              </div>
+              <p class="mt-2 text-[15px] leading-relaxed text-muted"><%= r.body %></p>
+
+              <% if (r.media && r.media.length) { %>
+                <ul class="mt-3 flex flex-wrap gap-2">
+                  <% r.media.forEach(function (m) { %>
+                    <li>
+                      <% if (m.type === 'video') { %>
+                        <video src="<%= m.src %>" controls preload="metadata"
+                               class="h-28 w-20 bg-cream object-cover sm:h-32 sm:w-24"></video>
+                      <% } else { %>
+                        <a href="<%= m.src %>" target="_blank" rel="noopener">
+                          <img src="<%= m.src %>" alt="Customer photo" loading="lazy"
+                               class="h-28 w-20 bg-cream object-cover transition hover:opacity-90 sm:h-32 sm:w-24">
+                        </a>
+                      <% } %>
+                    </li>
+                  <% }); %>
+                </ul>
+              <% } %>
+
+              <p class="mt-2 text-[10px] uppercase tracking-luxe text-muted">
+                <%= r.author %><%= r.location ? ' · ' + r.location : '' %> ·
+                <%= new Date(r.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) %>
+              </p>
+              <% if (r.reply) { %>
+                <div class="mt-3 border-l-2 border-gold/50 pl-4">
+                  <p class="text-[10px] uppercase tracking-luxe text-gold">Response from <%= config.brand.name %></p>
+                  <p class="mt-1 text-[15px] leading-relaxed text-muted"><%= r.reply.body %></p>
+                </div>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== FAQs ============================== -->
+  <% if (faqs.length) { %>
+    <section class="border-t border-line py-12 lg:py-16" x-data="{ open: 0 }">
+      <p class="text-[10px] uppercase tracking-luxe text-gold">Questions</p>
+      <h2 class="mt-2 font-serif text-2xl lg:text-3xl">Before you order</h2>
+      <%
+        /* Two columns from lg. A max-w-3xl list left 439px of the page empty on a
+           1280 screen — that is dead space, not white space: it reads as a page
+           that failed to load rather than a page with room to breathe. */
+      %>
+      <div class="mt-7 lg:grid lg:grid-cols-2 lg:gap-x-14">
+        <% faqs.forEach(function (f, i) { %>
+          <div class="border-b border-line">
+            <button type="button" @click="open = open === <%= i %> ? null : <%= i %>"
+                    class="flex w-full items-center justify-between gap-4 py-4 text-left text-[15px]">
+              <span class="text-ink"><%= f.q %></span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   :class="open === <%= i %> ? 'rotate-45' : ''" class="shrink-0 text-muted transition"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div x-show="open === <%= i %>" x-collapse>
+              <p class="pb-5 text-[15px] leading-relaxed text-muted"><%= f.a %></p>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+
+  <!-- ========================= you may also like ========================= -->
+  <% if (related.length) { %>
+    <!-- id is watched by the sticky buy bar: once the shopper is looking at OTHER
+         pieces, a bar for THIS one is noise, and worse, a mis-click. -->
+    <section id="upsell" class="border-t border-line py-14 lg:py-20"
+             x-data="{ atStart: true, atEnd: false,
+                       sync() { const r = $refs.rail; this.atStart = r.scrollLeft < 8; this.atEnd = r.scrollLeft + r.clientWidth >= r.scrollWidth - 8; } }"
+             x-init="$nextTick(() => sync())">
+      <div class="flex items-end justify-between">
+        <div>
+          <p class="text-[10px] uppercase tracking-luxe text-gold">Curated for you</p>
+          <h2 class="mt-2 font-serif text-2xl lg:text-3xl">You may also like</h2>
+        </div>
+        <div class="hidden gap-2 lg:flex">
+          <button type="button" @click="$refs.rail.scrollBy({ left: -$refs.rail.clientWidth * 0.8, behavior: 'smooth' })"
+                  :class="atStart ? 'opacity-30' : 'hover:border-maroon hover:text-maroon'"
+                  class="flex h-10 w-10 items-center justify-center border border-line transition" aria-label="Previous">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <button type="button" @click="$refs.rail.scrollBy({ left: $refs.rail.clientWidth * 0.8, behavior: 'smooth' })"
+                  :class="atEnd ? 'opacity-30' : 'hover:border-maroon hover:text-maroon'"
+                  class="flex h-10 w-10 items-center justify-center border border-line transition" aria-label="Next">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <ul id="rail-related" x-ref="rail" @scroll.passive="sync()"
+          class="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-2 no-scrollbar lg:snap-none lg:gap-6">
+        <% related.forEach(function (r) { %>
+          <li class="w-[58%] shrink-0 snap-start sm:w-[38%] lg:w-[23%]">
+            <%- include('../partials/product-card', { product: r }) %>
+          </li>
+        <% }); %>
+      </ul>
+    </section>
+  <% } %>
+</div>
+
+<!-- ============ mobile/tablet sticky buy bar (sits above the tab bar) ============ -->
+<!-- =========================== sticky buy bar ===========================
+     Both actions stay reachable however far the page is scrolled — on a page this
+     long, hunting back up for the button is the commonest reason a ready buyer
+     doesn't buy.
+
+     On phone it is always there (above the app tab bar). On desktop it appears
+     only once the real buttons have scrolled out of view, watched with an
+     IntersectionObserver rather than a scroll listener, so there is no work on
+     every scroll frame. -->
+<%
+  /* The bar keeps its own `size`: the picker's Alpine scope is the product grid,
+     which this bar sits outside of. It reads the hidden input the picker already
+     writes to — one source of truth, no second copy of the selection logic. */
+%>
+<%
+  /* Measured on scroll rather than with an IntersectionObserver: an observer set
+     up inside x-init did not reliably reach this component's reactive state from
+     its callback, and the bar silently never appeared. A throttled read of two
+     bounding rects is a few microseconds and is obvious to reason about. */
+%>
+<div x-data="{
+       past: false,
+       upsell: false,
+       size: '<%= p.sizes[0] %>',
+       /* Visible when this piece is still what the page is about: the real buttons
+          have scrolled away, and the shopper has not started browsing other
+          pieces. Phone shows it from the start — there the buttons leave the
+          screen immediately. */
+       get visible() { return !this.upsell && (this.past || window.innerWidth < 1024); },
+       measure() {
+         const main = document.getElementById('atc-main');
+         if (main) this.past = main.getBoundingClientRect().bottom < 70;
+         const up = document.getElementById('upsell');
+         // 'Started browsing other pieces' = the upsell is a fifth of the way in,
+         // not merely one pixel over the edge.
+         this.upsell = up ? up.getBoundingClientRect().top < window.innerHeight * 0.8 : false;
+         this.readSize();
+       },
+       readSize() { const el = document.querySelector('#atc-form input[name=size]'); if (el) this.size = el.value; }
+     }"
+     x-init="measure()"
+     @scroll.window.throttle.100ms="measure()"
+     @resize.window.throttle.200ms="measure()"
+     @click.window="readSize()"
+     x-show="visible"
+     x-transition.opacity
+     class="fixed inset-x-0 bottom-[calc(4.4rem+env(safe-area-inset-bottom))] z-[71] border-t border-line bg-ivory/95 backdrop-blur lg:bottom-0">
+  <div class="mx-auto flex max-w-[1600px] items-center gap-3 px-4 py-3 lg:px-8">
+    <img src="<%= p.images[0] %>" alt="" class="hidden h-12 w-9 shrink-0 object-cover lg:block">
+    <div class="min-w-0 flex-1">
+      <p class="truncate font-serif text-[15px]"><%= p.name %></p>
+      <p class="text-[15px] text-ink">
+        <%= money(p.price) %>
+        <% if (p.mrp > p.price) { %><span class="ml-1 text-[13px] text-muted line-through"><%= money(p.mrp) %></span><% } %>
+        <span class="ml-1 hidden text-[12.5px] text-muted lg:inline">incl. taxes</span>
+      </p>
+    </div>
+
+    <!-- Size is echoed here because at this scroll depth the picker is long gone
+         and "which size am I buying?" is a fair question to be able to answer. -->
+    <p class="hidden shrink-0 text-[12.5px] text-muted lg:block">
+      Size <span class="text-ink" x-text="size"></span>
+    </p>
+
+    <button type="button"
+            hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
+            hx-on:htmx:after-request="window.location.href='/checkout'"
+            class="hidden shrink-0 border border-ink px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon lg:block">
+      Buy now
+    </button>
+    <button type="button"
+            hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
+            class="shrink-0 bg-maroon px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+      Add to bag
+    </button>
+  </div>
+</div>
+<div class="h-16 lg:hidden"></div>
+
+<%- include('../partials/document-close') %>

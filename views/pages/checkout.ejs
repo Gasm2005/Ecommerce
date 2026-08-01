@@ -1,0 +1,22 @@
+<%- include('../partials/document-open', { title: 'Checkout' }) %>
+
+<%
+  /* Deliberately thin: the step fragment owns BOTH columns (fields + summary),
+     because an HTMX step swap has to be able to re-render the totals and move
+     the CTA with it. The header is kept short so the whole of step 1 lands on
+     one screen — checkout is the one page where scrolling costs money. */
+%>
+<div class="mx-auto max-w-[1180px] px-4 py-6 lg:px-8 lg:py-8">
+  <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line pb-4">
+    <h1 class="font-serif text-2xl">Almost yours</h1>
+    <p class="text-xs text-muted">
+      Need help? <a href="tel:<%= config.brand.supportPhone %>" class="text-maroon"><%= config.brand.supportPhone %></a>
+    </p>
+  </div>
+
+  <div id="checkout-body" class="pt-5">
+    <%- include('../fragments/checkout-step') %>
+  </div>
+</div>
+
+<%- include('../partials/document-close') %>

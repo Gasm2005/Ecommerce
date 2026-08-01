@@ -1,0 +1,57 @@
+<%
+  /* Answer to a pincode lookup. Fills city and state by out-of-band swap so the
+     customer types six digits instead of three fields, and says in the same
+     breath when it arrives and whether COD is on offer there — the two questions
+     that otherwise make someone abandon and go ask on WhatsApp.
+
+     locals: result (src/pincode.lookup), codCheck, eta */
+%>
+
+<% if (!result.ok) { %>
+  <p class="mt-1 text-xs text-maroon"><%= result.reason %></p>
+<% } else { %>
+
+  <!-- OOB: fill the address fields the lookup just answered -->
+  <% if (result.city) { %>
+    <input id="city-field" name="city" value="<%= result.city %>" placeholder="Mumbai" autocomplete="address-level2"
+           hx-swap-oob="true"
+           class="w-full border border-line bg-ivory px-4 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-maroon">
+  <% } %>
+  <% if (result.state) { %>
+    <input id="state-field" name="state" value="<%= result.state %>" placeholder="Maharashtra" autocomplete="address-level1"
+           hx-swap-oob="true"
+           class="w-full border border-line bg-ivory px-4 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-maroon">
+  <% } %>
+
+  <div class="mt-1.5 space-y-1 text-[11px] leading-relaxed">
+    <p class="text-muted">
+      <span class="text-good">✓</span>
+      <% if (result.city) { %>
+        Delivering to <span class="text-ink"><%= result.city %>, <%= result.state %></span>
+      <% } else { %>
+        <span class="text-ink"><%= result.state %></span> — please confirm your city
+      <% } %>
+      <% if (eta) { %> · <%= eta %><% } %>
+    </p>
+
+    <% if (codCheck && (codCheck.partialAllowed || codCheck.fullAllowed)) { %>
+      <p class="text-muted">Cash on delivery available here</p>
+    <% } else if (codCheck && codCheck.reason) { %>
+      <p class="text-muted">Prepaid only at this pincode — <%= codCheck.reason.charAt(0).toLowerCase() + codCheck.reason.slice(1) %></p>
+    <% } %>
+  </div>
+
+  <!-- Area picker: cheaper than typing a landmark, and it lands in address2 -->
+  <% if (result.areas && result.areas.length > 1) { %>
+    <div class="mt-2">
+      <p class="text-[10px] uppercase tracking-luxe text-muted">Pick your area</p>
+      <div class="mt-1.5 flex flex-wrap gap-1.5">
+        <% result.areas.forEach(function (a) { %>
+          <button type="button"
+                  onclick="const f=document.querySelector('[name=address2]'); if (f) { f.value = '<%= a.replace(/'/g, "\\'") %>'; f.focus(); }"
+                  class="border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-maroon hover:text-maroon"><%= a %></button>
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+<% } %>

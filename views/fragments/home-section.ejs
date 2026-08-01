@@ -1,0 +1,173 @@
+<% const s = section; %>
+
+<% if (s.type === 'occasions') { %>
+
+  <%
+     // Carousel: snap rail on every size, with arrows + edge fades on desktop.
+     // `x-init` seeds the arrow state so it's correct before the first scroll.
+     const railId = 'rail-occasions';
+  %>
+  <section class="mx-auto max-w-[1600px] px-4 py-16 lg:px-8 lg:py-20"
+           x-data="{
+             atStart: true, atEnd: false,
+             sync() {
+               const r = $refs.rail;
+               this.atStart = r.scrollLeft < 8;
+               this.atEnd = r.scrollLeft + r.clientWidth >= r.scrollWidth - 8;
+             }
+           }" x-init="$nextTick(() => sync())">
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div class="text-center sm:text-left">
+        <p class="text-[10px] uppercase tracking-luxe text-gold"><%= s.subtitle || '' %></p>
+        <h2 class="mt-3 font-serif text-3xl lg:text-4xl"><%= s.title %></h2>
+      </div>
+
+      <div class="hidden gap-2 lg:flex">
+        <button type="button" @click="$refs.rail.scrollBy({ left: -$refs.rail.clientWidth * 0.7, behavior: 'smooth' })"
+                :disabled="atStart" :class="atStart ? 'opacity-30' : 'hover:border-maroon hover:text-maroon'"
+                class="flex h-10 w-10 items-center justify-center border border-line text-ink transition" aria-label="Previous">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button type="button" @click="$refs.rail.scrollBy({ left: $refs.rail.clientWidth * 0.7, behavior: 'smooth' })"
+                :disabled="atEnd" :class="atEnd ? 'opacity-30' : 'hover:border-maroon hover:text-maroon'"
+                class="flex h-10 w-10 items-center justify-center border border-line text-ink transition" aria-label="Next">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="relative mt-10">
+      <!-- edge fades hint that the rail keeps going -->
+      <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-ivory to-transparent transition-opacity duration-300"
+           :class="atStart ? 'opacity-0' : 'opacity-100'"></div>
+      <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-ivory to-transparent transition-opacity duration-300"
+           :class="atEnd ? 'opacity-0' : 'opacity-100'"></div>
+
+      <ul id="<%= railId %>" x-ref="rail" @scroll.passive="sync()"
+          class="flex snap-x snap-mandatory gap-6 overflow-x-auto overscroll-x-contain pb-3 no-scrollbar lg:gap-5">
+        <% config.occasions.forEach(function (o, i) { %>
+          <!-- 2.6 per view on phones, 5 on desktop — big enough circles that the
+               rail actually has somewhere to scroll -->
+          <li class="w-[38%] shrink-0 snap-start sm:w-[26%] lg:w-[calc((100%-4*1.25rem)/5)]">
+            <a href="<%= o.href %>" class="group block text-center">
+              <div class="relative mx-auto aspect-square overflow-hidden rounded-full bg-cream ring-1 ring-line transition duration-500 group-hover:ring-gold">
+                <img loading="lazy" decoding="async" src="<%= o.image || ('/ph.svg?seed=occ' + i + '&w=520&h=520&label=' + encodeURIComponent(o.label)) %>"
+                     alt="<%= o.label %>" class="h-full w-full object-cover transition duration-700 group-hover:scale-110">
+              </div>
+              <p class="mt-3 text-[11px] uppercase tracking-[0.16em] text-ink transition group-hover:text-maroon"><%= o.label %></p>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+  </section>
+
+<% } else if (s.type === 'grid') { %>
+
+  <% const items = s.key === 'new' ? catalog.newArrivals(8) : catalog.bestsellers(8); %>
+  <section class="mx-auto max-w-[1600px] px-4 py-16 lg:px-8 lg:py-20">
+    <div class="flex flex-col items-center text-center">
+      <p class="text-[10px] uppercase tracking-luxe text-gold"><%= s.subtitle || '' %></p>
+      <h2 class="mt-3 font-serif text-3xl lg:text-4xl"><%= s.title %></h2>
+      <span class="mt-5 h-px w-14 bg-gold/60"></span>
+    </div>
+
+    <div class="mt-11 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-12">
+      <% items.forEach(function (p) { %>
+        <%- include('../partials/product-card', { product: p }) %>
+      <% }); %>
+    </div>
+
+    <% if (s.href) { %>
+      <div class="mt-12 text-center">
+        <a href="<%= s.href %>" class="inline-block border border-ink px-9 py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:bg-maroon hover:text-ivory">View all</a>
+      </div>
+    <% } %>
+  </section>
+
+<% } else if (s.type === 'editorial') { %>
+
+  <section class="bg-cream/60">
+    <div class="mx-auto grid max-w-[1600px] items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:gap-20 lg:px-8 lg:py-24">
+      <div class="relative">
+        <img loading="lazy" decoding="async" src="/ph.svg?seed=editorial&w=1100&h=760&kind=hero&label=<%= encodeURIComponent(s.subtitle || 'Atelier') %>"
+             alt="<%= s.title %>" class="aspect-[4/3] w-full object-cover">
+        <span class="absolute -bottom-4 -right-4 hidden h-24 w-24 border border-gold/50 lg:block"></span>
+      </div>
+      <div class="max-w-lg">
+        <p class="text-[10px] uppercase tracking-luxe text-gold"><%= s.subtitle || '' %></p>
+        <h2 class="mt-3 font-serif text-3xl leading-tight lg:text-[2.6rem]"><%= s.title %></h2>
+        <p class="mt-6 text-sm leading-relaxed text-muted lg:text-base"><%= s.body %></p>
+        <% if (s.cta) { %>
+          <a href="<%= s.cta.href %>" class="mt-8 inline-block border-b border-maroon pb-1 text-[11px] uppercase tracking-luxe text-maroon"><%= s.cta.label %></a>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+<% } else if (s.type === 'testimonials') { %>
+
+  <%
+     /* Live Google reviews when configured (config.reviews.source = google|both),
+        otherwise the hand-written ones from site.config.json. */
+     const g = (typeof googleStore !== 'undefined') ? googleStore : null;
+     const gReviews = g && g.reviews && g.reviews.length ? g.reviews.slice(0, 3) : null;
+     const cards = gReviews
+       ? gReviews.map(function (r) { return { quote: r.body, author: r.author, location: r.relative, rating: r.rating, source: 'google', url: r.url }; })
+       : config.testimonials.map(function (t) { return { quote: t.quote, author: t.author, location: t.location, rating: t.rating, source: 'local' }; });
+  %>
+
+  <section class="mx-auto max-w-[1600px] px-4 py-16 lg:px-8 lg:py-24">
+    <h2 class="text-center font-serif text-3xl lg:text-4xl"><%= s.title %></h2>
+
+    <% if (g && g.total && config.reviews.showStoreBadge) { %>
+      <p class="mt-4 text-center text-[11px] uppercase tracking-luxe text-muted">
+        <span class="text-gold">★</span> <span class="text-ink"><%= g.rating %></span>
+        from <%= g.total.toLocaleString('en-IN') %> Google reviews
+        <% if (g.profileUrl) { %>
+          · <a href="<%= g.profileUrl %>" target="_blank" rel="noopener" class="text-maroon underline underline-offset-4">Read on Google</a>
+        <% } %>
+      </p>
+    <% } %>
+
+    <div class="mt-12 grid gap-8 lg:grid-cols-3 lg:gap-12">
+      <% cards.forEach(function (t) { %>
+        <figure class="flex flex-col border border-line bg-ivory p-8 text-center">
+          <div class="flex justify-center gap-1 text-gold" aria-label="<%= t.rating %> out of 5">
+            <% for (let i = 0; i < (t.rating || 5); i++) { %>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.6 6.2 6.7.5-5.1 4.4 1.6 6.5L12 17.2 6.2 20.6l1.6-6.5L2.7 9.7l6.7-.5Z"/></svg>
+            <% } %>
+          </div>
+          <blockquote class="mt-5 flex-1 font-serif text-lg leading-relaxed">“<%= t.quote.length > 260 ? t.quote.slice(0, 257) + '…' : t.quote %>”</blockquote>
+          <figcaption class="mt-5 text-[10px] uppercase tracking-luxe text-muted">
+            <%= t.author %><%= t.location ? ' · ' + t.location : '' %>
+            <% if (t.source === 'google') { %><span class="ml-1 text-gold">· via Google</span><% } %>
+          </figcaption>
+        </figure>
+      <% }); %>
+    </div>
+  </section>
+
+<% } else if (s.type === 'newsletter') { %>
+
+  <section class="border-y border-line bg-maroon text-ivory">
+    <div class="mx-auto max-w-2xl px-4 py-16 text-center lg:py-20">
+      <p class="text-[10px] uppercase tracking-luxe text-goldLight">Newsletter</p>
+      <h2 class="mt-3 font-serif text-3xl lg:text-4xl"><%= s.title %></h2>
+      <p class="mx-auto mt-4 max-w-md text-sm text-ivory/80"><%= s.subtitle %></p>
+
+      <div id="newsletter-slot" class="mt-8">
+        <form hx-post="/newsletter" hx-target="#newsletter-slot" hx-swap="innerHTML"
+              class="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+          <input type="email" name="email" required placeholder="Your email address"
+                 class="flex-1 border border-ivory/30 bg-transparent px-4 py-3.5 text-sm text-ivory placeholder:text-ivory/50 focus:border-goldLight focus:outline-none">
+          <button type="submit" class="bg-ivory px-7 py-3.5 text-[11px] uppercase tracking-luxe text-maroon transition hover:bg-goldLight hover:text-ivory">
+            Subscribe
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+<% } %>

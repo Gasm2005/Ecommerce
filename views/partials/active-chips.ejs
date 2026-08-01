@@ -1,0 +1,25 @@
+<%
+  // Shared by the listing page (inline) and the grid fragment (out-of-band swap).
+  const asOob = (typeof oob !== 'undefined') && oob;
+  const chips = [];
+  ['occasion', 'color', 'fabric', 'size'].forEach(function (k) {
+    filters[k].forEach(function (v) { chips.push({ k: k, v: v, label: v }); });
+  });
+  filters.price.forEach(function (v) {
+    const r = priceRanges.find(function (x) { return x.id === v; });
+    chips.push({ k: 'price', v: v, label: r ? r.label : v });
+  });
+%>
+
+<div id="active-chips" <%= asOob ? 'hx-swap-oob="true"' : '' %>
+     class="<%= chips.length ? 'flex' : 'hidden' %> flex-wrap items-center gap-2">
+  <% chips.forEach(function (c) { %>
+    <button type="button" onclick="removeFilter('<%= c.k %>', <%- JSON.stringify(c.v) %>)"
+            class="inline-flex items-center gap-1.5 border border-line bg-cream/60 px-3 py-1.5 text-[11px] text-ink transition hover:border-maroon">
+      <%= c.label %><span class="text-muted">&times;</span>
+    </button>
+  <% }); %>
+  <% if (chips.length > 1) { %>
+    <button type="button" onclick="clearFilters()" class="ml-1 text-[10px] uppercase tracking-[0.14em] text-maroon underline underline-offset-4">Clear all</button>
+  <% } %>
+</div>

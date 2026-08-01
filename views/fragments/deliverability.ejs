@@ -1,0 +1,30 @@
+<%
+  /* Answer to a pincode on the product page. Short on purpose: a shopper wants a
+     date and a yes/no on cash, not a paragraph.
+
+     When the shop delivers this area itself, that leads — "today by 9pm, by us"
+     beats "3-6 working days" and is the reason someone buys here instead of a
+     marketplace. */
+  const ship = config.shipping || {};
+  const freeHere = !ship.standardCharge || product.price >= (ship.freeAbove || 0);
+%>
+
+<% if (local) { %>
+  <span class="text-gold">●</span>
+  <span class="text-ink"><%= local.title %></span> in <%= result.city || result.state %> —
+  <%= local.note %>
+  <% if (local.charge === 0) { %><span class="text-gold">free</span><% } %>
+  <% if (local.cutoffNote) { %><br><span class="text-maroon"><%= local.cutoffNote %></span><% } %>
+  <% if (pickup) { %><br><span class="text-muted">Or collect from the store</span><% } %>
+<% } else { %>
+  <span class="text-good">✓</span>
+  Delivers to <span class="text-ink"><%= result.city || result.state %></span><%
+    %><% if (days) { %> in about <span class="text-ink"><%= days %> working days</span><% } %>
+  <br>
+  <%= freeHere ? 'Free delivery' : money(ship.standardCharge) + ' delivery' %>
+<% } %>
+<% if (codCheck && (codCheck.partialAllowed || codCheck.fullAllowed)) { %>
+  · Cash on delivery available
+<% } else { %>
+  · Prepaid only at this pincode
+<% } %>

@@ -1,0 +1,201 @@
+<%- include('./partials/open', {
+  active: 'marketing',
+  adminTitle: 'Marketing',
+  adminSubtitle: 'SEO · AEO (answer engines) · GEO (generative engines) — health score ' + Math.round(audit.score) + '/100',
+  adminActions: '<a href="/sitemap.xml" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">sitemap.xml</a>'
+    + '<a href="/robots.txt" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">robots.txt</a>'
+    + '<a href="/llms.txt" target="_blank" class="adm-btn adm-btn-ghost adm-btn-sm">llms.txt</a>'
+}) %>
+
+<div x-data="{ tab: '<%= tab %>' }">
+
+  <!-- tabs -->
+  <div class="mb-4 flex flex-wrap gap-2">
+    <% [['seo','SEO — search engines'],['aeo','AEO — answer engines'],['geo','GEO — generative engines']].forEach(function (t) { %>
+      <button @click="tab = '<%= t[0] %>'"
+              :class="tab === '<%= t[0] %>' ? 'border-maroon bg-maroon text-ivory' : 'border-line bg-panel text-muted'"
+              class="border px-4 py-2 text-[10.5px] uppercase tracking-[0.12em]"><%= t[1] %></button>
+    <% }); %>
+  </div>
+
+  <div class="grid gap-3 xl:grid-cols-3">
+    <div class="space-y-3 xl:col-span-2">
+
+      <!-- ============================== SEO ============================== -->
+      <div x-show="tab === 'seo'" class="space-y-3">
+        <div class="card p-4">
+          <h2 class="font-serif text-base">Defaults</h2>
+          <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+            Applied to every page that doesn't override them. Titles append the suffix; descriptions
+            fall back to product copy.
+          </p>
+          <form class="mt-3 space-y-3" hx-post="/admin/marketing/seo" hx-target="#audit" hx-swap="innerHTML">
+            <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="adm-label" for="titleSuffix">Title suffix</label>
+                <input id="titleSuffix" name="titleSuffix" class="adm-input" value="<%= seo.titleSuffix %>" placeholder=" · <%= config.brand.name %>">
+              </div>
+              <div>
+                <label class="adm-label" for="canonicalHost">Canonical host</label>
+                <input id="canonicalHost" name="canonicalHost" class="adm-input" value="<%= seo.canonicalHost %>" placeholder="https://www.yourdomain.com">
+              </div>
+            </div>
+            <div>
+              <label class="adm-label" for="defaultDescription">Default description</label>
+              <textarea id="defaultDescription" name="defaultDescription" rows="2" class="adm-textarea"><%= seo.defaultDescription %></textarea>
+            </div>
+            <div>
+              <label class="adm-label" for="keywords">Head keywords <span class="text-muted">(comma separated)</span></label>
+              <input id="keywords" name="keywords" class="adm-input" value="<%= seo.keywords.join(', ') %>">
+            </div>
+            <div>
+              <label class="adm-label" for="ogImage">Social share image</label>
+              <input id="ogImage" name="ogImage" class="adm-input" value="<%= seo.ogImage || '' %>" placeholder="/static/img/og.jpg">
+            </div>
+            <label class="flex items-center gap-2 text-[12.5px]">
+              <input type="checkbox" name="indexable" <%= seo.indexable ? 'checked' : '' %>>
+              Allow indexing (off writes <code class="bg-cream px-1">Disallow: /</code> into robots.txt)
+            </label>
+            <button class="adm-btn adm-btn-primary">Save SEO defaults</button>
+          </form>
+        </div>
+
+        <div class="card p-4">
+          <h2 class="font-serif text-base">Per-product overrides</h2>
+          <p class="mt-1 text-[11.5px] text-muted">Leave blank to use generated copy. Product pages also have these fields inline.</p>
+          <form class="mt-3 space-y-3" hx-post="/admin/marketing/product-seo" hx-target="#audit" hx-swap="innerHTML">
+            <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+            <div>
+              <label class="adm-label" for="slug">Product</label>
+              <select id="slug" name="slug" class="adm-select">
+                <% products.forEach(function (p) { %>
+                  <option value="<%= p.slug %>"><%= p.name %><%= seo.products[p.slug] ? ' — has override' : '' %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div>
+              <label class="adm-label" for="ptitle">Meta title</label>
+              <input id="ptitle" name="title" class="adm-input" placeholder="≤ 60 characters">
+            </div>
+            <div>
+              <label class="adm-label" for="pdesc">Meta description</label>
+              <textarea id="pdesc" name="description" rows="2" class="adm-textarea" placeholder="120–155 characters"></textarea>
+            </div>
+            <div>
+              <label class="adm-label" for="pkeys">Keywords</label>
+              <input id="pkeys" name="keywords" class="adm-input" placeholder="bridal lehenga, banarasi">
+            </div>
+            <label class="flex items-center gap-2 text-[12.5px]"><input type="checkbox" name="indexable" checked> Indexable</label>
+            <button class="adm-btn adm-btn-primary">Save override</button>
+          </form>
+
+          <% const overrides = Object.keys(seo.products); %>
+          <% if (overrides.length) { %>
+            <div class="mt-4 border-t border-line pt-3">
+              <p class="adm-label">Existing overrides</p>
+              <ul class="space-y-1 text-[11.5px]">
+                <% overrides.forEach(function (slug) { %>
+                  <li class="flex items-center justify-between gap-3">
+                    <span class="truncate"><code class="bg-cream px-1"><%= slug %></code> <span class="text-muted"><%= (seo.products[slug].title || '').slice(0, 48) %></span></span>
+                    <a href="/product/<%= slug %>" target="_blank" class="shrink-0 text-maroon">View</a>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- ============================== AEO ============================== -->
+      <div x-show="tab === 'aeo'" x-cloak class="space-y-3">
+        <div class="card p-4">
+          <h2 class="font-serif text-base">Answer blurb</h2>
+          <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+            Two or three sentences an assistant can quote verbatim when asked “what is <%= config.brand.name %>?”.
+            Goes into <code class="bg-cream px-1">llms.txt</code>, Organization JSON-LD and the FAQ block.
+          </p>
+          <form class="mt-3 space-y-3" hx-post="/admin/marketing/aeo" hx-target="#audit" hx-swap="innerHTML">
+            <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+            <textarea name="answerBlurb" rows="4" class="adm-textarea"><%= aeo.answerBlurb %></textarea>
+            <button class="adm-btn adm-btn-primary">Save blurb</button>
+          </form>
+        </div>
+
+        <div class="card p-4">
+          <h2 class="font-serif text-base">FAQs</h2>
+          <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+            Published as <code class="bg-cream px-1">FAQPage</code> structured data and listed in llms.txt.
+            Scope one to a product slug to show it on that product page only.
+          </p>
+
+          <form class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]" hx-post="/admin/marketing/faq" hx-target="#faq-list" hx-swap="innerHTML">
+            <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+            <div class="space-y-2">
+              <input name="q" class="adm-input" placeholder="Question — e.g. Can I return a customised piece?" required>
+              <textarea name="a" rows="3" class="adm-textarea" placeholder="Answer — direct, factual, quotable." required></textarea>
+              <select name="scope" class="adm-select">
+                <option value="global">Site-wide</option>
+                <% products.forEach(function (p) { %><option value="<%= p.slug %>"><%= p.name %></option><% }); %>
+              </select>
+            </div>
+            <button class="adm-btn adm-btn-primary self-start">Add FAQ</button>
+          </form>
+
+          <div id="faq-list" class="mt-4 border-t border-line pt-3">
+            <%- include('./fragments/faq-list') %>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== GEO ============================== -->
+      <div x-show="tab === 'geo'" x-cloak class="space-y-3">
+        <div class="card p-4">
+          <h2 class="font-serif text-base">Generative engine settings</h2>
+          <p class="mt-1 text-[11.5px] leading-relaxed text-muted">
+            GEO is about being citable: explicit facts, a machine-readable brief at
+            <code class="bg-cream px-1">/llms.txt</code>, and crawler permissions for
+            <%= crawlers.slice(0, 4).join(', ') %> and others.
+          </p>
+          <form class="mt-3 space-y-3" hx-post="/admin/marketing/geo" hx-target="#audit" hx-swap="innerHTML">
+            <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+            <label class="flex items-start gap-2 text-[12.5px]">
+              <input type="checkbox" name="allowAiCrawlers" class="mt-0.5" <%= geo.allowAiCrawlers ? 'checked' : '' %>>
+              <span>Allow AI crawlers<span class="block text-[11px] text-muted">Blocking them keeps you out of AI answers entirely.</span></span>
+            </label>
+            <div>
+              <label class="adm-label" for="citations">Citation targets <span class="text-muted">(one per line: Label | /path)</span></label>
+              <textarea id="citations" name="citations" rows="4" class="adm-textarea"><%= geo.citations.map(function (c) { return c.label + ' | ' + c.href; }).join('\n') %></textarea>
+            </div>
+            <div>
+              <label class="adm-label" for="llmsExtra">Notes for llms.txt</label>
+              <textarea id="llmsExtra" name="llmsExtra" rows="2" class="adm-textarea"><%= geo.llmsExtra %></textarea>
+            </div>
+            <button class="adm-btn adm-btn-primary">Save GEO settings</button>
+          </form>
+        </div>
+
+        <div class="card p-4">
+          <h2 class="font-serif text-base">Brand facts</h2>
+          <p class="mt-1 text-[11.5px] text-muted">Short, checkable statements. These are what models repeat.</p>
+          <form class="mt-3 flex flex-wrap items-end gap-2" hx-post="/admin/marketing/fact" hx-target="#fact-list" hx-swap="innerHTML">
+            <% if (adminToken) { %><input type="hidden" name="token" value="<%= adminToken %>"><% } %>
+            <div class="w-40"><label class="adm-label" for="flabel">Label</label><input id="flabel" name="label" class="adm-input" placeholder="Founded" required></div>
+            <div class="min-w-[200px] flex-1"><label class="adm-label" for="fvalue">Value</label><input id="fvalue" name="value" class="adm-input" placeholder="2014, Mumbai" required></div>
+            <button class="adm-btn adm-btn-primary adm-btn-sm">Add</button>
+          </form>
+          <div id="fact-list" class="mt-4 border-t border-line pt-3">
+            <%- include('./fragments/fact-list') %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================ audit rail ============================ -->
+    <div id="audit" class="adm-swap">
+      <%- include('./fragments/marketing-audit') %>
+    </div>
+  </div>
+</div>
+
+<%- include('./partials/close') %>

@@ -1,0 +1,65 @@
+<%
+  const p = product;
+  const eager = (typeof priority !== 'undefined') && priority;
+  const hover = p.images[1] || p.images[0];
+%>
+<article class="group relative">
+  <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
+    <%- include('../fragments/wishlist-button', { product: p, variant: 'card' }) %>
+  <% } %>
+
+  <a href="/product/<%= p.slug %>" class="block">
+    <div class="relative aspect-[3/4] overflow-hidden bg-cream">
+      <img src="<%= p.images[0] %>" alt="<%= p.name %>"
+           <%= eager ? '' : 'loading="lazy"' %> decoding="async"
+           class="absolute inset-0 h-full w-full object-cover transition-all duration-[900ms] ease-out group-hover:scale-[1.06] group-hover:opacity-0">
+      <img src="<%= hover %>" alt="" aria-hidden="true" loading="lazy" decoding="async"
+           class="absolute inset-0 h-full w-full scale-[1.06] object-cover opacity-0 transition-all duration-[900ms] ease-out group-hover:scale-100 group-hover:opacity-100">
+
+      <% if (p.badge) { %>
+        <span class="absolute left-3 top-3 z-10 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
+      <% } %>
+      <% if (p.discount >= 10) { %>
+        <span class="absolute left-3 <%= p.badge ? 'top-10' : 'top-3' %> z-10 bg-maroon px-2.5 py-1 text-[9px] uppercase tracking-luxe text-ivory"><%= p.discount %>% off</span>
+      <% } %>
+
+      <% if (config.features.quickView) { %>
+        <span class="absolute inset-x-0 bottom-0 z-10 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <button type="button"
+                  @click.prevent.stop="$store.ui.openQuick()"
+                  hx-get="/fragments/quick-view/<%= p.slug %>"
+                  hx-target="#quick-body" hx-swap="innerHTML"
+                  hx-indicator="#quick-loading"
+                  class="w-full bg-ink/85 py-3 text-[10px] uppercase tracking-luxe text-ivory backdrop-blur transition hover:bg-maroon">
+            Quick view
+          </button>
+        </span>
+      <% } %>
+    </div>
+
+    <div class="pt-3.5">
+      <h3 class="font-serif text-[15px] leading-snug text-ink transition group-hover:text-maroon"><%= p.name %></h3>
+      <p class="mt-0.5 truncate text-[13px] text-muted"><%= p.subtitle %></p>
+      <!-- Price, was-price, saving — the three numbers a shopper compares, in the
+           order they compare them. No tax microcopy here: the card is a glance,
+           and the price is already the final one. -->
+      <p class="mt-2 flex items-baseline gap-2">
+        <span class="text-[15px] text-ink"><%= money(p.price) %></span>
+        <% if (config.features.showMrpStrikethrough && p.mrp > p.price) { %>
+          <span class="text-[13px] text-muted line-through"><%= money(p.mrp) %></span>
+          <span class="text-[13px] text-gold"><%= p.discount %>% off</span>
+        <% } %>
+      </p>
+
+      <!-- available colourways -->
+      <span class="mt-2 flex items-center gap-1.5">
+        <% p.colors.slice(0, 4).forEach(function (c) { %>
+          <span title="<%= c %>" class="h-2.5 w-2.5 rounded-full ring-1 ring-line" style="background: <%= swatch(c) %>"></span>
+        <% }); %>
+        <span class="ml-0.5 text-[10px] uppercase tracking-[0.12em] text-muted">
+          <%= p.colors.length %> colour<%= p.colors.length > 1 ? 's' : '' %>
+        </span>
+      </span>
+    </div>
+  </a>
+</article>

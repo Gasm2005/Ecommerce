@@ -1,0 +1,116 @@
+<%
+  /* Verified-buyer review form.
+     Media uploads fire on file-select into a separate request, so compression
+     (WebP / 720p MP4) finishes in the background while the customer types.
+     locals: product, reason (error|null), state (previous body), keptMedia */
+  const rc = config.reviews || {};
+  const needsPurchase = rc.requirePurchase !== false;
+  const allowMedia = rc.allowMedia !== false;
+  const s = state || {};
+  const kept = (typeof keptMedia !== 'undefined' && keptMedia) ? keptMedia : [];
+%>
+
+<details class="border border-line" <%= reason ? 'open' : '' %>>
+  <summary class="cursor-pointer list-none px-4 py-3 text-[11px] uppercase tracking-luxe text-maroon">
+    Write a review
+    <% if (needsPurchase) { %><span class="ml-1 normal-case tracking-normal text-muted">— customers only</span><% } %>
+  </summary>
+
+  <div class="border-t border-line p-4">
+
+    <!-- ============ step 1: media, uploaded immediately ============ -->
+    <% if (allowMedia) { %>
+      <div class="mb-4">
+        <p class="text-[10px] uppercase tracking-luxe text-gold">Photos & video first</p>
+        <p class="mt-1 text-[11px] leading-relaxed text-muted">
+          Pick them now and they upload and compress while you write — nothing to wait for at the end.
+        </p>
+
+        <form id="review-media-form" class="mt-2.5"
+              hx-post="/uploads/review-media"
+              hx-target="#review-media-list"
+              hx-swap="beforeend"
+              hx-encoding="multipart/form-data"
+              hx-indicator="#review-media-busy"
+              hx-on::after-request="this.reset()">
+          <label class="flex cursor-pointer items-center justify-between gap-3 border border-dashed border-line px-3 py-3 transition hover:border-maroon">
+            <span>
+              <span class="block text-[11px] uppercase tracking-luxe text-ink">Choose photos or a video</span>
+              <span class="block text-[11px] text-muted">Any size — we convert photos to WebP and video to 720p MP4</span>
+            </span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" class="shrink-0 text-gold"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            <input type="file" name="media" multiple
+                   accept="image/jpeg,image/png,image/webp,image/avif,image/heic,video/mp4,video/webm,video/quicktime"
+                   class="hidden"
+                   onchange="htmx.trigger(this.form, 'submit')">
+          </label>
+        </form>
+
+        <div id="review-media-busy" class="htmx-indicator mt-2 flex items-center gap-2 text-[11px] text-muted">
+          <svg class="animate-spin text-maroon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9" stroke-linecap="round"/></svg>
+          Uploading and compressing — keep writing, this finishes on its own.
+        </div>
+      </div>
+    <% } %>
+
+    <!-- ============ step 2: the review itself ============ -->
+    <form class="space-y-3" hx-post="/product/<%= product.slug %>/review"
+          hx-target="#review-form-slot" hx-swap="innerHTML">
+
+      <% if (reason) { %>
+        <p class="border border-maroon/40 bg-maroon/5 px-3 py-2.5 text-xs text-maroon"><%= reason %></p>
+      <% } %>
+
+      <!-- uploaded media lives inside the review form, so its tokens submit with it -->
+      <div id="review-media-list" class="flex flex-wrap gap-2 <%= kept.length ? 'mb-1' : '' %>">
+        <% kept.forEach(function (k) { %>
+          <%- include('./review-media-item', { item: k, error: null }) %>
+        <% }); %>
+      </div>
+
+      <% if (needsPurchase) { %>
+        <div class="border border-line bg-cream/50 p-3">
+          <p class="text-[10px] uppercase tracking-luxe text-gold">Verify your purchase</p>
+          <p class="mt-1 text-[11px] leading-relaxed text-muted">
+            Only clients who bought this piece can review it. Use the order number from your confirmation.
+          </p>
+          <div class="mt-2.5 grid gap-2 sm:grid-cols-2">
+            <input name="orderId" required value="<%= s.orderId || '' %>" placeholder="Order no. (ORD-00042)"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm uppercase focus:border-maroon focus:outline-none">
+            <input name="contact" required value="<%= s.contact || '' %>" placeholder="Email or phone on the order"
+                   class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+          </div>
+        </div>
+      <% } %>
+
+      <div x-data="{ rating: <%= s.rating || 5 %> }">
+        <p class="mb-1.5 text-[10px] uppercase tracking-luxe text-muted">Rating</p>
+        <div class="flex gap-1.5">
+          <template x-for="i in 5" :key="i">
+            <button type="button" @click="rating = i" class="text-xl leading-none"
+                    :class="i <= rating ? 'text-gold' : 'text-line'" :aria-label="i + ' stars'">★</button>
+          </template>
+        </div>
+        <input type="hidden" name="rating" :value="rating">
+      </div>
+
+      <input name="title" required value="<%= s.title || '' %>" placeholder="Headline"
+             class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+      <textarea name="body" rows="4" required placeholder="How was the fit, fabric and finishing?"
+                class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none"><%= s.body || '' %></textarea>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <input name="author" value="<%= s.author || '' %>" placeholder="Display name (optional)"
+               class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+        <input name="location" value="<%= s.location || '' %>" placeholder="City (optional)"
+               class="w-full border border-line bg-ivory px-3 py-2.5 text-sm focus:border-maroon focus:outline-none">
+      </div>
+
+      <button class="w-full bg-maroon py-3 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+        <span class="htmx-hide-on-request">Submit review</span>
+        <span class="htmx-show-on-request">Submitting…</span>
+      </button>
+      <p class="text-center text-[10px] uppercase tracking-[0.14em] text-muted">Reviews are checked before publishing</p>
+    </form>
+  </div>
+</details>

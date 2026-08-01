@@ -1,0 +1,100 @@
+<%
+  /* Gateway hand-off. The order does not exist yet — it is written only after
+     /checkout/verify confirms the signature, so an abandoned payment leaves no
+     phantom order in the admin.
+     locals: intent, state, summary, plan, payable */
+  const partial = plan && plan.type === 'partial-cod';
+%>
+
+<div class="border border-line bg-cream/40 p-6 text-center"
+     x-data="{ failed: null, pay() { this.failed = null; window.__openCheckout(this); } }"
+     x-init="$nextTick(() => pay())">
+
+  <p class="text-[10px] uppercase tracking-luxe text-gold">Secure payment</p>
+  <h2 class="mt-2 font-serif text-2xl">Paying <%= money(payable) %></h2>
+
+  <% if (partial) { %>
+    <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
+      This is the advance on your <%= money(summary.total) %> order —
+      <%= money(plan.dueOnDelivery) %> is due in cash when it arrives.
+    </p>
+  <% } else { %>
+    <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
+      Complete the payment in the window that opens. Please don’t refresh this page.
+    </p>
+  <% } %>
+
+  <div x-show="!failed" class="mt-6 flex items-center justify-center gap-2 text-xs text-muted">
+    <svg class="animate-spin text-maroon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9" stroke-linecap="round"/></svg>
+    Opening the payment window…
+  </div>
+
+  <div x-show="failed" x-cloak class="mt-5">
+    <p class="border border-maroon/40 bg-maroon/5 px-4 py-3 text-sm text-maroon" x-text="failed"></p>
+    <div class="mt-4 flex flex-wrap justify-center gap-3">
+      <button @click="pay()" class="bg-maroon px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">Try again</button>
+      <button hx-post="/checkout/step/3" hx-target="#checkout-body" hx-swap="innerHTML"
+              hx-vals='<%- JSON.stringify({ _from: 3 }) %>'
+              class="border border-ink px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon">
+        Change payment method
+      </button>
+    </div>
+  </div>
+
+  <p class="mt-5 text-[10px] uppercase tracking-[0.14em] text-muted">
+    Your cart is held until payment succeeds — nothing is charged twice
+  </p>
+
+  <!-- the signed gateway response is posted back here for verification -->
+  <form id="pay-verify" class="hidden" hx-post="/checkout/verify" hx-target="#checkout-body" hx-swap="innerHTML">
+    <input type="hidden" name="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature">
+  </form>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  /* Defined on window so the Alpine component (and the "Try again" button) can
+     re-open the modal without re-rendering this fragment. */
+  window.__openCheckout = function (component) {
+    if (typeof Razorpay === 'undefined') {
+      component.failed = 'Could not reach the payment provider. Check your connection and try again.';
+      return;
+    }
+
+    const form = document.getElementById('pay-verify');
+    const rzp = new Razorpay({
+      key: <%- JSON.stringify(intent.keyId) %>,
+      order_id: <%- JSON.stringify(intent.id) %>,
+      amount: <%- JSON.stringify(intent.amount) %>,
+      currency: <%- JSON.stringify(intent.currency) %>,
+      name: <%- JSON.stringify(config.brand.name) %>,
+      description: <%- JSON.stringify(partial ? 'Advance payment' : 'Order payment') %>,
+      theme: { color: <%- JSON.stringify(config.theme.colors.maroon) %> },
+      prefill: {
+        name: <%- JSON.stringify(state.fullName || '') %>,
+        email: <%- JSON.stringify(state.email || '') %>,
+        contact: <%- JSON.stringify(state.phone || '') %>
+      },
+      notes: { plan: <%- JSON.stringify(plan ? plan.type : 'prepaid') %> },
+      handler: function (response) {
+        form.querySelector('[name=razorpay_payment_id]').value = response.razorpay_payment_id || '';
+        form.querySelector('[name=razorpay_order_id]').value = response.razorpay_order_id || '';
+        form.querySelector('[name=razorpay_signature]').value = response.razorpay_signature || '';
+        htmx.trigger(form, 'submit');
+      },
+      modal: {
+        ondismiss: function () {
+          component.failed = 'Payment was not completed. Your cart is untouched — you can try again.';
+        }
+      }
+    });
+
+    rzp.on('payment.failed', function (resp) {
+      component.failed = (resp && resp.error && resp.error.description) || 'The payment failed. Please try another method.';
+    });
+
+    rzp.open();
+  };
+</script>

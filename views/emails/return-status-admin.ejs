@@ -1,0 +1,30 @@
+<%
+  const c = config.theme.colors;
+  const money = (n) => config.currency.symbol + Number(n || 0).toLocaleString(config.currency.locale || 'en-IN');
+%>
+<%- include('./_head', { config, brand, settings, title: 'Return requested — ' + request.id, preheader: request.reason + ' · ' + money(request.requestedAmount) }) %>
+
+<p style="margin:0 0 6px; font-family:Georgia,serif; font-size:20px; color:<%= c.ink %>;">
+  Return requested — <%= money(request.requestedAmount) %>
+</p>
+
+<p style="margin:0 0 16px; font-size:13px; line-height:1.6; color:<%= c.muted %>;">
+  <%= request.id %> on <%= request.orderId %> · <%= request.customer.name %> · <%= request.customer.phone %>
+</p>
+
+<table role="presentation" width="100%" style="margin:0 0 16px;">
+  <tr><td style="padding:14px 16px; background:<%= c.cream %>; border:1px solid <%= c.line %>; font-size:13px; line-height:1.7; color:<%= c.ink %>;">
+    <strong>Reason:</strong> <%= request.reason %><br>
+    <% if (request.note) { %><strong>Note:</strong> <%= request.note %><br><% } %>
+    <strong>Pieces:</strong> <%= request.items.map(function (i) { return i.name + ' ×' + i.qty; }).join(', ') %>
+    <% if (request.media && request.media.length) { %>
+      <br><strong>Attachments:</strong> <%= request.media.length %> file<%= request.media.length === 1 ? '' : 's' %>
+    <% } %>
+  </td></tr>
+</table>
+
+<p style="margin:0; font-size:13px; color:<%= c.muted %>;">
+  Approve or reject it in the admin panel under Returns &amp; refunds.
+</p>
+
+<%- include('./_foot', { config, brand, settings }) %>
