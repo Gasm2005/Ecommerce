@@ -19,3 +19,6 @@ data/users.json
 # notification + activity logs are runtime noise, not source
 data/notifications.json
 data/activity.json
+
+# local backup archives — copy these off the machine, do not commit them
+backups/

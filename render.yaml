@@ -1,0 +1,40 @@
+# One-click deploy blueprint (Render).
+#
+# Render reads this file when you connect the repo, so there is nothing to
+# configure by hand. It gives a public https URL you can send to anyone.
+#
+#   1. render.com → New → Blueprint → connect this repo
+#   2. Render finds this file and creates the service
+#   3. You get https://<name>.onrender.com
+#
+# DEMO, NOT A CLIENT STORE. Two reasons, both about the free tier:
+#   · the disk is ephemeral, so orders/products written while it runs are lost on
+#     the next restart. The demo catalogue and orders committed to the repo always
+#     come back, which is what you want for a sales demo and not what you want for
+#     a real shop.
+#   · a free service sleeps after ~15 minutes idle and takes ~50s to wake. Open the
+#     link yourself a minute before you show it to anyone.
+#
+# For a real client: a paid instance with a persistent disk mounted at /data, and
+# DATA_DIR pointed at it. Everything else stays the same.
+
+services:
+  - type: web
+    name: ethnic-commerce-demo
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render supplies PORT itself; server.js already reads it.
+      #
+      # Left deliberately unset:
+      #   ADMIN_TOKEN     an escape hatch, not a login — the first visit to /admin
+      #                   offers a one-time owner setup instead
+      #   LICENSE_KEY     unlicensed falls back to the plan in site.config.json,
+      #                   which is what a demo should show
+      - key: DEMO
+        value: "true"
