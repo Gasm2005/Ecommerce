@@ -136,6 +136,21 @@ completely. CSV import takes `stock` for a single number, or `variantStock` as
 `S:4|M:2|L:0` (or `S/Red:4|S/Gold:2`); a row with neither imports as zero rather
 than unlimited, because overselling costs more than a listing an owner has to correct.
 
+### Returning customers
+Recognised without an account. Most people buy ethnic wear two or three times a year,
+and asking them to invent a password for that is a checkout step that earns nothing.
+A signed cookie remembers their name, phone and the addresses they have used, fills
+the next checkout in, and offers "Not you? Start fresh" in one click — a half-typed
+address is never overwritten by a remembered one, so someone who has moved does not
+watch their new street revert on a reload. **Your orders** lists what this device
+bought; the order-number lookup still works from any other device.
+
+The cookie is signed rather than merely stored, and that is the point of it. Order ids
+run in sequence — ORD-00042 tells anyone that ORD-00041 exists — so the confirmation
+page is gated on either having placed the order in this browser or supplying the
+contact on it. An unsigned cookie would have let anyone list a stranger's purchase by
+typing a number into their own.
+
 ### GST & invoicing
 - Sequential tax invoices, one series per financial year, allocated once and never
   reused — a gap is what an auditor asks about
@@ -242,6 +257,7 @@ test dependencies:
 | `license.test.js` | forgery, expiry, domain lock, entitlement |
 | `plan.test.js`, `plan-gate.test.js` | plan enforcement, including over HTTP |
 | `checkout-flow.test.js` | the whole checkout over HTTP, no mocks |
+| `shopper.test.js` | cookie forgery, order privacy, saved addresses |
 
 Each test file gets a throwaway data directory, so tests never touch a real store.
 

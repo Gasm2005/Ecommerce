@@ -17,11 +17,20 @@
     </p>
   <% } %>
 
+  <% if (orderWanted) { %>
+    <!-- Say why they were sent here. A privacy check with no explanation reads as a bug. -->
+    <p class="mt-4 border border-gold/40 bg-gold/5 px-4 py-3 text-xs text-muted">
+      <strong class="text-ink"><%= orderWanted %></strong> wasn’t placed from this device, so we ask for the
+      email or phone on the order before showing it. It keeps your order private from anyone who guesses a
+      number.
+    </p>
+  <% } %>
+
   <form class="py-8" hx-post="/returns/lookup" hx-target="#returns-panel" hx-swap="innerHTML">
     <div class="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
       <div>
         <label class="mb-1.5 block text-[10px] uppercase tracking-luxe text-muted" for="orderId">Order number</label>
-        <input id="orderId" name="orderId" required placeholder="ORD-00042" value="<%= invoiceWanted %>"
+        <input id="orderId" name="orderId" required placeholder="ORD-00042" value="<%= orderWanted || invoiceWanted %>"
                class="w-full border border-line bg-ivory px-4 py-3 text-sm uppercase focus:border-maroon focus:outline-none">
       </div>
       <div>

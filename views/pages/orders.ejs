@@ -1,0 +1,88 @@
+<%
+  /* Your orders, with no account. locals: rows (newest first), me
+
+     This reads the orders whose ids this browser is signed as owning. It is not a
+     replacement for accounts — a new phone shows nothing — so the page always
+     offers the order-number lookup as the way in from anywhere else. */
+%>
+<section class="mx-auto max-w-3xl px-4 py-12 lg:px-8 lg:py-16">
+  <header>
+    <h1 class="font-serif text-3xl leading-tight lg:text-4xl">Your orders</h1>
+    <p class="mt-2 max-w-xl text-[13.5px] leading-relaxed text-muted">
+      <% if (rows.length) { %>
+        Everything you’ve ordered from this device. No account, no password.
+      <% } else { %>
+        Orders you place will appear here on this device — no account needed.
+      <% } %>
+    </p>
+  </header>
+
+  <% if (!rows.length) { %>
+    <div class="mt-8 border border-line bg-cream/40 px-5 py-6">
+      <p class="text-[13.5px] leading-relaxed text-muted">
+        Nothing here yet. If you ordered from a different phone or computer, look it up with your
+        order number and the email or phone you used — that works from anywhere.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a href="/returns" class="border border-maroon px-6 py-3 text-[11px] uppercase tracking-luxe text-maroon transition hover:bg-maroon hover:text-ivory">
+          Find an order
+        </a>
+        <a href="/category/all" class="border border-line px-6 py-3 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon">
+          Start shopping
+        </a>
+      </div>
+    </div>
+  <% } else { %>
+
+    <ul class="mt-8 space-y-3">
+      <% rows.forEach(function (o) { %>
+        <%
+          const s = orders.status ? orders.status(o.status) : { label: o.status, tone: 'info' };
+          const when = o.createdAt ? new Date(o.createdAt) : null;
+          const first = (o.items || [])[0];
+          const more = Math.max(0, (o.items || []).length - 1);
+        %>
+        <li class="border border-line">
+          <a href="/order/<%= o.id %>" class="flex items-start gap-4 p-4 transition hover:bg-cream/40">
+            <% if (first && first.image) { %>
+              <img src="<%= first.image %>" alt="" loading="lazy"
+                   class="h-20 w-16 shrink-0 bg-cream object-cover">
+            <% } %>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span class="font-mono text-[12px] tracking-wide text-ink"><%= o.id %></span>
+                <% if (when) { %>
+                  <span class="text-[12px] text-muted">
+                    <%= when.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                  </span>
+                <% } %>
+                <span class="pill pill-<%= s.tone %> ml-auto shrink-0"><%= s.label %></span>
+              </div>
+
+              <p class="mt-1.5 truncate text-[13.5px] text-ink">
+                <%= first ? first.name : 'Order' %><%= more ? ' + ' + more + ' more' : '' %>
+              </p>
+
+              <p class="mt-1 text-[13px] text-muted">
+                <%= money(o.total) %>
+                <% if (o.refundedAmount) { %>
+                  · <span class="text-maroon"><%= money(o.refundedAmount) %> refunded</span>
+                <% } %>
+              </p>
+            </div>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+
+    <p class="mt-6 text-[12.5px] leading-relaxed text-muted">
+      Ordered from another device? <a href="/returns" class="text-maroon underline underline-offset-4">Look it up</a>
+      with your order number. To stop this device remembering you,
+      <!-- Offered plainly. A shared computer is the normal case in a family, not an edge case. -->
+      <form method="post" action="/orders/forget" class="inline">
+        <button class="text-maroon underline underline-offset-4">forget me</button>
+      </form>.
+    </p>
+  <% } %>
+</section>

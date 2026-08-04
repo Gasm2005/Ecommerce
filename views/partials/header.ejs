@@ -31,8 +31,8 @@
       </a>
 
 
-      <!-- phone/tablet: account only — bag, saved and search live in the bottom tab bar -->
-      <a href="/checkout" class="-mr-1 p-2 text-ink lg:hidden" aria-label="Account">
+      <!-- phone/tablet: orders only — bag, saved and search live in the bottom tab bar -->
+      <a href="/orders" class="-mr-1 p-2 text-ink lg:hidden" aria-label="Your orders">
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/></svg>
       </a>
 
@@ -53,7 +53,10 @@
           <span id="cart-count" class="<%= cartSummary.count ? '' : 'hidden ' %>absolute -right-0.5 -top-0.5 min-w-[17px] rounded-full bg-maroon px-1 text-center text-[10px] font-medium leading-[17px] text-ivory"><%= cartSummary.count %></span>
         </button>
 
-        <a href="/checkout" class="ml-1 hidden items-center gap-2 border border-line px-4 py-2 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon lg:inline-flex">Login</a>
+        <!-- Named for what it does. "Login" would promise an account this shop does not have. -->
+        <a href="/orders" class="ml-1 hidden items-center gap-2 border border-line px-4 py-2 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon lg:inline-flex">
+          <%= me && me.orderIds && me.orderIds.length ? 'Your orders' : 'Track order' %>
+        </a>
       </nav>
     </div>
 
@@ -183,7 +186,7 @@
       <% }); %>
       <a href="/category/all?sort=new" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em] text-maroon">New In</a>
       <a href="/wishlist" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em]">Wishlist</a>
-      <a href="/checkout" class="block py-3.5 text-sm uppercase tracking-[0.14em]">Login</a>
+      <a href="/orders" class="block py-3.5 text-sm uppercase tracking-[0.14em]"><%= me && me.orderIds && me.orderIds.length ? 'Your orders' : 'Track order' %></a>
     </nav>
     <div class="border-t border-line px-5 py-4 text-xs text-muted">
       <p><%= config.brand.supportPhone %></p>

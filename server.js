@@ -17,6 +17,7 @@ const journal = require('./src/journal');
 const marketing = require('./src/marketing');
 const discounts = require('./src/discounts');
 const attribution = require('./src/attribution');
+const shopper = require('./src/shopper');
 const returns = require('./src/returns');
 const invoice = require('./src/invoice');
 const pincode = require('./src/pincode');
@@ -75,6 +76,11 @@ app.use((req, res, next) => {
   res.locals.delivery = delivery;
   res.locals.fulfilment = fulfilment;
   res.locals.variants = variants;
+  res.locals.shopper = shopper;
+  /* Who this browser is, as far as a guest checkout can honestly say. Set here so
+     the several places that render a checkout step cannot each forget it. */
+  res.locals.me = shopper.current(req);
+  res.locals.savedAddresses = res.locals.me.addresses;
   /* Which section of the shop this visitor is in. A single-audience shop resolves
      to its only audience and never shows a chooser or a switcher. */
   res.locals.audience = audience.current(req, config);
@@ -415,6 +421,18 @@ function checkoutState(req) {
   }
 }
 
+/**
+ * The state checkout should open with.
+ *
+ * A returning customer's most recent address fills the form, but only where they
+ * have not already typed something this visit — a half-finished form must never be
+ * overwritten by a remembered one. The saved address is a starting point, not a
+ * decision: the form is fully editable and there is a way to clear it outright.
+ */
+function checkoutStateFor(req) {
+  return shopper.prefill(checkoutState(req), shopper.current(req));
+}
+
 function saveCheckoutState(res, state) {
   res.cookie('aanya_checkout', Buffer.from(JSON.stringify(state), 'utf8').toString('base64'), {
     httpOnly: true, sameSite: 'lax', path: '/', maxAge: 1000 * 60 * 60 * 24 * 7
@@ -486,10 +504,51 @@ app.get('/checkout', (req, res) => {
   res.render('pages/checkout', {
     steps: STEPS,
     step: 1,
-    state: checkoutState(req),
+    state: checkoutStateFor(req),
     errors: {},
     codCheck: codCheckFor(req, res, config),
     title: 'Checkout'
+  });
+});
+
+/**
+ * "Not you?" — drops the remembered address and details.
+ *
+ * Someone buying a gift for their sister needs one obvious way to start fresh, or
+ * they edit four fields, miss the fifth, and the parcel goes to the wrong city.
+ */
+app.post('/checkout/forget', (req, res) => {
+  shopper.forget(res);
+
+  const config = loadConfig();
+  const state = {};
+  saveCheckoutState(res, state);
+
+  const summary = checkoutSummary(req, res, config, state);
+  res.render('fragments/checkout-step', {
+    steps: STEPS, step: 1, state, summary, errors: {},
+    me: shopper.blank(), savedAddresses: [],   // forgotten: override the locals
+    codCheck: cod.evaluate(codConfigFor(config), { pincode: '', total: summary.total })
+  });
+});
+
+/** Switches to another remembered address without retyping it. */
+app.post('/checkout/address/:index', (req, res) => {
+  const config = loadConfig();
+  const me = shopper.current(req);
+  const picked = me.addresses[Math.max(0, parseInt(req.params.index, 10) || 0)];
+
+  const state = { ...checkoutState(req) };
+  if (picked) shopper.ADDRESS_FIELDS.forEach((k) => { state[k] = picked[k] || ''; });
+  saveCheckoutState(res, state);
+
+  const summary = checkoutSummary(req, res, config, state);
+  res.render('fragments/checkout-step', {
+    steps: STEPS, step: 1, state, summary, errors: {},
+    // Newest-first order would jump the chosen address to the top mid-edit, so keep
+    // the list as it is and let the form show what was picked.
+    savedAddresses: me.addresses,
+    codCheck: cod.evaluate(codConfigFor(config), { pincode: state.pincode || '', total: summary.total })
   });
 });
 
@@ -651,6 +710,10 @@ async function finaliseOrder({ req, res, config, summary, state, plan, payment }
     lastOrder: { id: order.id, total: order.total, email: state.email || '' }
   });
 
+  /* This browser now owns this order, and whatever they typed is what we know about
+     them next time. Signed, because these ids decide who may read an order. */
+  shopper.rememberOrder(res, shopper.current(req), { order, state });
+
   // Never let a mail failure break a completed checkout.
   notifications.orderPlaced(order, config, marketing.origin(req, config)).catch((err) => console.error('order email failed:', err.message));
   activity.log('Orders', `${order.id} placed · ${config.currency.symbol}${order.total.toLocaleString('en-IN')}${payment ? ' · ' + payment.provider : ''}`);
@@ -722,11 +785,54 @@ app.post('/webhooks/payments', express.raw({ type: '*/*', limit: '1mb' }), (req,
   res.json({ ok: true });
 });
 
+/**
+ * Your orders, without an account.
+ *
+ * Reads only the ids this browser is signed as owning, so this cannot become a way
+ * to enumerate the shop's orders. An id we no longer hold — a deleted order — is
+ * dropped rather than rendered as a blank row.
+ */
+app.get('/orders', (req, res) => {
+  const me = shopper.current(req);
+  const rows = me.orderIds
+    .map((id) => ordersStore.byId(id))
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  res.locals.seo = { title: 'Your orders' + marketing.data().seo.titleSuffix, description: 'Track the orders you have placed.' };
+  res.render('pages/orders', { title: 'Your orders', rows, me });
+});
+
+/** A shared computer is the normal case in a family, not an edge case. */
+app.post('/orders/forget', (req, res) => {
+  shopper.forget(res);
+  res.redirect('/orders');
+});
+
 app.get('/order/:id', (req, res) => {
   const state = checkoutState(req);
-  const order = ordersStore.byId(req.params.id);
+  const id = String(req.params.id || '').trim().toUpperCase();
+  const order = ordersStore.byId(id);
+
+  /* Order ids run in sequence, so ORD-00042 tells anyone that ORD-00041 exists.
+     Without a check, walking the numbers read back what strangers had paid. Proof is
+     either of the two the invoice already accepts: this browser placed the order, or
+     the contact on it is supplied. */
+  const me = shopper.current(req);
+  const ownSession = (state.lastOrder && String(state.lastOrder.id).toUpperCase() === id)
+    || shopper.ownsOrder(me, id);
+
+  const check = (order && req.query.contact)
+    ? ordersStore.verifyPurchase({ orderId: id, contact: req.query.contact, productId: order.items[0] && order.items[0].productId })
+    : { reason: 'no contact' };
+  const contactOk = !!req.query.contact && !/find that order|match the order/.test(check.reason || '');
+
+  if (order && !ownSession && !contactOk) {
+    return res.redirect('/returns?order=' + encodeURIComponent(id));
+  }
+
   res.render('pages/order', {
-    orderId: req.params.id,
+    orderId: id,
     order: order || state.lastOrder || null,
     placed: order || null,
     state,
@@ -801,7 +907,8 @@ app.get('/returns', storefrontFeature('returns'), (req, res) => {
   res.locals.seo = { title: 'Returns & refunds' + marketing.data().seo.titleSuffix, description: 'Track an order or request a return.' };
   res.render('pages/returns', {
     title: 'Returns', lookup: null, error: null, state: {},
-    invoiceWanted: String(req.query.invoice || '').trim().toUpperCase().slice(0, 20)
+    invoiceWanted: String(req.query.invoice || '').trim().toUpperCase().slice(0, 20),
+    orderWanted: String(req.query.order || '').trim().toUpperCase().slice(0, 20)
   });
 });
 
