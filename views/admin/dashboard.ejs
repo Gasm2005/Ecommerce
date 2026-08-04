@@ -1,5 +1,30 @@
 <%- include('./partials/open', { active: 'dashboard', adminTitle: 'Dashboard', adminSubtitle: config.brand.name + ' · ' + orders.all().length + ' orders on record', adminActions: null }) %>
 
+<% if (typeof mailHealth !== 'undefined' && mailHealth && mailHealth.broken) { %>
+  <!-- The one failure a shop cannot see for itself: mail that stopped arriving while
+       the settings still look correct. Every order taken meanwhile is a customer
+       wondering whether it went through. -->
+  <div class="card mb-4 border-l-2 border-l-maroon p-4">
+    <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+      <div>
+        <h2 class="font-serif text-base text-maroon">Order confirmations are not going out</h2>
+        <p class="mt-1 text-[12.5px] leading-relaxed text-muted">
+          The last <strong class="text-ink"><%= mailHealth.consecutiveFailures %></strong> emails failed:
+          <span class="text-ink"><%= mailHealth.reason %></span>.
+          <% if (mailHealth.lastOk) { %>
+            The last one that did arrive was
+            <%= new Date(mailHealth.lastOk.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) %>.
+          <% } %>
+          Customers are still ordering — they are just not hearing back.
+        </p>
+      </div>
+      <a href="/admin/marketing<%= tokenQs %>" class="shrink-0 border border-maroon px-4 py-2 text-[10px] uppercase tracking-luxe text-maroon transition hover:bg-maroon hover:text-ivory">
+        Check email settings
+      </a>
+    </div>
+  </div>
+<% } %>
+
 <!-- range picker: presets plus an explicit from/to, so a campaign window
      (say the 5 days after an influencer post) can be measured directly -->
 <form hx-get="/admin" hx-target="#dash" hx-swap="innerHTML" data-auto-submit

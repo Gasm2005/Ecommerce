@@ -220,7 +220,22 @@ function checkIntegrations() {
     fail('Email', `${notif.provider} is selected but has no credentials: ${(notif.missing || []).join(', ')}.`,
       'Add the API key.');
   } else {
-    ok('Email', `${notif.label || notif.provider} configured`);
+    /* Credentials present is not the same as mail arriving. An expired SMTP password
+       or a revoked API key leaves every check saying "ready" while no confirmation
+       reaches a customer, so read the delivery log rather than the settings. */
+    const mail = notifications.health();
+    if (mail.broken) {
+      fail('Email', `${mail.consecutiveFailures} sends in a row have failed — ${mail.reason}`,
+        'Re-check the credentials, then use the test send in Admin → Marketing.');
+    } else if (mail.failed) {
+      warn('Email', `${mail.failed} of the last ${mail.attempts} sends failed — ${mail.reason}`,
+        'One-off failures are usually the network; a pattern is not.');
+    } else if (!mail.attempts) {
+      warn('Email', `${notif.label || notif.provider} configured, but nothing has been sent yet.`,
+        'Send a test from Admin → Marketing before launch.');
+    } else {
+      ok('Email', `${notif.label || notif.provider} — last ${mail.attempts} sends delivered`);
+    }
   }
 
   const media = require('../src/media').available();

@@ -458,7 +458,10 @@ function dashboardModel(req) {
     reviewStats: reviews.overview(),
     seoAudit: marketing.audit(config),
     custo: analytics.customers(range),
-    activityRows: activity.recent(6)
+    activityRows: activity.recent(6),
+    /* Surfaced on the dashboard rather than only on the Marketing page: a client who
+       has to go looking will not find out their confirmations stopped. */
+    mailHealth: notifications.health()
   };
 }
 

@@ -342,6 +342,38 @@ async function returnUpdate(request, order, config) {
 }
 
 /** Admin "send test" button. Deliberately bypasses the per-event switches. */
+/**
+ * A published review, back to whoever wrote it.
+ *
+ * This event has been in the settings list since the start with nothing sending it —
+ * an owner could switch "Review published" on and receive silence forever. A switch
+ * that does nothing is worse than a missing feature: it spends the owner's trust in
+ * every other switch on the screen.
+ *
+ * The address comes from the ORDER, not the review: reviews only carry a display name.
+ */
+async function reviewPublished(review, config) {
+  const order = review && review.orderId ? require('./orders').byId(review.orderId) : null;
+  const to = order && order.customer && order.customer.email;
+  if (!to) return null;
+
+  const product = require('./catalog').all().find((p) => p.id === review.productId);
+  const name = (product && product.name) || 'your piece';
+
+  return send({
+    event: 'review.published',
+    to,
+    subject: `Your review of ${name} is live · ${config.brand.name}`,
+    template: 'generic',
+    data: {
+      headline: 'Thank you for the review',
+      body: `Your review of ${name} is now on the product page${review.rating ? ` — ${review.rating} out of 5` : ''}. ` +
+            'It helps the next person buying it more than anything we could write ourselves.'
+    },
+    config
+  });
+}
+
 async function sendTest(to, config) {
   const s = settings(config);
   try {
@@ -367,6 +399,48 @@ function recent(n = 25) {
   return store.read('notifications', []).slice(0, n);
 }
 
+/**
+ * Is mail actually going out?
+ *
+ * status() answers whether it is CONFIGURED, which is a different question and the
+ * less useful one after launch. An SMTP password expires, a Resend key gets revoked,
+ * a sending domain loses its DNS record — credentials are still present, so every
+ * check keeps saying "ready" while not one confirmation reaches a customer. Nobody
+ * finds out until somebody rings to ask where their order went.
+ *
+ * So this reads the delivery log instead of the settings: what failed, how recently,
+ * and whether anything has succeeded since.
+ *
+ * Skipped sends are not failures. An event switched off, or an order with no email on
+ * it, is the shop working as configured.
+ */
+function health(window = 20) {
+  const rows = recent(window).filter((r) => !r.skipped);
+  const failures = rows.filter((r) => !r.ok);
+  const lastOk = rows.find((r) => r.ok) || null;
+  const lastFailure = failures[0] || null;
+
+  /* "Broken" is every attempt since the last success having failed, not merely one
+     bad row: a single timeout on a flaky network is noise, and warning about it
+     teaches an owner to ignore the warning. */
+  const sinceSuccess = [];
+  for (const r of rows) {
+    if (r.ok) break;
+    sinceSuccess.push(r);
+  }
+
+  return {
+    attempts: rows.length,
+    failed: failures.length,
+    consecutiveFailures: sinceSuccess.length,
+    broken: sinceSuccess.length >= 2,
+    lastOk,
+    lastFailure,
+    // The same message repeated is one problem, and it is the one worth printing.
+    reason: lastFailure ? lastFailure.error || 'unknown error' : null
+  };
+}
+
 function status(config) {
   const s = settings(config);
   const provider = EMAIL_PROVIDERS.find((p) => p.id === s.emailProvider) || EMAIL_PROVIDERS[0];
@@ -385,6 +459,6 @@ function status(config) {
 
 module.exports = {
   EMAIL_PROVIDERS, WHATSAPP_PROVIDERS, EVENTS,
-  settings, status, isEnabled, send, sendTest, recent,
-  orderPlaced, orderStatus, returnUpdate
+  settings, status, health, isEnabled, send, sendTest, recent,
+  orderPlaced, orderStatus, returnUpdate, reviewPublished
 };

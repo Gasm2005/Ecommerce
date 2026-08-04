@@ -60,8 +60,16 @@ router.get('/reviews/rows', requireSection('reviews'), (req, res) => {
 });
 
 router.post('/reviews/:id/status', requireSection('reviews'), (req, res) => {
+  const wasPublished = (reviews.all().find((x) => x.id === req.params.id) || {}).status === 'published';
   const updated = reviews.setStatus(req.params.id, req.body.status);
   if (updated) activity.log('Reviews', `${updated.id} → ${updated.status} (${updated.rating}★)`);
+
+  /* Only on the transition into published, so re-saving an already-live review does
+     not thank the same person twice. Never let a mail failure fail the approval. */
+  if (updated && updated.status === 'published' && !wasPublished) {
+    notifications.reviewPublished(updated, loadConfig())
+      .catch((err) => console.error('review email failed:', err.message));
+  }
   notify(res, updated ? `Review ${updated.status}` : 'Review not found', updated ? 'good' : 'critical');
   res.render('admin/fragments/review-groups', reviewsModel(req));
 });
