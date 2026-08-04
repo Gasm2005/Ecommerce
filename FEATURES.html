@@ -1,0 +1,815 @@
+<title>Full feature list — what you get and what it does for you</title>
+
+<style>
+  /* ── Tokens ─────────────────────────────────────────────────────────────
+     A ledger palette: warm near-black on warm paper, stamp-ink indigo as the
+     accent, marigold reserved for the questions the reader must go and ask.
+     Green and amber are semantic (included / verify), never decorative. */
+  :root {
+    --ink:      #1A1814;
+    --paper:    #FCFBF8;
+    --panel:    #F5F2EA;
+    --rule:     #E4DFD4;
+    --rule-soft:#EFEBE2;
+    --muted:    #6E6A61;
+    --indigo:   #253A6B;
+    --marigold: #A96C12;
+    --gain:     #1D6842;
+
+    --measure: 66ch;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', ui-serif, serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #EDEAE3; --paper: #14130F; --panel: #1C1A15; --rule: #302C24;
+      --rule-soft: #262319; --muted: #9A948A; --indigo: #93A6DA;
+      --marigold: #D9A253; --gain: #66BC8E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #EDEAE3; --paper: #14130F; --panel: #1C1A15; --rule: #302C24;
+    --rule-soft: #262319; --muted: #9A948A; --indigo: #93A6DA;
+    --marigold: #D9A253; --gain: #66BC8E;
+  }
+  :root[data-theme="light"] {
+    --ink: #1A1814; --paper: #FCFBF8; --panel: #F5F2EA; --rule: #E4DFD4;
+    --rule-soft: #EFEBE2; --muted: #6E6A61; --indigo: #253A6B;
+    --marigold: #A96C12; --gain: #1D6842;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 16px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 22px 90px; }
+
+  /* ── Masthead ───────────────────────────────────────────────────────── */
+  header.masthead { padding: 54px 0 30px; border-bottom: 2px solid var(--ink); }
+  .kicker {
+    font: 500 11px/1 var(--mono);
+    letter-spacing: .16em; text-transform: uppercase; color: var(--marigold);
+  }
+  h1 {
+    font: 400 clamp(30px, 5vw, 45px)/1.12 var(--serif);
+    text-wrap: balance; margin: 14px 0 0; letter-spacing: -.01em;
+  }
+  .standfirst { max-width: var(--measure); margin: 18px 0 0; font-size: 17px; color: var(--muted); }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  .counts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 1px; margin: 30px 0 0; background: var(--rule); border: 1px solid var(--rule);
+  }
+  .count { background: var(--paper); padding: 13px 15px; }
+  .count b {
+    display: block; font: 400 25px/1 var(--serif);
+    font-variant-numeric: tabular-nums; color: var(--indigo);
+  }
+  .count span {
+    display: block; margin-top: 4px; font: 400 10.5px/1.35 var(--mono);
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ── Sections ───────────────────────────────────────────────────────── */
+  section { padding-top: 58px; }
+  .part-label {
+    display: inline-block; font: 500 11px/1 var(--mono);
+    letter-spacing: .16em; text-transform: uppercase; color: var(--indigo); padding-bottom: 8px;
+  }
+  h2 { font: 400 clamp(23px, 3.2vw, 30px)/1.2 var(--serif); margin: 0; text-wrap: balance; }
+  .section-lead { max-width: var(--measure); margin: 12px 0 0; color: var(--muted); font-size: 15.5px; }
+
+  h3 {
+    font: 600 12.5px/1.3 var(--sans);
+    letter-spacing: .1em; text-transform: uppercase; color: var(--indigo);
+    margin: 42px 0 0; padding-bottom: 8px; border-bottom: 1.5px solid var(--ink);
+  }
+  h3 .n {
+    float: right; font: 400 11.5px/1.3 var(--mono);
+    font-variant-numeric: tabular-nums; letter-spacing: 0; text-transform: none; color: var(--muted);
+  }
+
+  /* Column headings, shown once per group so the three-part row reads as a table. */
+  .colhead {
+    display: grid; grid-template-columns: 1fr 1.35fr 1.3fr; gap: 18px;
+    padding: 9px 0 7px; border-bottom: 1px solid var(--rule);
+    font: 500 10px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  }
+  .colhead span:last-child { color: var(--gain); }
+
+  ul.features { list-style: none; margin: 0; padding: 0; }
+  ul.features > li {
+    display: grid; grid-template-columns: 1fr 1.35fr 1.3fr; gap: 6px 18px;
+    padding: 14px 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  .name { font-weight: 600; font-size: 15px; }
+  .what { color: var(--muted); font-size: 14.5px; }
+  /* The benefit column is the point of the document, so it gets the colour. */
+  .gain { font-size: 14.5px; color: var(--gain); }
+  .gain::before { content: "→ "; opacity: .55; }
+
+  @media (max-width: 760px) {
+    .colhead { display: none; }
+    ul.features > li { grid-template-columns: 1fr; gap: 5px; padding: 16px 0; }
+    .what::before { content: "What it is · "; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  }
+
+  .rare {
+    display: inline-block; margin-left: 6px; padding: 1px 5px;
+    font: 500 9.5px/1.5 var(--mono); letter-spacing: .07em; text-transform: uppercase;
+    color: var(--marigold); border: 1px solid currentColor; vertical-align: 2px; white-space: nowrap;
+  }
+
+  aside.note {
+    margin: 42px 0 0; padding: 21px 23px;
+    background: var(--panel); border-left: 3px solid var(--marigold);
+  }
+  aside.note h4 { margin: 0 0 8px; font: 600 14px/1.4 var(--sans); }
+  aside.note p { margin: 0 0 10px; max-width: var(--measure); font-size: 14.5px; color: var(--muted); }
+  aside.note p:last-child { margin-bottom: 0; }
+  aside.note strong { color: var(--ink); }
+
+  /* ── Questions ──────────────────────────────────────────────────────── */
+  ol.questions { list-style: none; margin: 26px 0 0; padding: 0; counter-reset: q; }
+  ol.questions > li {
+    counter-increment: q; display: grid; grid-template-columns: 30px 1fr;
+    gap: 3px 14px; padding: 15px 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  ol.questions > li::before {
+    content: counter(q, decimal-leading-zero);
+    font: 400 12px/1.9 var(--mono); font-variant-numeric: tabular-nums; color: var(--marigold);
+  }
+  .q { font-weight: 600; font-size: 15.5px; }
+  .why { grid-column: 2; margin-top: 3px; font-size: 14px; color: var(--muted); }
+  .why em { font-style: normal; color: var(--indigo); }
+
+  .scroller { overflow-x: auto; }
+  table.compare { width: 100%; margin: 24px 0 0; border-collapse: collapse; font-size: 14.5px; }
+  table.compare th, table.compare td {
+    text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--rule-soft); vertical-align: top;
+  }
+  table.compare thead th {
+    font: 600 10.5px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1.5px solid var(--ink); white-space: nowrap;
+  }
+  table.compare td:first-child { font-weight: 600; }
+
+  footer.sig {
+    margin-top: 60px; padding-top: 20px; border-top: 2px solid var(--ink);
+    font-size: 14px; color: var(--muted);
+  }
+  footer.sig p { max-width: var(--measure); margin: 0 0 8px; }
+
+  @media print {
+    body { background: #fff; color: #000; font-size: 10.5pt; }
+    section { padding-top: 26px; }
+    ul.features > li, ol.questions > li, .counts { break-inside: avoid; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Feature list · Ethnic-wear e-commerce platform</p>
+    <h1>What you get, and what each thing does for your business</h1>
+    <p class="standfirst">
+      Every feature listed with <strong>what it is</strong> and <strong>what you gain from
+      it</strong>. Part&nbsp;1 is the customer-facing shop. Part&nbsp;2 is your admin panel.
+      Part&nbsp;3 is fourteen questions to ask any other vendor — the answers will tell you
+      more than the price does.
+    </p>
+
+    <div class="counts">
+      <div class="count"><b>62</b><span>Features</span></div>
+      <div class="count"><b>25</b><span>Admin screens</span></div>
+      <div class="count"><b>3</b><span>Shop sections</span></div>
+      <div class="count"><b>9</b><span>Report windows</span></div>
+      <div class="count"><b>245</b><span>Automated tests</span></div>
+    </div>
+  </header>
+
+  <!-- ════════════════ PART 1 · STOREFRONT ════════════════ -->
+  <section>
+    <span class="part-label">Part one · What your customer sees</span>
+    <h2>The storefront</h2>
+    <p class="section-lead">
+      The half of the website that turns a visitor into an order. Everything here works
+      on a phone as well as a laptop.
+    </p>
+
+    <h3>Sections for who you sell to <span class="n">Group 1 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Menswear / Womenswear / Kidswear<span class="rare">rare</span></span>
+        <span class="what">A visitor is asked once which section they want. Categories, homepage, search and footer all change to match.</span>
+        <span class="gain">Sell to men and women without the site feeling confused. One website does the job of two, and if you sell to only one audience the question never appears.</span>
+      </li>
+      <li>
+        <span class="name">Separate categories per section</span>
+        <span class="what">Sherwani, kurta pyjama, indo-western, suiting for men. Bridal, sarees, lehengas, gowns for women. Kids has its own.</span>
+        <span class="gain">A man shopping for a sherwani never scrolls past lehengas, so he finds what he came for and does not leave.</span>
+      </li>
+      <li>
+        <span class="name">Its own homepage per section</span>
+        <span class="what">Different banner, headline and bestsellers for each section.</span>
+        <span class="gain">The first screen already speaks to the person who landed on it, instead of asking them to filter.</span>
+      </li>
+      <li>
+        <span class="name">Universal items</span>
+        <span class="what">A stole or dupatta with no section set shows to everyone.</span>
+        <span class="gain">Accessories keep selling to all three sections without you listing them three times.</span>
+      </li>
+    </ul>
+
+    <h3>Finding a product <span class="n">Group 2 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Search as you type</span>
+        <span class="what">Results appear from the second letter — products, categories and fabrics.</span>
+        <span class="gain">A customer who knows what they want reaches it in two seconds instead of giving up on your menu.</span>
+      </li>
+      <li>
+        <span class="name">Filters with no page reload</span>
+        <span class="what">Colour, fabric, size, occasion, price. The grid fades and updates; the web address updates too.</span>
+        <span class="gain">Browsing feels instant, and a customer can send a filtered view — "red lehengas under ₹50,000" — straight to her sister on WhatsApp.</span>
+      </li>
+      <li>
+        <span class="name">Counts on every filter</span>
+        <span class="what">"Raw Silk (12)" next to each option.</span>
+        <span class="gain">Nobody clicks into an empty result and concludes your shop has nothing.</span>
+      </li>
+      <li>
+        <span class="name">Sort five ways</span>
+        <span class="what">Featured, newest, popularity, price low to high, high to low.</span>
+        <span class="gain">Budget shoppers and premium shoppers both get to the right end of your range quickly.</span>
+      </li>
+      <li>
+        <span class="name">Endless scroll and Load more</span>
+        <span class="what">Both, on the same page.</span>
+        <span class="gain">More of your catalogue actually gets seen, which matters most for the pieces sitting on page two.</span>
+      </li>
+      <li>
+        <span class="name">Category dropdown menus</span>
+        <span class="what">Full-width menus showing featured pieces, not a plain text list.</span>
+        <span class="gain">Your best stock is visible from every page of the site.</span>
+      </li>
+      <li>
+        <span class="name">Wishlist and quick view</span>
+        <span class="what">Save for later; open a product without leaving the grid.</span>
+        <span class="gain">A bride comparing eight lehengas can shortlist instead of losing her place — and comes back to the list.</span>
+      </li>
+    </ul>
+
+    <h3>The product page <span class="n">Group 3 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Four photos visible at once</span>
+        <span class="what">Two-by-two on a laptop, swipeable on a phone, magnify on hover.</span>
+        <span class="gain">Embroidery and fabric detail sell themselves. Fewer "can you send more photos on WhatsApp" messages for your staff to answer.</span>
+      </li>
+      <li>
+        <span class="name">Colour and size on every product</span>
+        <span class="what">With actual colour swatches, not just names.</span>
+        <span class="gain">Fewer wrong-colour orders, which means fewer returns you pay courier both ways for.</span>
+      </li>
+      <li>
+        <span class="name">Pincode check before the cart<span class="rare">rare</span></span>
+        <span class="what">Six digits and the customer sees the delivery date, whether you deliver there yourself, and whether COD is available.</span>
+        <span class="gain">The two questions that stop a purchase are answered before the customer commits — instead of surfacing at checkout, where they abandon.</span>
+      </li>
+      <li>
+        <span class="name">Price with nothing hidden</span>
+        <span class="what">"Inclusive of all taxes" plus the delivery position stated right on the product page.</span>
+        <span class="gain">No surprise charge at checkout. Surprise charges are the single biggest reason a full cart is abandoned.</span>
+      </li>
+      <li>
+        <span class="name">Buy buttons that follow the page<span class="rare">rare</span></span>
+        <span class="what">A slim bar keeps Add to bag and Buy now on screen while scrolling, and disappears once they browse other pieces.</span>
+        <span class="gain">A customer who has decided at the bottom of the page does not have to scroll back up to buy.</span>
+      </li>
+      <li>
+        <span class="name">Size guide per audience</span>
+        <span class="what">Chest and shoulder for men, bust and hip for women, on tabs.</span>
+        <span class="gain">A man is not shown a bust measurement. Right size chosen first time means fewer size-exchange returns.</span>
+      </li>
+      <li>
+        <span class="name">Specifications, care, questions</span>
+        <span class="what">Fabric, occasion, SKU, wash care, and a FAQ per product.</span>
+        <span class="gain">Answers the questions your team currently answers on the phone, at 11pm, one customer at a time.</span>
+      </li>
+      <li>
+        <span class="name">Related pieces</span>
+        <span class="what">From the same section, closest in price.</span>
+        <span class="gain">A bigger average order — someone buying a sherwani sees the stole that goes with it.</span>
+      </li>
+    </ul>
+
+    <h3>Reviews from real buyers <span class="n">Group 4 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Only customers can review<span class="rare">rare</span></span>
+        <span class="what">A review needs the order number plus the phone or email on that order, and the order must be delivered.</span>
+        <span class="gain">A competitor cannot post a fake one-star review on your bestseller. Your ratings stay worth something.</span>
+      </li>
+      <li>
+        <span class="name">Photos and videos in reviews</span>
+        <span class="what">Uploads start compressing while the customer is still typing.</span>
+        <span class="gain">A real customer photo of your lehenga sells better than any studio shot, and nobody waits for an upload bar.</span>
+      </li>
+      <li>
+        <span class="name">You approve before it appears</span>
+        <span class="what">Nothing publishes until you have read it.</span>
+        <span class="gain">A genuine complaint reaches you privately first, so you can fix it instead of reading it in public.</span>
+      </li>
+      <li>
+        <span class="name">Live Google reviews</span>
+        <span class="what">Your Google rating can be pulled onto the site.</span>
+        <span class="gain">Reviews you have already earned start working on your own website too.</span>
+      </li>
+    </ul>
+
+    <h3>Bag and checkout <span class="n">Group 5 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Slide-out bag</span>
+        <span class="what">Change quantity without leaving the page. The bag survives closing the browser for 30 days.</span>
+        <span class="gain">Someone who was interrupted comes back a week later and their bag is still there.</span>
+      </li>
+      <li>
+        <span class="name">Checkout without an account</span>
+        <span class="what">Three steps on one page: address, delivery, payment.</span>
+        <span class="gain">No "create a password" step. Forcing account creation loses a meaningful share of first-time buyers.</span>
+      </li>
+      <li>
+        <span class="name">Pincode fills city and state<span class="rare">rare</span></span>
+        <span class="what">Six digits and the address completes itself, with local area suggestions.</span>
+        <span class="gain">Three fewer fields to type on a phone, and far fewer wrong addresses — which means fewer failed deliveries you pay for.</span>
+      </li>
+      <li>
+        <span class="name">Full price breakdown</span>
+        <span class="what">Items, discount, delivery with the waived charge struck through, total payable, GST disclosed, and "you save ₹X".</span>
+        <span class="gain">The customer can see they are getting a deal, and can see nothing is hidden. Both raise the chance they finish.</span>
+      </li>
+      <li>
+        <span class="name">Total updates as they choose</span>
+        <span class="what">Pick express or gift wrap and the total changes instantly.</span>
+        <span class="gain">Nobody is surprised by a charge they picked, so express delivery actually gets bought instead of questioned.</span>
+      </li>
+      <li>
+        <span class="name">Coupon codes</span>
+        <span class="what">Percentage, flat amount or free shipping, with minimum order, expiry and usage limits.</span>
+        <span class="gain">Run a Diwali sale or an influencer code without giving away more than you planned.</span>
+      </li>
+      <li>
+        <span class="name">GST number for business buyers<span class="rare">rare</span></span>
+        <span class="what">A reseller enters their GSTIN and gets a proper B2B invoice. The number is checked digit-by-digit.</span>
+        <span class="gain">Boutiques and resellers can buy from you, because they can claim their input credit. That is a whole customer segment most small sites cannot serve.</span>
+      </li>
+      <li>
+        <span class="name">Stock re-checked at payment</span>
+        <span class="what">If someone else bought the last piece while the bag sat open, nothing is charged.</span>
+        <span class="gain">You never take money for something you cannot send — which is the worst call your team can have to make.</span>
+      </li>
+    </ul>
+
+    <h3>Payment and cash on delivery <span class="n">Group 6 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Razorpay, on your own account</span>
+        <span class="what">UPI, cards, net banking, EMI. Your keys, your bank.</span>
+        <span class="gain">Money settles directly to you. Nobody sits between you and your revenue.</span>
+      </li>
+      <li>
+        <span class="name">Partial cash on delivery<span class="rare">rare</span></span>
+        <span class="what">Take 25% online, the rest at the door. Percentage or flat, your choice.</span>
+        <span class="gain">The single biggest lever on returns. On a ₹90,000 sherwani, a customer who has paid ₹22,500 does not refuse the parcel — and you are not paying courier both ways for nothing.</span>
+      </li>
+      <li>
+        <span class="name">COD off by pincode</span>
+        <span class="what">Block specific pincodes or whole ranges — or invert it and allow COD only where you trust it. Set a maximum order value.</span>
+        <span class="gain">The areas that cost you money stop costing you money, without switching COD off for everyone.</span>
+      </li>
+      <li>
+        <span class="name">Payment verified before the order exists</span>
+        <span class="what">An abandoned payment never creates an order.</span>
+        <span class="gain">Your order list stays real. No phantom orders to chase, and your sales figures are not inflated.</span>
+      </li>
+    </ul>
+
+    <h3>Delivery, including your own <span class="n">Group 7 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Same-day delivery in your own city<span class="rare">rare</span></span>
+        <span class="what">Deliver across your city yourself, same evening, free — courier for everyone else. With time slots.</span>
+        <span class="gain">You keep the courier fee, the customer gets it today, and you can promise something no marketplace can. For a local shop this is the strongest thing on your website.</span>
+      </li>
+      <li>
+        <span class="name">Orders marked "we deliver this"</span>
+        <span class="what">The order says plainly: do not book a courier.</span>
+        <span class="gain">Nobody in your team pays for a courier on a parcel you already delivered by hand.</span>
+      </li>
+      <li>
+        <span class="name">Store pickup</span>
+        <span class="what">Customer collects from the shop.</span>
+        <span class="gain">Zero delivery cost, and they walk into your shop — where they buy more.</span>
+      </li>
+      <li>
+        <span class="name">Honest cut-off times</span>
+        <span class="what">Same-day stops being offered after 2pm.</span>
+        <span class="gain">You never break a promise the website made on your behalf at 6pm.</span>
+      </li>
+      <li>
+        <span class="name">Delivery charges by method</span>
+        <span class="what">Free above an amount you set; express and nominated-date at your own rates.</span>
+        <span class="gain">Free shipping pushes up your average order value, and express becomes a small extra income instead of a cost.</span>
+      </li>
+    </ul>
+
+    <h3>After the order <span class="n">Group 8 of 8</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Order confirmation email</span>
+        <span class="what">In your colours, with the full price breakdown and a link to the GST invoice.</span>
+        <span class="gain">The customer relaxes, and your shop looks established rather than improvised.</span>
+      </li>
+      <li>
+        <span class="name">Track an order without an account</span>
+        <span class="what">Order number plus phone or email.</span>
+        <span class="gain">"Where is my order?" stops being a phone call to your staff.</span>
+      </li>
+      <li>
+        <span class="name">Customer starts their own return</span>
+        <span class="what">With photos, inside the window you set. You approve or reject.</span>
+        <span class="gain">Returns become a queue you process at your own pace, with evidence attached, instead of an argument on the phone.</span>
+      </li>
+      <li>
+        <span class="name">WhatsApp updates</span>
+        <span class="what">Order and shipping updates through your own WhatsApp account.</span>
+        <span class="gain">Indian customers read WhatsApp and ignore email. Far fewer status enquiries.</span>
+      </li>
+      <li>
+        <span class="name">Blog / journal</span>
+        <span class="what">Long-form posts with proper tags and structure.</span>
+        <span class="gain">How a new shop gets found on Google without paying for every click.</span>
+      </li>
+      <li>
+        <span class="name">Works like an app on a phone</span>
+        <span class="what">Bottom tab bar, installable to the home screen, images that load only when needed.</span>
+        <span class="gain">Most of your traffic is on a phone. A site that feels like an app there converts better and loads on a weak network.</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ════════════════ PART 2 · ADMIN ════════════════ -->
+  <section>
+    <span class="part-label">Part two · What you operate</span>
+    <h2>The admin panel</h2>
+    <p class="section-lead">
+      Twenty-five screens. This half decides whether running the shop takes an hour a
+      day or an afternoon — and it is where cheap websites are usually hollow.
+    </p>
+
+    <h3>What you actually earned <span class="n">Group 1 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Profit in hand, not just sales<span class="rare">rare</span></span>
+        <span class="what">Sales, minus refunds, GST, cost of goods, packaging, courier, COD handling, gateway fee, returns provision, marketing, rent, salaries — then depreciation, loan interest and income tax.</span>
+        <span class="gain">You find out on the 3rd of the month whether last month made money. Most shop owners find out from their CA in July.</span>
+      </li>
+      <li>
+        <span class="name">EBITDA and take-home shown separately</span>
+        <span class="what">Two different numbers, both on screen.</span>
+        <span class="gain">You can see the business is healthy while your own take-home is thin — and know it is the loan, not the shop.</span>
+      </li>
+      <li>
+        <span class="name">Your cost per item, hidden from customers</span>
+        <span class="what">Enter what each piece costs you. Never shown on the storefront.</span>
+        <span class="gain">Without this, no profit figure on any website is real. With it, you know a ₹500 sale on a ₹100 piece nets you ₹376.</span>
+      </li>
+      <li>
+        <span class="name">Nine time windows, each compared</span>
+        <span class="what">Today, 2, 5, 7, 15, 30, 90 days, 12 months, all time — or any two dates. Each compared with the same length before it.</span>
+        <span class="gain">You see whether this week beat last week without doing arithmetic.</span>
+      </li>
+      <li>
+        <span class="name">Did that influencer post work?<span class="rare">rare</span></span>
+        <span class="what">Short windows plus campaign tracking on every order.</span>
+        <span class="gain">Two days after a paid post you know exactly what it sold. You stop paying the influencers who do not sell.</span>
+      </li>
+      <li>
+        <span class="name">Profit per product and per category</span>
+        <span class="what">Margin, units and profit for every SKU.</span>
+        <span class="gain">You reorder what makes money instead of what looks busy. Some bestsellers lose money and only this screen shows it.</span>
+      </li>
+      <li>
+        <span class="name">Coupon economics</span>
+        <span class="what">What each code cost you, and how much came back as returns. Coupon orders are numbered separately.</span>
+        <span class="gain">You find out that your discount code buyers return twice as often — before you run the sale again.</span>
+      </li>
+      <li>
+        <span class="name">Dead stock and low stock</span>
+        <span class="what">What has not sold, and what is running out.</span>
+        <span class="gain">Cash stuck on a shelf gets cleared, and you stop losing sales to items quietly at zero.</span>
+      </li>
+    </ul>
+
+    <h3>GST, done properly <span class="n">Group 2 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Proper tax invoices</span>
+        <span class="what">One unbroken series per financial year, allocated once, never reused.</span>
+        <span class="gain">A gap or a duplicate in the series is the first thing an officer asks about. There is nothing to explain.</span>
+      </li>
+      <li>
+        <span class="name">CGST/SGST or IGST decided correctly<span class="rare">rare</span></span>
+        <span class="what">Same state as you: CGST plus SGST. Different state: IGST. Taken from the buyer's address.</span>
+        <span class="gain">Get this wrong on a ₹1,50,000 order and you either underpay tax or overcharge a customer. Neither is cheap to unwind.</span>
+      </li>
+      <li>
+        <span class="name">Rate by price slab</span>
+        <span class="what">Garments under ₹2,500 at 5%, at or above at 18% — per piece, not per order.</span>
+        <span class="gain">Correct tax on a mixed basket without you checking each line.</span>
+      </li>
+      <li>
+        <span class="name">HSN code on every line</span>
+        <span class="what">Per product, with a store-wide fallback.</span>
+        <span class="gain">Your invoices and your returns match, which is what an audit looks for.</span>
+      </li>
+      <li>
+        <span class="name">Papers your CA can file from<span class="rare">rare</span></span>
+        <span class="what">GSTR-1 tables ready-made: B2CS, B2CL, B2B, HSN summary, documents issued, credit notes, and the 3B figure — and the tables reconcile with each other.</span>
+        <span class="gain">Your CA's monthly job becomes minutes, not a day of reading order screenshots. Ask your CA what they currently charge for that.</span>
+      </li>
+      <li>
+        <span class="name">TDS and TCS treated as recoverable</span>
+        <span class="what">What a marketplace withholds is reported as money you claim back, never as a cost.</span>
+        <span class="gain">Your profit figure is not quietly understated by 2% of your marketplace sales.</span>
+      </li>
+    </ul>
+
+    <h3>Orders <span class="n">Group 3 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Seven stages with a history</span>
+        <span class="what">Pending, confirmed, in production, shipped, delivered, cancelled, returned — each change dated.</span>
+        <span class="gain">Anyone in your team can see where an order stands without asking you.</span>
+      </li>
+      <li>
+        <span class="name">Filter by anything</span>
+        <span class="what">Status, payment method, paid or unpaid, who is delivering it, date range, free-text search.</span>
+        <span class="gain">"What am I delivering myself today" is one click, every morning.</span>
+      </li>
+      <li>
+        <span class="name">Cash still to collect</span>
+        <span class="what">A running total outstanding on COD orders.</span>
+        <span class="gain">You know how much of your "revenue" is still in other people's hands.</span>
+      </li>
+      <li>
+        <span class="name">Profit on each individual order</span>
+        <span class="what">Open any order and see what it earned.</span>
+        <span class="gain">You can tell whether that heavily discounted big order was worth taking.</span>
+      </li>
+      <li>
+        <span class="name">Export any date range</span>
+        <span class="what">A week, a month, a custom range, as a spreadsheet.</span>
+        <span class="gain">Send your CA exactly the period they asked for, not the whole year.</span>
+      </li>
+      <li>
+        <span class="name">Automatic emails on status change</span>
+        <span class="what">Shipped and delivered notify the customer.</span>
+        <span class="gain">Your staff stop sending status updates by hand.</span>
+      </li>
+    </ul>
+
+    <h3>Products <span class="n">Group 4 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Upload a whole catalogue at once</span>
+        <span class="what">A spreadsheet with 24 columns, validated before anything saves, with a backup taken first.</span>
+        <span class="gain">200 products go up in an afternoon instead of a fortnight of typing.</span>
+      </li>
+      <li>
+        <span class="name">Photos and video compressed automatically<span class="rare">rare</span></span>
+        <span class="what">Every upload becomes WebP; videos are re-encoded and given a poster frame.</span>
+        <span class="gain">A 4 MB phone photo becomes a few hundred KB. Your site stays fast as the catalogue grows — and a slow site is a site that does not sell.</span>
+      </li>
+      <li>
+        <span class="name">Stock per product</span>
+        <span class="what">Adjust up or down; sold-out pieces cannot be bought even by someone bypassing the page.</span>
+        <span class="gain">You never sell what you do not have, and never take a call apologising for it.</span>
+      </li>
+      <li>
+        <span class="name">Categories you control</span>
+        <span class="what">Add, rename, delete — including which section they belong to.</span>
+        <span class="gain">You reorganise your own shop for a new season without paying anyone.</span>
+      </li>
+      <li>
+        <span class="name">Made-to-order or ready stock<span class="rare">rare</span></span>
+        <span class="what">A switch. Off, and every promise about stitching, measurements and "our atelier" disappears from the site, checkout and emails.</span>
+        <span class="gain">A retail shop is never made to promise tailoring it does not do — and a couture house gets all of it back with one click.</span>
+      </li>
+    </ul>
+
+    <h3>Returns and refunds <span class="n">Group 5 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Refund part of an order</span>
+        <span class="what">Not just all or nothing. Several returns on one order add up correctly.</span>
+        <span class="gain">One item back out of three is handled properly, so your books stay right.</span>
+      </li>
+      <li>
+        <span class="name">Refunds move your profit figure</span>
+        <span class="what">A refund is not just a note on the order.</span>
+        <span class="gain">Your month's profit is true. A shop that counts refunded orders as sales does not know how it is doing.</span>
+      </li>
+      <li>
+        <span class="name">Refund through Razorpay</span>
+        <span class="what">One click. If the gateway refuses, you are told to do it by hand.</span>
+        <span class="gain">Refunds take a minute, and the system never pretends a failed refund succeeded.</span>
+      </li>
+      <li>
+        <span class="name">Return window you set</span>
+        <span class="what">Counted from delivery, not from the order date.</span>
+        <span class="gain">A customer whose parcel took a week does not lose a week of their return window — and nobody argues about the dates.</span>
+      </li>
+    </ul>
+
+    <h3>Marketing and Google <span class="n">Group 6 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Page titles and descriptions you edit</span>
+        <span class="what">Per category and per product.</span>
+        <span class="gain">You control how your shop reads in Google results, without a developer.</span>
+      </li>
+      <li>
+        <span class="name">Sitemap and structured data</span>
+        <span class="what">Prices, ratings and stock published in the format Google reads.</span>
+        <span class="gain">Your listing shows a price and stars instead of a plain blue link, which is a large difference in clicks.</span>
+      </li>
+      <li>
+        <span class="name">Written for AI answers too</span>
+        <span class="what">FAQ markup and a plain-language summary file.</span>
+        <span class="gain">When someone asks an AI assistant for bridal lehengas in your city, your shop can be quoted.</span>
+      </li>
+      <li>
+        <span class="name">Where every order came from</span>
+        <span class="what">Instagram, WhatsApp, Google, a specific campaign link — first touch and last touch.</span>
+        <span class="gain">You spend your marketing money on the channel that actually produced orders.</span>
+      </li>
+      <li>
+        <span class="name">Review feed for Google Shopping</span>
+        <span class="what">Your ratings exported in Google's format.</span>
+        <span class="gain">Stars appear inside your ads, which lowers what each click costs you.</span>
+      </li>
+    </ul>
+
+    <h3>Your data, your staff, your safety <span class="n">Group 7 of 7</span></h3>
+    <div class="colhead"><span>Feature</span><span>What it is</span><span>What you gain</span></div>
+    <ul class="features">
+      <li>
+        <span class="name">Download everything, any time<span class="rare">rare</span></span>
+        <span class="what">One button: orders, customers, products, reviews, returns — as spreadsheets and data files. Imports into Shopify or WooCommerce.</span>
+        <span class="gain">You are never trapped. If you ever want to leave, you leave with everything, without asking permission.</span>
+      </li>
+      <li>
+        <span class="name">Staff logins with limits</span>
+        <span class="what">Owner, manager, staff. Enforced on the server, not by hiding menu items.</span>
+        <span class="gain">Your packing help processes orders and returns and never sees your costs, your profit or your settings.</span>
+      </li>
+      <li>
+        <span class="name">Real login security</span>
+        <span class="what">Passwords stored so nobody can read them, locked after repeated wrong attempts, reset links usable once.</span>
+        <span class="gain">Your customer list and your margins are not one guessed password away.</span>
+      </li>
+      <li>
+        <span class="name">Backup before every change</span>
+        <span class="what">Every edit takes a timestamped copy first, plus a one-command full backup.</span>
+        <span class="gain">A wrong bulk upload is undone in a minute instead of retyping your catalogue.</span>
+      </li>
+      <li>
+        <span class="name">Log of who did what</span>
+        <span class="what">Every price change, refund and setting, with a name and a time.</span>
+        <span class="gain">When a price is wrong or a refund is unexplained, you know who and when — no guessing.</span>
+      </li>
+      <li>
+        <span class="name">Pre-launch check</span>
+        <span class="what">One command that refuses to go live with a test payment key, a placeholder brand or a missing GST number.</span>
+        <span class="gain">Your shop does not open with test payments switched on, which is a mistake that happens more often than anyone admits.</span>
+      </li>
+    </ul>
+
+    <aside class="note">
+      <h4>What is honestly not here yet</h4>
+      <p>
+        No customer accounts — checkout is guest-only and orders are looked up by number
+        and phone. No automatic courier booking yet, though the groundwork is done. No
+        abandoned-cart reminders. The GST papers are working papers your CA files from, not
+        a one-click portal upload.
+      </p>
+      <p>
+        These are on the roadmap and will be told to you before you buy, not after.
+        <strong>Any vendor who says their software has no limitations has not tested it.</strong>
+      </p>
+    </aside>
+  </section>
+
+  <!-- ════════════════ PART 3 · QUESTIONS ════════════════ -->
+  <section>
+    <span class="part-label">Part three · Take this with you</span>
+    <h2>Fourteen questions for the other quote</h2>
+    <p class="section-lead">
+      Do not compare prices — compare answers. Ask these in order and write down what you
+      hear. Each takes an honest vendor half a minute, and anyone else a long time.
+    </p>
+
+    <ol class="questions">
+      <li><span class="q">Does my invoice split CGST and SGST for my own state, and switch to IGST for other states, automatically?</span><span class="why">This is the law, not a feature. <em>Ask to see a real invoice PDF for an out-of-state order.</em></span></li>
+      <li><span class="q">Are my invoice numbers one unbroken series per financial year?</span><span class="why">A gap or duplicate is the first thing a GST officer questions. <em>Ask what happens when an order is cancelled.</em></span></li>
+      <li><span class="q">Can my CA file GSTR-1 from your admin, or will they be typing from order screenshots?</span><span class="why">This one question separates a real system from a website with a payment button.</span></li>
+      <li><span class="q">Can I enter what each item costs me, and see profit after GST, courier, packaging and gateway fees?</span><span class="why">Most cheap websites show revenue and call it profit. <em>Ask to see the actual screen.</em></span></li>
+      <li><span class="q">Can I take 25% now and the rest as cash on delivery?</span><span class="why">On a ₹90,000 order this is the difference between a sale and a returned parcel.</span></li>
+      <li><span class="q">Can I switch off cash on delivery for specific pincodes?</span><span class="why">Every ethnic-wear shop has a list of areas that cost them money.</span></li>
+      <li><span class="q">Can I deliver in my own city myself and use a courier for the rest?</span><span class="why">And will the order tell my staff not to book a courier for it?</span></li>
+      <li><span class="q">Can a customer check delivery date and COD by pincode <em>before</em> adding to the bag?</span><span class="why">Answering that after checkout has started is where the sale is lost.</span></li>
+      <li><span class="q">Who can post a review?</span><span class="why">If anyone can, your competitor can. <em>Ask whether a review requires a delivered order.</em></span></li>
+      <li><span class="q">Are customer photos and videos compressed automatically?</span><span class="why">If not, your site gets slower every month and nobody notices until sales drop.</span></li>
+      <li><span class="q">Can I give my packing staff a login that hides my costs and profit?</span><span class="why">One shared owner password is not a permission system.</span></li>
+      <li><span class="q">Can I download all my data — orders, customers, products — right now, without asking you?</span><span class="why">This is the lock-in question. <em>A vendor who hesitates has already answered it.</em></span></li>
+      <li><span class="q">What does this cost per year after year one, including every app I will need?</span><span class="why">Get COD, WhatsApp, reviews, GST invoicing and a page builder priced individually. On a hosted platform the apps often cost more per year than the build did.</span></li>
+      <li><span class="q">If you stop answering the phone in a year, what do I have?</span><span class="why">Ask for it in writing: what you hold, what happens to your data, who else can maintain it.</span></li>
+    </ol>
+
+    <h3>What ₹15,000 usually buys — plainly</h3>
+    <p class="section-lead" style="margin-top:14px;">
+      A ₹15,000 website is a real thing and worth understanding accurately. It is normally
+      a ready-made theme installed and filled with your products by one freelancer over a
+      few days. That is genuine work, and for some shops it is the right purchase.
+    </p>
+
+    <div class="scroller">
+      <table class="compare">
+        <thead>
+          <tr><th>What you're buying</th><th>A ₹15,000 build, typically</th><th>This</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>The shop front</td><td>Ready-made theme with your logo and products in it</td><td>Built for ethnic wear; colours and fonts are one setting</td></tr>
+          <tr><td>GST invoices</td><td>Usually a paid add-on, often a PDF with a number on it</td><td>Sequential series, place-of-supply split, HSN, GSTR-1 papers</td></tr>
+          <tr><td>Your profit</td><td>Revenue and order count</td><td>Your cost per item, down to profit in hand</td></tr>
+          <tr><td>Cash on delivery</td><td>On or off</td><td>Partial advance, pincode rules, maximum order value</td></tr>
+          <tr><td>Reviews</td><td>Anyone can post, or a paid add-on</td><td>Delivered-order only, with photo and video</td></tr>
+          <tr><td>Local delivery</td><td>Not usually possible</td><td>Same-day in your city, your own staff, with slots</td></tr>
+          <tr><td>Yearly cost after year one</td><td>Platform fee plus each add-on, rising with your sales</td><td>Hosting and maintenance, flat</td></tr>
+          <tr><td>When something breaks</td><td>Whoever built it, if they still reply</td><td>Named support, and a written exit if we ever stop</td></tr>
+          <tr><td>Your data</td><td>Ask, and hope</td><td>One button, any time, no permission needed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <aside class="note">
+      <h4>The one number to work out before you decide</h4>
+      <p>
+        Add up the <strong>yearly</strong> cost, not the build cost. Platform fee, plus a COD
+        app, plus WhatsApp, plus reviews, plus GST invoicing, plus a page builder — charged
+        every month, usually rising as you sell more.
+      </p>
+      <p>
+        Then ask what a wrong tax split on a ₹1,50,000 order costs, or one Saturday offline
+        in wedding season. <strong>A ₹15,000 website is not expensive. It is cheap for what
+        it is — and that is a different sentence.</strong>
+      </p>
+    </aside>
+  </section>
+
+  <footer class="sig">
+    <p>
+      62 features across 25 admin screens and 11 customer-facing pages. 245 automated tests
+      run before any change reaches your shop, because the expensive mistakes in e-commerce
+      are the quiet ones: a delivery charge shown and never taken, a refund that erased the
+      one before it.
+    </p>
+    <p>Prepared for your own research. Take it to anyone.</p>
+  </footer>
+
+</div>
