@@ -53,24 +53,26 @@ function writeCart(req, res, lines) {
 /**
  * How many of a product may be in the cart.
  *
- * A product with no stock number is untracked — made to order — and is capped
- * only by the per-line limit. A product that DOES track stock can never be
- * carted beyond what exists: the buy button being hidden in the UI is not a
- * control, because anyone can POST straight to this route.
+ * Capped against the stock for THIS SIZE AND COLOUR, not the product total. A
+ * kurti with twelve pieces across M, L and XL must not sell twelve XL — that is
+ * a refund and an apology, and it was the behaviour before variants existed.
+ *
+ * Untracked stock (made to order) is capped only by the per-line limit. And the
+ * buy button being hidden in the UI is not a control: anyone can POST straight to
+ * this route, so the limit is enforced here.
  */
 const LINE_LIMIT = 10;
 
-function stockCap(product) {
-  if (!product || !Number.isFinite(product.stock)) return LINE_LIMIT;
-  return Math.max(0, Math.min(LINE_LIMIT, product.stock));
+function stockCap(product, choice) {
+  const variants = require('./variants');
+  const available = variants.stockFor(product, choice || {});
+  if (available === null) return LINE_LIMIT;   // untracked — made to order
+  return Math.max(0, Math.min(LINE_LIMIT, available));
 }
 
 function addToCart(req, res, { id, size, color, qty }) {
   const product = catalog.byId(id) || catalog.bySlug(id);
   if (!product) return readCart(req);
-
-  const cap = stockCap(product);
-  if (cap === 0) return readCart(req);   // sold out: nothing enters the cart
 
   const line = {
     id: product.id,
@@ -78,6 +80,11 @@ function addToCart(req, res, { id, size, color, qty }) {
     color: color || (product.colors && product.colors[0]) || '',
     qty: Math.max(1, parseInt(qty, 10) || 1)
   };
+
+  // The cap depends on the chosen size and colour, so it is worked out after the
+  // line is resolved rather than from the product alone.
+  const cap = stockCap(product, line);
+  if (cap === 0) return readCart(req);   // this variant is sold out
 
   const lines = readCart(req);
   const existing = lines.find((l) => lineKey(l) === lineKey(line));
@@ -95,7 +102,7 @@ function updateQty(req, res, key, qty) {
   } else {
     lines = lines.map((l) => {
       if (lineKey(l) !== key) return l;
-      return { ...l, qty: Math.min(stockCap(catalog.byId(l.id)), n) };
+      return { ...l, qty: Math.min(stockCap(catalog.byId(l.id), l), n) };
     }).filter((l) => l.qty > 0);
   }
   return writeCart(req, res, lines);
@@ -107,17 +114,28 @@ function updateQty(req, res, key, qty) {
  * re-checked against the catalogue at the moment of purchase.
  */
 function stockProblems(summary) {
+  const variants = require('./variants');
+
   return summary.lines
     .map((l) => {
-      const available = Number.isFinite(l.product.stock) ? l.product.stock : null;
+      // Checked per size and colour: the M might be gone while the L is fine, and
+      // "we have 6 in stock" is no comfort to someone who ordered the M.
+      const available = variants.stockFor(l.product, { size: l.size, color: l.color });
       if (available === null || l.qty <= available) return null;
+
+      // Name the variant, not just the product, or the customer cannot tell what
+      // to change.
+      const which = [l.size, l.color].filter(Boolean).join(' · ');
+      const what = which ? `${l.product.name} (${which})` : l.product.name;
+
       return {
         name: l.product.name,
+        variant: which || null,
         wanted: l.qty,
         available,
         message: available === 0
-          ? `${l.product.name} has just sold out.`
-          : `Only ${available} left of ${l.product.name}.`
+          ? `${what} has just sold out.`
+          : `Only ${available} left of ${what}.`
       };
     })
     .filter(Boolean);

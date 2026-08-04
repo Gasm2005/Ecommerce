@@ -185,9 +185,20 @@ function decrementStock(items) {
   // Required lazily: src/products.js requires catalog, which requires nothing
   // back here, but keeping it local documents that this is a side effect.
   const products = require('./products');
+  const variants = require('./variants');
+
   items.forEach((it) => {
     const product = catalog.byId(it.productId);
-    if (product && Number.isFinite(product.stock)) products.adjustStock(it.productId, -it.qty);
+    if (!product) return;
+
+    // Take it off the exact size and colour that sold. Falling back to the
+    // whole-product number would leave the M looking available after the last M
+    // went out of the door.
+    if (variants.tracksVariants(product)) {
+      products.adjustVariantStock(it.productId, { size: it.size, color: it.color }, -it.qty);
+      return;
+    }
+    if (Number.isFinite(product.stock)) products.adjustStock(it.productId, -it.qty);
   });
 }
 

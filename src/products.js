@@ -136,6 +136,45 @@ function adjustStock(id, delta) {
   return list[idx];
 }
 
+/**
+ * Moves the stock on ONE size/colour. Used when an order sells a specific
+ * variant, and by the admin stock grid.
+ *
+ * `product.stock` is kept in step as the sum of the variants, so every screen and
+ * report that still reads a single number stays truthful instead of drifting.
+ */
+function adjustVariantStock(id, choice, delta) {
+  const variants = require('./variants');
+  const list = readRaw();
+  const idx = list.findIndex((p) => p.id === id);
+  if (idx < 0) return null;
+
+  const product = list[idx];
+  const current = variants.stockFor(product, choice);
+  const next = Math.max(0, (Number.isFinite(current) ? current : 0) + delta);
+
+  const rows = variants.setStock(product, choice, next);
+  list[idx] = { ...product, variants: rows, stock: variants.totalStock({ ...product, variants: rows }) };
+
+  writeRaw(list, { skipBackup: true });
+  return list[idx];
+}
+
+/** Sets one variant outright, rather than moving it by a delta. */
+function setVariantStock(id, choice, value) {
+  const variants = require('./variants');
+  const list = readRaw();
+  const idx = list.findIndex((p) => p.id === id);
+  if (idx < 0) return null;
+
+  const product = list[idx];
+  const rows = variants.setStock(product, choice, value);
+  list[idx] = { ...product, variants: rows, stock: variants.totalStock({ ...product, variants: rows }) };
+
+  writeRaw(list, { skipBackup: true });
+  return list[idx];
+}
+
 function setStock(id, value) {
   const list = readRaw();
   const idx = list.findIndex((p) => p.id === id);
@@ -179,4 +218,5 @@ function csv(list) {
     .join('\n') + '\n';
 }
 
-module.exports = { readRaw, writeRaw, fieldsFromBody, create, update, remove, adjustStock, setStock, renameCategory, removeCategory, csv };
+module.exports = { readRaw, writeRaw, fieldsFromBody, create, update, remove, adjustStock, setStock,
+  adjustVariantStock, setVariantStock, renameCategory, removeCategory, csv };

@@ -1198,14 +1198,36 @@
     "sizeChart": "men",
     "cost": 5250,
     "hsn": "6203",
-    "stock": 14,
+    "stock": 12,
     "deliveryDays": 7,
     "popularity": 78,
     "createdAt": "2026-03-13",
     "description": "Lucknowi chikankari with cotton pyjama. Tailored in cotton, finished by hand.",
     "fabricDetails": "Cotton · hand-finished seams · lined body",
     "care": "Dry clean only.",
-    "images": []
+    "images": [],
+    "variants": [
+      {
+        "size": "40",
+        "stock": 6
+      },
+      {
+        "size": "42",
+        "stock": 1
+      },
+      {
+        "size": "44",
+        "stock": 3
+      },
+      {
+        "size": "38",
+        "stock": 2
+      },
+      {
+        "size": "46",
+        "stock": 0
+      }
+    ]
   },
   {
     "id": "p032",
