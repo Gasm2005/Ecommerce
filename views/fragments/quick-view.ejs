@@ -1,5 +1,32 @@
-<% const p = product; %>
-<div x-data="{ main: 0, size: '<%= p.sizes[0] %>', color: '<%= p.colors[0] %>' }" class="grid gap-0 sm:grid-cols-2">
+<%
+  const p = product;
+
+  const stockMap = {};
+  (p.sizes || []).forEach(function (sz) {
+    (p.colors || []).forEach(function (c) {
+      stockMap[(sz + '|' + c).toLowerCase()] = variants.stockFor(p, { size: sz, color: c });
+    });
+  });
+
+  // Open on a size that can actually be bought, not on whichever is listed first.
+  const firstColour = (p.colors || [])[0] || '';
+  const openSize = (p.sizes || []).find(function (sz) {
+    const n = variants.stockFor(p, { size: sz, color: firstColour });
+    return n === null || n > 0;
+  }) || (p.sizes || [])[0] || '';
+
+  const soldOut = !variants.anyAvailable(p);
+%>
+<div data-stock='<%= JSON.stringify(stockMap) %>'
+     x-data="{
+       main: 0,
+       size: '<%= openSize %>',
+       color: '<%= firstColour %>',
+       stock: JSON.parse($el.dataset.stock),
+       left(sz, c) { const v = this.stock[(sz + '|' + c).toLowerCase()]; return v === undefined ? null : v; },
+       canBuy(sz, c) { const n = this.left(sz, c); return n === null || n > 0; }
+     }"
+     class="grid gap-0 sm:grid-cols-2">
 
   <div class="bg-cream">
     <% p.images.forEach(function (img, i) { %>
@@ -34,10 +61,16 @@
     <p class="mt-6 text-[10px] uppercase tracking-luxe text-muted">Colour · <span class="text-ink" x-text="color"></span></p>
     <div class="mt-2 flex flex-wrap gap-2">
       <% p.colors.forEach(function (c) { %>
+        <%
+          const colourLeft = (p.sizes || []).some(function (sz) {
+            const n = variants.stockFor(p, { size: sz, color: c });
+            return n === null || n > 0;
+          });
+        %>
         <button type="button" @click="color = '<%= c %>'" :class="color === '<%= c %>' ? 'border-maroon text-ink ring-1 ring-maroon' : 'border-line text-muted'"
-                class="inline-flex items-center gap-2 border px-3 py-1.5 text-xs">
+                class="inline-flex items-center gap-2 border px-3 py-1.5 text-xs <%= colourLeft ? '' : 'line-through opacity-60' %>">
           <span class="h-3 w-3 shrink-0 rounded-full ring-1 ring-line" style="background: <%= swatch(c) %>"></span>
-          <%= c %>
+          <%= c %><%= colourLeft ? '' : ' · Out' %>
         </button>
       <% }); %>
     </div>
@@ -45,7 +78,10 @@
     <p class="mt-5 text-[10px] uppercase tracking-luxe text-muted">Size</p>
     <div class="mt-2 flex flex-wrap gap-2">
       <% p.sizes.forEach(function (sz) { %>
-        <button type="button" @click="size = '<%= sz %>'" :class="size === '<%= sz %>' ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink'"
+        <button type="button" @click="size = '<%= sz %>'"
+                :disabled="!canBuy('<%= sz %>', color)"
+                :class="size === '<%= sz %>' ? 'border-maroon bg-maroon text-ivory'
+                        : (canBuy('<%= sz %>', color) ? 'border-line text-ink' : 'border-line text-muted line-through opacity-60 cursor-not-allowed')"
                 class="min-w-[48px] border px-3 py-2 text-xs"><%= sz %></button>
       <% }); %>
     </div>
@@ -55,12 +91,24 @@
       <input type="hidden" name="size" :value="size">
       <input type="hidden" name="color" :value="color">
       <input type="hidden" name="qty" value="1">
-      <button type="button"
-              hx-post="/cart/add" hx-include="#qv-form-<%= p.id %>" hx-target="#cart-panel" hx-swap="innerHTML"
-              class="w-full bg-maroon py-3.5 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
-        <span class="htmx-hide-on-request">Add to bag</span>
-        <span class="htmx-show-on-request">Adding…</span>
-      </button>
+      <% if (soldOut) { %>
+        <button type="button" disabled
+                class="w-full cursor-not-allowed border border-line py-3.5 text-[11px] uppercase tracking-luxe text-muted">
+          Sold out
+        </button>
+      <% } else { %>
+        <button type="button"
+                x-show="canBuy(size, color)"
+                hx-post="/cart/add" hx-include="#qv-form-<%= p.id %>" hx-target="#cart-panel" hx-swap="innerHTML"
+                class="w-full bg-maroon py-3.5 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
+          <span class="htmx-hide-on-request">Add to bag</span>
+          <span class="htmx-show-on-request">Adding…</span>
+        </button>
+        <button type="button" disabled x-show="!canBuy(size, color)" x-cloak
+                class="w-full cursor-not-allowed border border-line py-3.5 text-[11px] uppercase tracking-luxe text-muted">
+          Sold out in <span x-text="size"></span>
+        </button>
+      <% } %>
     </form>
 
     <a href="/product/<%= p.slug %>" class="mt-3 block text-center text-[10px] uppercase tracking-luxe text-muted underline underline-offset-4 transition hover:text-maroon">View full details</a>

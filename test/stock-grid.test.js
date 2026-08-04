@@ -445,3 +445,28 @@ test('the cells are named apart from the form field they sit beside', () => {
   assert.doesNotMatch(tpl, /name="stock"/, 'that name belongs to the edit form, not the grid');
   assert.match(tpl, /hx-params="count,size,color,token"/, 'pin the payload so the form cannot ride along');
 });
+
+/* -------------------------------------------------------------- quick view ---- */
+
+/**
+ * Quick view could never oversell — /cart/add refuses a bad size either way — but
+ * it could show a sold-out size as available for the second before that refusal,
+ * which reads as a broken shop rather than a busy one.
+ */
+test('quick view knows what is left, like the product page does', async () => {
+  await setCell('p001', 'XS', 'Red', 5);
+  await setCell('p001', 'S', 'Red', 0);
+
+  const res = await get('/fragments/quick-view/test-lehenga');
+  assert.equal(res.status, 200);
+
+  const map = /data-stock='([^']+)'/.exec(res.text);
+  assert.ok(map, 'quick view must carry a stock map');
+  const stock = JSON.parse(unescapeXml(map[1]));
+  assert.equal(stock['s|red'], 0);
+  assert.equal(stock['xs|red'], 5);
+
+  // It opens on a size that can be bought, not on whichever is listed first.
+  assert.match(res.text, /size: 'XS'/);
+  assert.match(res.text, /Sold out in/);
+});
