@@ -15,7 +15,16 @@
       </div>
 
       <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8">
-        <% config.footer.columns.forEach(function (col) { %>
+        <%
+          /* The "Shop" column is generated from the audience's own nav, not from a
+             fixed list. Otherwise a menswear visitor gets Sarees and Lehengas in the
+             footer — links to categories their section does not contain.
+             Every other column (client care, atelier) is the same for everyone and
+             stays exactly as configured. */
+          const shopColumn = { title: 'Shop', links: nav.map((n) => ({ label: n.label, href: '/category/' + n.slug })) };
+          const columns = [shopColumn, ...(config.footer.columns || []).filter((c) => c.title !== 'Shop')];
+        %>
+        <% columns.forEach(function (col) { %>
           <div>
             <p class="mb-4 text-[10px] uppercase tracking-luxe text-gold"><%= col.title %></p>
             <ul class="space-y-2.5">

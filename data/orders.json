@@ -9902,5 +9902,84 @@
         "label": "Order placed"
       }
     ]
+  },
+  {
+    "id": "ORD-00139",
+    "createdAt": "2026-08-04T07:01:12.415Z",
+    "status": "cancelled",
+    "paymentMethod": "upi",
+    "paymentStatus": "refunded",
+    "codPlan": null,
+    "payment": null,
+    "channel": "direct",
+    "attribution": {
+      "source": "direct",
+      "medium": "none",
+      "campaign": null,
+      "firstSource": "direct",
+      "touches": 1
+    },
+    "customer": {
+      "name": "jat",
+      "email": "ajjuprpandey@gmail.com",
+      "phone": "7408690994",
+      "gstin": null,
+      "businessName": null
+    },
+    "address": {
+      "address1": "patel nagar , Gomtinagar",
+      "city": "Lucknow",
+      "state": "Uttar Pradesh",
+      "pincode": "226010",
+      "country": "India"
+    },
+    "items": [
+      {
+        "productId": "p001",
+        "slug": "raniya-zardozi-bridal-lehenga",
+        "name": "Raniya Zardozi Bridal Lehenga",
+        "size": "XS",
+        "color": "Rani Pink",
+        "qty": 1,
+        "price": 189000,
+        "cost": 77659,
+        "gstPercent": 18,
+        "taxAmount": 28831
+      }
+    ],
+    "subtotal": 189000,
+    "discount": 0,
+    "discountCode": null,
+    "shipping": 0,
+    "giftWrapCharge": 0,
+    "chargeTax": 0,
+    "total": 189000,
+    "gstAmount": 28831,
+    "cogs": 77659,
+    "deliveryMethod": "standard",
+    "deliveryTitle": "Standard",
+    "deliveryNote": "3-6 working days after dispatch",
+    "fulfilment": "courier",
+    "deliveryZone": "lucknow",
+    "deliveryZoneLabel": "Lucknow city",
+    "deliverySlot": null,
+    "giftWrap": false,
+    "notes": "",
+    "timeline": [
+      {
+        "at": "2026-08-04T07:01:12.415Z",
+        "label": "Order placed"
+      },
+      {
+        "at": "2026-08-04T07:01:50.906Z",
+        "label": "Marked cancelled"
+      }
+    ],
+    "invoice": {
+      "number": "AAN/2026-27/0003",
+      "sequence": 3,
+      "financialYear": "2026-27",
+      "issuedAt": "2026-08-04T07:01:17.366Z"
+    }
   }
 ]

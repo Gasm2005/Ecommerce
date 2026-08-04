@@ -42,9 +42,10 @@
       "/ph.svg?seed=p001-zardozi&w=900&h=1200&label=Zardozi%20detail",
       "/ph.svg?seed=p001-hem&w=900&h=1200&label=Hem%20detail"
     ],
-    "stock": 5,
+    "stock": 4,
     "cost": 77659,
-    "sku": "AAN-0001"
+    "sku": "AAN-0001",
+    "audience": "women"
   },
   {
     "id": "p002",
@@ -79,7 +80,8 @@
     "images": [],
     "stock": 12,
     "cost": 30338,
-    "sku": "AAN-0002"
+    "sku": "AAN-0002",
+    "audience": "women"
   },
   {
     "id": "p003",
@@ -117,7 +119,8 @@
     "images": [],
     "stock": 11,
     "cost": 60221,
-    "sku": "AAN-0003"
+    "sku": "AAN-0003",
+    "audience": "women"
   },
   {
     "id": "p004",
@@ -156,7 +159,8 @@
     "images": [],
     "stock": 6,
     "cost": 45750,
-    "sku": "AAN-0004"
+    "sku": "AAN-0004",
+    "audience": "women"
   },
   {
     "id": "p005",
@@ -194,7 +198,8 @@
     "images": [],
     "stock": 10,
     "cost": 23164,
-    "sku": "AAN-0005"
+    "sku": "AAN-0005",
+    "audience": "women"
   },
   {
     "id": "p006",
@@ -229,7 +234,8 @@
     "images": [],
     "stock": 2,
     "cost": 14675,
-    "sku": "AAN-0006"
+    "sku": "AAN-0006",
+    "audience": "women"
   },
   {
     "id": "p007",
@@ -268,7 +274,8 @@
     "images": [],
     "stock": 5,
     "cost": 12673,
-    "sku": "AAN-0007"
+    "sku": "AAN-0007",
+    "audience": "women"
   },
   {
     "id": "p008",
@@ -306,7 +313,8 @@
     "images": [],
     "stock": 21,
     "cost": 57254,
-    "sku": "AAN-0008"
+    "sku": "AAN-0008",
+    "audience": "women"
   },
   {
     "id": "p009",
@@ -340,7 +348,8 @@
     "images": [],
     "stock": 17,
     "cost": 42253,
-    "sku": "AAN-0009"
+    "sku": "AAN-0009",
+    "audience": "women"
   },
   {
     "id": "p010",
@@ -378,7 +387,8 @@
     "images": [],
     "stock": 0,
     "cost": 11032,
-    "sku": "AAN-0010"
+    "sku": "AAN-0010",
+    "audience": "women"
   },
   {
     "id": "p011",
@@ -417,7 +427,8 @@
     "images": [],
     "stock": 1,
     "cost": 20122,
-    "sku": "AAN-0011"
+    "sku": "AAN-0011",
+    "audience": "women"
   },
   {
     "id": "p012",
@@ -454,7 +465,8 @@
     "images": [],
     "stock": 24,
     "cost": 31331,
-    "sku": "AAN-0012"
+    "sku": "AAN-0012",
+    "audience": "women"
   },
   {
     "id": "p013",
@@ -492,7 +504,8 @@
     "images": [],
     "stock": 12,
     "cost": 16968,
-    "sku": "AAN-0013"
+    "sku": "AAN-0013",
+    "audience": "women"
   },
   {
     "id": "p014",
@@ -530,7 +543,8 @@
     "images": [],
     "stock": 9,
     "cost": 33218,
-    "sku": "AAN-0014"
+    "sku": "AAN-0014",
+    "audience": "women"
   },
   {
     "id": "p015",
@@ -568,7 +582,8 @@
     "images": [],
     "stock": 13,
     "cost": 30082,
-    "sku": "AAN-0015"
+    "sku": "AAN-0015",
+    "audience": "women"
   },
   {
     "id": "p016",
@@ -603,7 +618,8 @@
     "images": [],
     "stock": 1,
     "cost": 41517,
-    "sku": "AAN-0016"
+    "sku": "AAN-0016",
+    "audience": "women"
   },
   {
     "id": "p017",
@@ -641,7 +657,8 @@
     "images": [],
     "stock": 6,
     "cost": 23817,
-    "sku": "AAN-0017"
+    "sku": "AAN-0017",
+    "audience": "women"
   },
   {
     "id": "p018",
@@ -679,7 +696,8 @@
     "images": [],
     "stock": 22,
     "cost": 68639,
-    "sku": "AAN-0018"
+    "sku": "AAN-0018",
+    "audience": "women"
   },
   {
     "id": "p019",
@@ -718,7 +736,8 @@
     "images": [],
     "stock": 0,
     "cost": 8854,
-    "sku": "AAN-0019"
+    "sku": "AAN-0019",
+    "audience": "women"
   },
   {
     "id": "p020",
@@ -756,7 +775,8 @@
     "images": [],
     "stock": 6,
     "cost": 28971,
-    "sku": "AAN-0020"
+    "sku": "AAN-0020",
+    "audience": "women"
   },
   {
     "id": "p021",
@@ -791,7 +811,8 @@
     "images": [],
     "stock": 3,
     "cost": 18205,
-    "sku": "AAN-0021"
+    "sku": "AAN-0021",
+    "audience": "women"
   },
   {
     "id": "p022",
@@ -829,7 +850,8 @@
     "images": [],
     "stock": 12,
     "cost": 47864,
-    "sku": "AAN-0022"
+    "sku": "AAN-0022",
+    "audience": "women"
   },
   {
     "id": "p023",
@@ -868,7 +890,8 @@
     "images": [],
     "stock": 5,
     "cost": 24397,
-    "sku": "AAN-0023"
+    "sku": "AAN-0023",
+    "audience": "women"
   },
   {
     "id": "p024",
@@ -903,7 +926,8 @@
     "images": [],
     "stock": 16,
     "cost": 11880,
-    "sku": "AAN-0024"
+    "sku": "AAN-0024",
+    "audience": "women"
   },
   {
     "id": "p025",
@@ -943,7 +967,8 @@
     "images": [],
     "stock": 21,
     "cost": 8296,
-    "sku": "AAN-0025"
+    "sku": "AAN-0025",
+    "audience": "women"
   },
   {
     "id": "p026",
@@ -982,7 +1007,8 @@
     "images": [],
     "stock": 1,
     "cost": 75186,
-    "sku": "AAN-0026"
+    "sku": "AAN-0026",
+    "audience": "women"
   },
   {
     "id": "p027",
@@ -1019,7 +1045,8 @@
     "images": [],
     "stock": 9,
     "cost": 23008,
-    "sku": "AAN-0027"
+    "sku": "AAN-0027",
+    "audience": "women"
   },
   {
     "id": "p028",
@@ -1058,6 +1085,526 @@
     "images": [],
     "stock": 0,
     "cost": 39714,
-    "sku": "AAN-0028"
+    "sku": "AAN-0028",
+    "audience": "women"
+  },
+  {
+    "id": "p029",
+    "slug": "rajvir-ivory-raw-silk-sherwani",
+    "name": "Rajvir Ivory Raw Silk Sherwani",
+    "subtitle": "Hand-embroidered with a matching stole",
+    "categories": [
+      "sherwani"
+    ],
+    "price": 96000,
+    "mrp": 118000,
+    "colors": [
+      "Ivory",
+      "Gold"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Raw Silk",
+    "occasion": [
+      "Wedding",
+      "Reception"
+    ],
+    "badge": "Bestseller",
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 40320,
+    "hsn": "6203",
+    "stock": 4,
+    "deliveryDays": 18,
+    "popularity": 90,
+    "createdAt": "2026-01-11",
+    "description": "Hand-embroidered with a matching stole. Tailored in raw silk, finished by hand.",
+    "fabricDetails": "Raw Silk · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p030",
+    "slug": "aarav-zardozi-wedding-sherwani",
+    "name": "Aarav Zardozi Wedding Sherwani",
+    "subtitle": "Zardozi yoke with churidar and dupatta",
+    "categories": [
+      "sherwani"
+    ],
+    "price": 142000,
+    "mrp": 168000,
+    "colors": [
+      "Maroon",
+      "Gold"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Silk Brocade",
+    "occasion": [
+      "Wedding"
+    ],
+    "badge": null,
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 59640,
+    "hsn": "6203",
+    "stock": 3,
+    "deliveryDays": 21,
+    "popularity": 84,
+    "createdAt": "2026-02-12",
+    "description": "Zardozi yoke with churidar and dupatta. Tailored in silk brocade, finished by hand.",
+    "fabricDetails": "Silk Brocade · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p031",
+    "slug": "ishaan-chikankari-kurta-set",
+    "name": "Ishaan Chikankari Kurta Set",
+    "subtitle": "Lucknowi chikankari with cotton pyjama",
+    "categories": [
+      "kurta-pyjama"
+    ],
+    "price": 12500,
+    "mrp": 15000,
+    "colors": [
+      "Ivory",
+      "Mint"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Cotton",
+    "occasion": [
+      "Festive",
+      "Daytime"
+    ],
+    "badge": "New",
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 5250,
+    "hsn": "6203",
+    "stock": 14,
+    "deliveryDays": 7,
+    "popularity": 78,
+    "createdAt": "2026-03-13",
+    "description": "Lucknowi chikankari with cotton pyjama. Tailored in cotton, finished by hand.",
+    "fabricDetails": "Cotton · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p032",
+    "slug": "kabir-silk-kurta-set",
+    "name": "Kabir Silk Kurta Set",
+    "subtitle": "Tussar silk kurta with churidar",
+    "categories": [
+      "kurta-pyjama"
+    ],
+    "price": 18500,
+    "mrp": 22000,
+    "colors": [
+      "Mustard",
+      "Rust"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Tussar Silk",
+    "occasion": [
+      "Festive",
+      "Sangeet"
+    ],
+    "badge": null,
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 7770,
+    "hsn": "6203",
+    "stock": 11,
+    "deliveryDays": 9,
+    "popularity": 72,
+    "createdAt": "2026-04-14",
+    "description": "Tussar silk kurta with churidar. Tailored in tussar silk, finished by hand.",
+    "fabricDetails": "Tussar Silk · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p033",
+    "slug": "vihaan-indo-western-drape-set",
+    "name": "Vihaan Indo-Western Drape Set",
+    "subtitle": "Asymmetric drape kurta with trousers",
+    "categories": [
+      "indo-western"
+    ],
+    "price": 34000,
+    "mrp": 42000,
+    "colors": [
+      "Charcoal",
+      "Navy"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Terry Rayon",
+    "occasion": [
+      "Sangeet",
+      "Cocktail"
+    ],
+    "badge": "New",
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 14280,
+    "hsn": "6203",
+    "stock": 7,
+    "deliveryDays": 12,
+    "popularity": 66,
+    "createdAt": "2026-05-15",
+    "description": "Asymmetric drape kurta with trousers. Tailored in terry rayon, finished by hand.",
+    "fabricDetails": "Terry Rayon · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p034",
+    "slug": "arjun-three-piece-bandhgala-suit",
+    "name": "Arjun Three-Piece Bandhgala Suit",
+    "subtitle": "Wool-blend bandhgala with waistcoat and trousers",
+    "categories": [
+      "suits"
+    ],
+    "price": 58000,
+    "mrp": 68000,
+    "colors": [
+      "Navy",
+      "Black"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Wool Blend",
+    "occasion": [
+      "Reception",
+      "Cocktail"
+    ],
+    "badge": "Bestseller",
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 24360,
+    "hsn": "6203",
+    "stock": 6,
+    "deliveryDays": 16,
+    "popularity": 60,
+    "createdAt": "2026-06-16",
+    "description": "Wool-blend bandhgala with waistcoat and trousers. Tailored in wool blend, finished by hand.",
+    "fabricDetails": "Wool Blend · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p035",
+    "slug": "devesh-five-piece-wedding-suit",
+    "name": "Devesh Five-Piece Wedding Suit",
+    "subtitle": "Jacket, waistcoat, trousers, shirt and pocket square",
+    "categories": [
+      "suits"
+    ],
+    "price": 88000,
+    "mrp": 102000,
+    "colors": [
+      "Charcoal",
+      "Bottle Green"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Italian Wool",
+    "occasion": [
+      "Wedding",
+      "Reception"
+    ],
+    "badge": null,
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 36960,
+    "hsn": "6203",
+    "stock": 4,
+    "deliveryDays": 20,
+    "popularity": 54,
+    "createdAt": "2026-01-17",
+    "description": "Jacket, waistcoat, trousers, shirt and pocket square. Tailored in italian wool, finished by hand.",
+    "fabricDetails": "Italian Wool · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p036",
+    "slug": "manav-brocade-nehru-jacket",
+    "name": "Manav Brocade Nehru Jacket",
+    "subtitle": "Banarasi brocade jacket, pairs over any kurta",
+    "categories": [
+      "nehru-jackets"
+    ],
+    "price": 14500,
+    "mrp": 18000,
+    "colors": [
+      "Gold",
+      "Maroon"
+    ],
+    "sizes": [
+      "38",
+      "40",
+      "42",
+      "44",
+      "46"
+    ],
+    "fabric": "Silk Brocade",
+    "occasion": [
+      "Festive"
+    ],
+    "badge": null,
+    "audience": "men",
+    "sizeChart": "men",
+    "cost": 6090,
+    "hsn": "6203",
+    "stock": 16,
+    "deliveryDays": 5,
+    "popularity": 48,
+    "createdAt": "2026-02-18",
+    "description": "Banarasi brocade jacket, pairs over any kurta. Tailored in silk brocade, finished by hand.",
+    "fabricDetails": "Silk Brocade · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p037",
+    "slug": "shaurya-boys-silk-kurta-set",
+    "name": "Shaurya Boys Silk Kurta Set",
+    "subtitle": "Dupion silk kurta with churidar",
+    "categories": [
+      "boys-ethnic",
+      "kids-festive"
+    ],
+    "price": 6500,
+    "mrp": 8200,
+    "colors": [
+      "Ivory",
+      "Mustard"
+    ],
+    "sizes": [
+      "2-3Y",
+      "4-5Y",
+      "6-7Y",
+      "8-9Y",
+      "10-11Y"
+    ],
+    "fabric": "Dupion Silk",
+    "occasion": [
+      "Festive",
+      "Wedding"
+    ],
+    "badge": "New",
+    "audience": "kids",
+    "sizeChart": "women",
+    "cost": 2730,
+    "hsn": "6203",
+    "stock": 18,
+    "deliveryDays": 6,
+    "popularity": 90,
+    "createdAt": "2026-01-11",
+    "description": "Dupion silk kurta with churidar. Tailored in dupion silk, finished by hand.",
+    "fabricDetails": "Dupion Silk · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p038",
+    "slug": "vivaan-boys-bandhgala-set",
+    "name": "Vivaan Boys Bandhgala Set",
+    "subtitle": "Miniature bandhgala with trousers",
+    "categories": [
+      "boys-ethnic"
+    ],
+    "price": 9800,
+    "mrp": 12000,
+    "colors": [
+      "Navy",
+      "Maroon"
+    ],
+    "sizes": [
+      "2-3Y",
+      "4-5Y",
+      "6-7Y",
+      "8-9Y",
+      "10-11Y"
+    ],
+    "fabric": "Cotton Silk",
+    "occasion": [
+      "Wedding"
+    ],
+    "badge": null,
+    "audience": "kids",
+    "sizeChart": "women",
+    "cost": 4116,
+    "hsn": "6203",
+    "stock": 12,
+    "deliveryDays": 8,
+    "popularity": 84,
+    "createdAt": "2026-02-12",
+    "description": "Miniature bandhgala with trousers. Tailored in cotton silk, finished by hand.",
+    "fabricDetails": "Cotton Silk · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p039",
+    "slug": "myra-girls-lehenga-set",
+    "name": "Myra Girls Lehenga Set",
+    "subtitle": "Organza lehenga with embroidered choli",
+    "categories": [
+      "girls-ethnic",
+      "kids-festive"
+    ],
+    "price": 11500,
+    "mrp": 14000,
+    "colors": [
+      "Rani Pink",
+      "Mint"
+    ],
+    "sizes": [
+      "2-3Y",
+      "4-5Y",
+      "6-7Y",
+      "8-9Y",
+      "10-11Y"
+    ],
+    "fabric": "Organza",
+    "occasion": [
+      "Festive",
+      "Wedding"
+    ],
+    "badge": "Bestseller",
+    "audience": "kids",
+    "sizeChart": "women",
+    "cost": 4830,
+    "hsn": "6203",
+    "stock": 10,
+    "deliveryDays": 9,
+    "popularity": 78,
+    "createdAt": "2026-03-13",
+    "description": "Organza lehenga with embroidered choli. Tailored in organza, finished by hand.",
+    "fabricDetails": "Organza · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p040",
+    "slug": "anaya-girls-anarkali-set",
+    "name": "Anaya Girls Anarkali Set",
+    "subtitle": "Chanderi anarkali with churidar and dupatta",
+    "categories": [
+      "girls-ethnic"
+    ],
+    "price": 8200,
+    "mrp": 9800,
+    "colors": [
+      "Peach",
+      "Ivory"
+    ],
+    "sizes": [
+      "2-3Y",
+      "4-5Y",
+      "6-7Y",
+      "8-9Y",
+      "10-11Y"
+    ],
+    "fabric": "Chanderi",
+    "occasion": [
+      "Festive"
+    ],
+    "badge": null,
+    "audience": "kids",
+    "sizeChart": "women",
+    "cost": 3444,
+    "hsn": "6203",
+    "stock": 15,
+    "deliveryDays": 7,
+    "popularity": 72,
+    "createdAt": "2026-04-14",
+    "description": "Chanderi anarkali with churidar and dupatta. Tailored in chanderi, finished by hand.",
+    "fabricDetails": "Chanderi · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
+  },
+  {
+    "id": "p041",
+    "slug": "kiaan-kids-nehru-jacket-set",
+    "name": "Kiaan Kids Nehru Jacket Set",
+    "subtitle": "Kurta, pyjama and brocade jacket",
+    "categories": [
+      "kids-festive",
+      "boys-ethnic"
+    ],
+    "price": 7400,
+    "mrp": 8900,
+    "colors": [
+      "Gold",
+      "Bottle Green"
+    ],
+    "sizes": [
+      "2-3Y",
+      "4-5Y",
+      "6-7Y",
+      "8-9Y",
+      "10-11Y"
+    ],
+    "fabric": "Silk Brocade",
+    "occasion": [
+      "Festive",
+      "Sangeet"
+    ],
+    "badge": null,
+    "audience": "kids",
+    "sizeChart": "women",
+    "cost": 3108,
+    "hsn": "6203",
+    "stock": 14,
+    "deliveryDays": 6,
+    "popularity": 66,
+    "createdAt": "2026-05-15",
+    "description": "Kurta, pyjama and brocade jacket. Tailored in silk brocade, finished by hand.",
+    "fabricDetails": "Silk Brocade · hand-finished seams · lined body",
+    "care": "Dry clean only.",
+    "images": []
   }
 ]

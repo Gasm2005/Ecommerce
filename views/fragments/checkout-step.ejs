@@ -133,11 +133,19 @@
           <% if (err('pincode')) { %><p class="text-[13px] text-maroon"><%= err('pincode') %></p><% } %>
         </div>
 
-        <div class="col-span-2 sm:col-span-4">
-          <label class="<%= labelCls %>">Measurements / stitching notes</label>
-          <textarea name="notes" rows="2" placeholder="Bust 34, waist 28, blouse length 15 — anything we should know"
-                    class="<%= inputCls %> border-line"><%= v('notes') %></textarea>
-        </div>
+        <%
+          /* "Measurements / stitching notes" only when the shop does customisation.
+             A retail store still gets a notes box, but for delivery instructions —
+             asking a kurti buyer for their bust measurement is a lost sale. */
+          const notes = fulfilment.notesField(config);
+        %>
+        <% if (notes.show) { %>
+          <div class="col-span-2 sm:col-span-4">
+            <label class="<%= labelCls %>"><%= notes.label %></label>
+            <textarea name="notes" rows="2" placeholder="<%= notes.placeholder %>"
+                      class="<%= inputCls %> border-line"><%= v('notes') %></textarea>
+          </div>
+        <% } %>
 
         <!-- Business purchase: collapsed, because almost every customer is retail
              and an empty GSTIN box on a bridal checkout is just friction. Opens

@@ -80,6 +80,38 @@
       <h2 class="mb-1 font-serif text-base">Variants & taxonomy</h2>
       <p class="mb-3 text-[11px] text-muted">Separate multiple values with <code class="bg-cream px-1">|</code></p>
       <div class="grid gap-3 sm:grid-cols-2">
+        <%
+          /* Which section of the shop this piece belongs to. Only offered when the
+             store actually has sections — a womenswear-only client is not asked a
+             question with one possible answer. "Everyone" is genuinely useful for
+             universal stock like a stole or a dupatta. */
+          const audienceList = ((config.audiences || {}).list || []).filter((a) => a && a.id);
+        %>
+        <% if (audienceList.length > 1) { %>
+          <div>
+            <label class="adm-label" for="audience">Section</label>
+            <select id="audience" name="audience" class="adm-select">
+              <option value="">Everyone (universal)</option>
+              <% audienceList.forEach(function (a) { %>
+                <option value="<%= a.id %>" <%= val('audience') === a.id ? 'selected' : '' %>><%= a.label %></option>
+              <% }); %>
+            </select>
+            <p class="mt-1 text-[10.5px] text-muted">
+              Decides which section browses this piece. A direct link always opens it.
+            </p>
+          </div>
+
+          <div>
+            <label class="adm-label" for="sizeChart">Size chart</label>
+            <select id="sizeChart" name="sizeChart" class="adm-select">
+              <option value="">Default (first)</option>
+              <% (((config.sizeChart || {}).charts) || []).forEach(function (ch) { %>
+                <option value="<%= ch.id %>" <%= val('sizeChart') === ch.id ? 'selected' : '' %>><%= ch.label %></option>
+              <% }); %>
+            </select>
+          </div>
+        <% } %>
+
         <div>
           <label class="adm-label" for="categories">Categories *</label>
           <input id="categories" name="categories" class="adm-input" value="<%= list('categories') %>" placeholder="bridal | lehengas">

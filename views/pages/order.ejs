@@ -8,8 +8,9 @@
   <p class="mt-7 text-[10px] uppercase tracking-luxe text-gold">Order confirmed</p>
   <h1 class="mt-3 font-serif text-4xl">Thank you<%= state.fullName ? ', ' + String(state.fullName).split(' ')[0] : '' %></h1>
   <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted">
-    Your order <strong class="text-ink"><%= orderId %></strong> is with our atelier. You’ll receive a confirmation
-    <%= state.email ? 'at ' + state.email : 'by SMS' %>, and a stitching update within 48 hours.
+    Your order <strong class="text-ink"><%= orderId %></strong> <%= fulfilment.orderStatusLine(config) %>.
+    You’ll receive a confirmation <%= state.email ? 'at ' + state.email : 'by SMS' %><%=
+      fulfilment.flags(config).madeToOrder ? ', and a stitching update within 48 hours' : '' %>.
   </p>
 
   <dl class="mx-auto mt-10 max-w-md divide-y divide-line border-y border-line text-left text-sm">

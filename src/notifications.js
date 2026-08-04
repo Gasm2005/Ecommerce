@@ -269,7 +269,7 @@ async function orderPlaced(order, config, origin) {
     phone: order.customer.phone,
     subject: `Order ${order.id} confirmed · ${config.brand.name}`,
     template: 'order-placed',
-    data: { order, origin: origin || '' },
+    data: { order, origin: origin || '', fulfilment: require('./fulfilment') },
     config,
     whatsappText: `Thank you! Order ${order.id} is confirmed — ${money(order.total, config)}. We'll message you when it ships.`
   }));

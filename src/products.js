@@ -36,7 +36,7 @@ const LISTS = ['categories', 'colors', 'sizes', 'occasion', 'images'];
 function fieldsFromBody(body) {
   const out = {};
 
-  ['name', 'subtitle', 'fabric', 'description', 'fabricDetails', 'care', 'badge', 'sku', 'hsn', 'createdAt', 'slug'].forEach((k) => {
+  ['name', 'subtitle', 'fabric', 'description', 'fabricDetails', 'care', 'badge', 'sku', 'hsn', 'audience', 'sizeChart', 'createdAt', 'slug'].forEach((k) => {
     if (body[k] !== undefined) out[k] = String(body[k]).trim();
   });
   NUMERIC.forEach((k) => {

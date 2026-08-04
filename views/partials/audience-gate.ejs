@@ -1,0 +1,52 @@
+<%
+  /* Shown once, on a first visit, when the shop sells to more than one audience.
+     A single-audience client never renders this at all — no popup, no switcher,
+     nothing to explain.
+
+     Deliberately NOT a hard gate: the storefront underneath is fully rendered and
+     the choice can be dismissed. Blocking a visitor who arrived from a Google
+     result for a specific product, to ask a question they didn't come to answer,
+     loses the sale.
+
+     Rendered server-side and hidden by a cookie check in the same tick, so a
+     returning visitor never sees it flash. */
+  if (!audienceChoiceNeeded) return;
+%>
+
+<div x-data="{ open: true }" x-show="open" x-cloak
+     class="fixed inset-0 z-[130] flex items-center justify-center bg-ink/60 px-4 backdrop-blur-sm"
+     role="dialog" aria-modal="true" aria-labelledby="audience-title">
+
+  <div class="relative w-full max-w-2xl bg-ivory p-7 sm:p-10" @click.outside="open = false">
+    <!-- Skip is real: it keeps the default section and gets out of the way. -->
+    <button type="button" @click="open = false"
+            class="absolute right-4 top-4 text-[11px] uppercase tracking-[0.14em] text-muted hover:text-maroon">
+      Skip
+    </button>
+
+    <p class="text-[10px] uppercase tracking-luxe text-gold">Welcome to <%= config.brand.name %></p>
+    <h2 id="audience-title" class="mt-2 font-serif text-2xl sm:text-3xl">What are you shopping for?</h2>
+    <p class="mt-2 text-[14.5px] leading-relaxed text-muted">
+      We'll show you the right collection. You can switch any time.
+    </p>
+
+    <div class="mt-7 grid gap-3 sm:grid-cols-<%= Math.min(3, audiences.length) %>">
+      <% audiences.forEach(function (a) { %>
+        <form method="post" action="/audience" class="contents">
+          <input type="hidden" name="audience" value="<%= a.id %>">
+          <input type="hidden" name="next" value="<%= currentPath %>">
+          <button type="submit"
+                  class="group border border-line bg-cream/40 p-5 text-left transition hover:border-maroon hover:bg-cream">
+            <span class="block font-serif text-lg text-ink group-hover:text-maroon"><%= a.label %></span>
+            <% if (a.blurb) { %>
+              <span class="mt-1 block text-[13px] leading-relaxed text-muted"><%= a.blurb %></span>
+            <% } %>
+            <span class="mt-3 block text-[10px] uppercase tracking-[0.14em] text-gold">
+              <%= (a.nav || []).length %> categories
+            </span>
+          </button>
+        </form>
+      <% }); %>
+    </div>
+  </div>
+</div>

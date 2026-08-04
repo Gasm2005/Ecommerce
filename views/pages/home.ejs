@@ -1,23 +1,29 @@
+<%
+  /* The hero belongs to the SECTION being browsed. A menswear visitor must not be
+     sold bridal lehengas in the first screen. An audience without its own hero
+     falls back to the store hero, so a single-audience shop configures one thing. */
+  const hero = (audience && audience.hero) || config.hero;
+%>
 <%- include('../partials/document-open', { title: null }) %>
 
 <!-- ================================ hero ================================ -->
 <section class="relative">
   <div class="relative h-[78vh] min-h-[520px] w-full overflow-hidden bg-cream lg:h-[86vh]">
-    <img src="<%= config.hero.image || ('/ph.svg?seed=hero-main&w=1920&h=1080&kind=hero&label=' + encodeURIComponent(config.brand.name + ' Bridal 2026')) %>"
-         alt="<%= config.hero.imageAlt %>" fetchpriority="high" decoding="async"
+    <img src="<%= hero.image || ('/ph.svg?seed=hero-main&w=1920&h=1080&kind=hero&label=' + encodeURIComponent(config.brand.name + ' Bridal 2026')) %>"
+         alt="<%= hero.imageAlt %>" fetchpriority="high" decoding="async"
          class="absolute inset-0 h-full w-full object-cover">
     <div class="absolute inset-0 bg-gradient-to-r from-ink/55 via-ink/25 to-transparent"></div>
 
     <div class="relative mx-auto flex h-full max-w-[1600px] items-center px-6 lg:px-8">
       <div class="max-w-xl text-ivory">
-        <p class="text-[10px] uppercase tracking-luxe text-goldLight"><%= config.hero.eyebrow %></p>
-        <h1 class="mt-5 whitespace-pre-line font-serif text-[2.5rem] leading-[1.08] sm:text-6xl lg:text-[4.25rem]"><%= config.hero.heading %></h1>
-        <p class="mt-6 max-w-md text-sm leading-relaxed text-ivory/85 lg:text-base"><%= config.hero.body %></p>
+        <p class="text-[10px] uppercase tracking-luxe text-goldLight"><%= hero.eyebrow %></p>
+        <h1 class="mt-5 whitespace-pre-line font-serif text-[2.5rem] leading-[1.08] sm:text-6xl lg:text-[4.25rem]"><%= hero.heading %></h1>
+        <p class="mt-6 max-w-md text-sm leading-relaxed text-ivory/85 lg:text-base"><%= hero.body %></p>
         <div class="mt-9 flex flex-wrap gap-3">
-          <a href="<%= config.hero.ctaPrimary.href %>"
-             class="bg-ivory px-8 py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:bg-gold hover:text-ivory"><%= config.hero.ctaPrimary.label %></a>
-          <a href="<%= config.hero.ctaSecondary.href %>"
-             class="border border-ivory/60 px-8 py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:border-ivory hover:bg-ivory/10"><%= config.hero.ctaSecondary.label %></a>
+          <a href="<%= hero.ctaPrimary.href %>"
+             class="bg-ivory px-8 py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:bg-gold hover:text-ivory"><%= hero.ctaPrimary.label %></a>
+          <a href="<%= hero.ctaSecondary.href %>"
+             class="border border-ivory/60 px-8 py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:border-ivory hover:bg-ivory/10"><%= hero.ctaSecondary.label %></a>
         </div>
       </div>
     </div>

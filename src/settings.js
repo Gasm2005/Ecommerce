@@ -60,15 +60,27 @@ function coerce(key, value) {
   return value;
 }
 
-/** Patches one config section from a form body (only keys present in the body). */
+/**
+ * Patches one config section from a form body (only keys present in the body).
+ *
+ * A key listed in `booleans` is coerced to a real true/false, not just defaulted
+ * to false when absent. Without that, a checked box stored the string "on", and
+ * any code testing `=== true` read it as off — a toggle that appeared to save and
+ * silently did nothing.
+ */
 function updateSection(section, body, { booleans = [] } = {}) {
   const config = readConfigRaw();
   const current = config[section] || {};
+  const boolSet = new Set(booleans);
   const patch = {};
 
   Object.keys(body).forEach((k) => {
     if (k === 'token' || k === 'section') return;
-    patch[k] = coerce(k, body[k]);
+    // A section's declared booleans win over the global key list, so a new toggle
+    // works by being listed in one place rather than two.
+    patch[k] = boolSet.has(k)
+      ? (body[k] === 'on' || body[k] === 'true' || body[k] === true)
+      : coerce(k, body[k]);
   });
   // Unchecked checkboxes never post, so default them to false explicitly.
   booleans.forEach((k) => { if (!(k in body)) patch[k] = false; });

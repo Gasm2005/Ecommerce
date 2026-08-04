@@ -40,7 +40,7 @@
 <% } %>
 
 <p style="margin:22px 0 0; font-size:13px; line-height:1.7; color:<%= c.muted %>;">
-  Made to order — we'll email you the moment it ships. Need to change something? Reply to this email today.
+  <%= fulfilment.nextStepLine(config) %> Need to change something? Reply to this email today.
 </p>
 
 <% if (locals.origin) { %>

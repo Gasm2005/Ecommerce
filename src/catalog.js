@@ -56,9 +56,22 @@ function byId(id) {
   return all().find((p) => p.id === id) || null;
 }
 
-function inCategory(slug) {
-  if (!slug || slug === 'all') return all();
-  return all().filter((p) => p.categories.includes(slug));
+/**
+ * The pool a visitor browses.
+ *
+ * `audience` narrows it to one section of the shop — menswear, womenswear, kids.
+ * Facets, search, suggestions and "you may also like" are all built on top of this
+ * one function, so the audience filter cannot be applied in one place and
+ * forgotten in another.
+ *
+ * A product with no audience of its own is universal stock and always shows, which
+ * is how a client's existing catalogue keeps working the day this is switched on.
+ */
+function inCategory(slug, audience) {
+  const audienceOf = require('./audience');
+  const pool = audience ? all().filter((p) => audienceOf.matches(p, audience)) : all();
+  if (!slug || slug === 'all') return pool;
+  return pool.filter((p) => p.categories.includes(slug));
 }
 
 function uniq(list) {
@@ -66,8 +79,8 @@ function uniq(list) {
 }
 
 /** Facet counts for the sidebar, computed against the current category. */
-function facets(slug) {
-  const pool = inCategory(slug);
+function facets(slug, audience) {
+  const pool = inCategory(slug, audience);
   const count = (fn) => {
     const map = new Map();
     pool.forEach((p) => [].concat(fn(p)).forEach((v) => v && map.set(v, (map.get(v) || 0) + 1)));
@@ -133,9 +146,9 @@ function sortList(list, sort) {
  * Main listing query. Returns a page of products plus enough metadata for the
  * "Load more" sentinel to know whether another page exists.
  */
-function search(categorySlug, filters, perPage) {
+function search(categorySlug, filters, perPage, audience) {
   const f = filters;
-  let list = inCategory(categorySlug).filter((p) =>
+  let list = inCategory(categorySlug, audience).filter((p) =>
     matchesPrice(p, f.price) &&
     (!f.color.length || p.colors.some((c) => f.color.includes(c))) &&
     (!f.fabric.length || f.fabric.includes(p.fabric)) &&
@@ -160,11 +173,11 @@ function haystack(p) {
 }
 
 /** As-you-type suggestions: products first, then matching categories/facets. */
-function suggest(term, config, limit = 6) {
+function suggest(term, config, limit = 6, audience) {
   const t = term.trim().toLowerCase();
   if (t.length < 2) return { products: [], groups: [], term: t };
 
-  const scored = all().map((p) => {
+  const scored = inCategory(null, audience).map((p) => {
     const name = p.name.toLowerCase();
     let score = 0;
     if (name.startsWith(t)) score = 100;
@@ -196,17 +209,17 @@ function suggest(term, config, limit = 6) {
   return { products: scored, groups: groups.slice(0, 4), term: t };
 }
 
-function bestsellers(n = 8) {
-  return sortList(all(), 'popular').slice(0, n);
+function bestsellers(n = 8, audience) {
+  return sortList(inCategory(null, audience), 'popular').slice(0, n);
 }
 
-function newArrivals(n = 8) {
-  return sortList(all(), 'new').slice(0, n);
+function newArrivals(n = 8, audience) {
+  return sortList(inCategory(null, audience), 'new').slice(0, n);
 }
 
 /** Same-category, closest-priced products. */
 function related(product, n = 6) {
-  return all()
+  return inCategory(null, product.audience)
     .filter((p) => p.id !== product.id && p.categories.some((c) => product.categories.includes(c)))
     .sort((a, b) => Math.abs(a.price - product.price) - Math.abs(b.price - product.price))
     .slice(0, n);

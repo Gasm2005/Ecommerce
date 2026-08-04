@@ -22,6 +22,8 @@ const invoice = require('./src/invoice');
 const pincode = require('./src/pincode');
 const gstin = require('./src/gstin');
 const delivery = require('./src/delivery');
+const fulfilment = require('./src/fulfilment');
+const audience = require('./src/audience');
 const plans = require('./src/plan');
 const cod = require('./src/cod');
 const payments = require('./src/payments');
@@ -70,6 +72,15 @@ app.use((req, res, next) => {
   res.locals.cod = cod;
   res.locals.cart = cart;
   res.locals.delivery = delivery;
+  res.locals.fulfilment = fulfilment;
+  /* Which section of the shop this visitor is in. A single-audience shop resolves
+     to its only audience and never shows a chooser or a switcher. */
+  res.locals.audience = audience.current(req, config);
+  res.locals.audienceId = res.locals.audience ? res.locals.audience.id : null;
+  res.locals.audiences = audience.list(config);
+  res.locals.audienceChoiceNeeded = audience.isMultiple(config) && !audience.hasChosen(req, config);
+  // The header renders THIS nav, not config.nav — menswear must not show Sarees.
+  res.locals.nav = audience.navFor(req, config);
   res.locals.hasFeature = (id) => plans.hasFeature(config, id);
   res.locals.marketing = marketing;
   res.locals.origin = marketing.origin(req, config);
@@ -135,6 +146,24 @@ function storefrontFeature(id) {
   };
 }
 
+/**
+ * The visitor picks a section. Stored in a cookie for six months, changeable any
+ * time from the header — it is a preference, not a gate: a direct link to any
+ * product always opens regardless.
+ */
+app.post('/audience', (req, res) => {
+  const config = loadConfig();
+  const picked = audience.choose(req, res, config, String(req.body.audience || ''));
+  const next = String(req.body.next || '/');
+  const safe = next.startsWith('/') && !next.startsWith('//') ? next : '/';
+  if (!picked) return res.redirect('/');
+  if (res.locals.isHx) {
+    res.set('HX-Redirect', safe);
+    return res.status(200).send('');
+  }
+  return res.redirect(safe);
+});
+
 /* --------------------------------------------------------------- home ---- */
 
 app.get('/', (req, res) => {
@@ -172,7 +201,7 @@ app.get('/fragments/home-section/:index', async (req, res) => {
 
 app.get('/fragments/search-suggest', (req, res) => {
   const config = loadConfig();
-  const result = catalog.suggest(String(req.query.q || ''), config);
+  const result = catalog.suggest(String(req.query.q || ''), config, 6, res.locals.audienceId);
   res.render('fragments/search-suggest', { result });
 });
 
@@ -185,19 +214,21 @@ app.get('/search', (req, res) => {
 
 /* ------------------------------------------------------ product listing ---- */
 
-function listingModel(req) {
+function listingModel(req, res) {
   const config = loadConfig();
   const slug = req.params.slug || 'all';
   const filters = catalog.parseQuery(req.query);
   const perPage = (config.features && config.features.productsPerPage) || 8;
-  const result = catalog.search(slug, filters, perPage);
-  const navEntry = (config.nav || []).find((n) => n.slug === slug);
+  const result = catalog.search(slug, filters, perPage, res.locals.audienceId);
+  // Look the category up in the AUDIENCE's nav, so a men's category page gets
+  // its own heading rather than falling through to a womenswear one.
+  const navEntry = (res.locals.nav || config.nav || []).find((n) => n.slug === slug);
   return {
     slug,
     filters,
     result,
     perPage,
-    facets: catalog.facets(slug),
+    facets: catalog.facets(slug, res.locals.audienceId),
     priceRanges: catalog.PRICE_RANGES,
     sorts: catalog.SORTS,
     heading: navEntry ? navEntry.label : (filters.q ? `Results for “${filters.q}”` : 'All Couture'),
@@ -208,7 +239,7 @@ function listingModel(req) {
 
 app.get('/category/:slug', (req, res) => {
   const config = loadConfig();
-  const model = listingModel(req);
+  const model = listingModel(req, res);
   res.locals.seo = marketing.metaForCategory(model.slug, model.heading, config);
   res.locals.jsonLd = [
     marketing.breadcrumbJsonLd([
@@ -230,7 +261,7 @@ app.get('/category/:slug', (req, res) => {
 
 // Grid-only fragment: filter change, sort change and "load more" all hit this.
 app.get('/fragments/products/:slug', (req, res) => {
-  const model = listingModel(req);
+  const model = listingModel(req, res);
   const append = req.query.append === '1';
   // Filter/sort changes rewrite the address bar; "load more" must not, or a
   // reload would land the visitor on page 2 with page 1 missing.
@@ -274,7 +305,10 @@ app.get('/fragments/quick-view/:slug', (req, res) => {
 });
 
 app.get('/fragments/size-chart', (req, res) => {
-  res.render('fragments/size-chart');
+  // Opened from a product page, the guide should show that product's audience —
+  // a men's kurta buyer has no use for a bust measurement.
+  const product = req.query.product ? catalog.bySlug(String(req.query.product)) : null;
+  res.render('fragments/size-chart', { product });
 });
 
 /* ----------------------------------------------------------- wishlist ---- */

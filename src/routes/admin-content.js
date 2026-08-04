@@ -371,7 +371,10 @@ router.get('/customers/export.csv', requireSection('customers'), (req, res) => {
 
 const SECTION_BOOLEANS = {
   shipping: ['codAvailable'],
-  features: ['guestCheckout', 'wishlist', 'quickView', 'infiniteScroll', 'showMrpStrikethrough'],
+  features: ['guestCheckout', 'wishlist', 'quickView', 'infiniteScroll', 'showMrpStrikethrough',
+    // Unchecked checkboxes never post, so these must be listed or they can never
+    // be switched OFF once on.
+    'madeToOrder', 'customisation', 'orderNotes'],
   reviews: ['showStoreBadge', 'merchantFeed', 'requirePurchase', 'allowMedia'],
   inventory: [],
   brand: [],

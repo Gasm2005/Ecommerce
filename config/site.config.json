@@ -45,7 +45,11 @@
     "quickView": true,
     "infiniteScroll": true,
     "showMrpStrikethrough": true,
-    "productsPerPage": 8
+    "productsPerPage": 12,
+    "madeToOrder": false,
+    "customisation": false,
+    "orderNotes": true,
+    "_fulfilmentReadme": "madeToOrder: the shop stitches after the order. customisation: free size/measurement customisation is included. Both OFF = a retail shop, and every promise about stitching, measurements and the atelier disappears from the storefront, checkout and emails. orderNotes keeps an optional notes box for delivery instructions either way."
   },
   "finance": {
     "_readme": "Every cost line the owner controls. Product prices are GST-INCLUSIVE, so tax is extracted from the price, never added. Per-SKU cost/GST on the product beats the category default, which beats these globals.",
@@ -793,5 +797,452 @@
       "Unaltered pieces may be returned within 7 days of delivery.",
       "Subject to Mumbai jurisdiction."
     ]
+  },
+  "sizeChart": {
+    "_readme": "One entry per audience. A single entry renders without tabs. Set a product.sizeChart to point a product at one by id; otherwise the first is used. unit is printed as-is.",
+    "unit": "inches",
+    "charts": [
+      {
+        "id": "women",
+        "label": "Women",
+        "columns": [
+          "Size",
+          "Bust",
+          "Waist",
+          "Hip"
+        ],
+        "rows": [
+          [
+            "XS",
+            "32",
+            "26",
+            "35"
+          ],
+          [
+            "S",
+            "34",
+            "28",
+            "37"
+          ],
+          [
+            "M",
+            "36",
+            "30",
+            "39"
+          ],
+          [
+            "L",
+            "38",
+            "32",
+            "41"
+          ],
+          [
+            "XL",
+            "40",
+            "34",
+            "43"
+          ],
+          [
+            "XXL",
+            "42",
+            "36",
+            "45"
+          ]
+        ],
+        "notes": [
+          {
+            "label": "Blouse length",
+            "text": "Standard 14\"."
+          },
+          {
+            "label": "Lehenga length",
+            "text": "Standard 41\" from waist."
+          }
+        ]
+      },
+      {
+        "id": "men",
+        "label": "Men",
+        "columns": [
+          "Size",
+          "Chest",
+          "Waist",
+          "Shoulder"
+        ],
+        "rows": [
+          [
+            "S",
+            "38",
+            "32",
+            "17"
+          ],
+          [
+            "M",
+            "40",
+            "34",
+            "17.5"
+          ],
+          [
+            "L",
+            "42",
+            "36",
+            "18"
+          ],
+          [
+            "XL",
+            "44",
+            "38",
+            "18.5"
+          ],
+          [
+            "XXL",
+            "46",
+            "40",
+            "19"
+          ],
+          [
+            "3XL",
+            "48",
+            "42",
+            "19.5"
+          ]
+        ],
+        "notes": [
+          {
+            "label": "Kurta length",
+            "text": "Standard 40\" for regular fit."
+          },
+          {
+            "label": "Sleeve",
+            "text": "Full sleeve unless stated."
+          }
+        ]
+      }
+    ]
+  },
+  "audiences": {
+    "_readme": "Who this shop sells to. ONE entry = a single-audience shop: no chooser, no switcher, and its nav is the site nav. TWO OR MORE = visitors are asked once which section they want, and everything (nav, listing, search, home) follows that choice. Delete the ones a client does not sell and the feature disappears cleanly. Each product carries an audience id; products with none show to everyone.",
+    "list": [
+      {
+        "id": "women",
+        "label": "Womenswear",
+        "blurb": "Bridal, festive and occasion wear",
+        "nav": [
+          {
+            "label": "Bridal",
+            "slug": "bridal",
+            "columns": [
+              {
+                "title": "By Silhouette",
+                "links": [
+                  {
+                    "label": "Bridal Lehengas",
+                    "href": "/category/lehengas?occasion=Wedding"
+                  },
+                  {
+                    "label": "Wedding Sarees",
+                    "href": "/category/sarees?occasion=Wedding"
+                  },
+                  {
+                    "label": "Reception Gowns",
+                    "href": "/category/gowns?occasion=Reception"
+                  },
+                  {
+                    "label": "Trousseau Edit",
+                    "href": "/category/bridal"
+                  }
+                ]
+              },
+              {
+                "title": "By Ceremony",
+                "links": [
+                  {
+                    "label": "Mehendi",
+                    "href": "/category/bridal?occasion=Mehendi"
+                  },
+                  {
+                    "label": "Sangeet",
+                    "href": "/category/bridal?occasion=Sangeet"
+                  },
+                  {
+                    "label": "Pheras",
+                    "href": "/category/bridal?occasion=Wedding"
+                  },
+                  {
+                    "label": "Reception",
+                    "href": "/category/bridal?occasion=Reception"
+                  }
+                ]
+              }
+            ],
+            "featured": {
+              "title": "The Benaras Bride",
+              "subtitle": "Hand-woven kadhwa, 2026",
+              "href": "/category/bridal",
+              "image": null
+            }
+          },
+          {
+            "label": "Festive",
+            "slug": "festive",
+            "columns": [
+              {
+                "title": "Shop",
+                "links": [
+                  {
+                    "label": "Anarkalis",
+                    "href": "/category/festive?fabric=Chanderi"
+                  },
+                  {
+                    "label": "Sharara Sets",
+                    "href": "/category/festive"
+                  },
+                  {
+                    "label": "Kurta Sets",
+                    "href": "/category/festive"
+                  },
+                  {
+                    "label": "Under ₹25,000",
+                    "href": "/category/festive?price=0-25000"
+                  }
+                ]
+              },
+              {
+                "title": "Occasion",
+                "links": [
+                  {
+                    "label": "Diwali",
+                    "href": "/category/festive?occasion=Festive"
+                  },
+                  {
+                    "label": "Karwa Chauth",
+                    "href": "/category/festive?occasion=Festive"
+                  },
+                  {
+                    "label": "Haldi",
+                    "href": "/category/festive?occasion=Haldi"
+                  },
+                  {
+                    "label": "Puja",
+                    "href": "/category/festive?occasion=Festive"
+                  }
+                ]
+              }
+            ],
+            "featured": {
+              "title": "Festive Ateliers",
+              "subtitle": "Chanderi & tissue silk",
+              "href": "/category/festive",
+              "image": null
+            }
+          },
+          {
+            "label": "Cocktail",
+            "slug": "cocktail",
+            "columns": [
+              {
+                "title": "Shop",
+                "links": [
+                  {
+                    "label": "Draped Gowns",
+                    "href": "/category/gowns"
+                  },
+                  {
+                    "label": "Cocktail Sarees",
+                    "href": "/category/cocktail"
+                  },
+                  {
+                    "label": "Sequin Edit",
+                    "href": "/category/cocktail?fabric=Sequin"
+                  },
+                  {
+                    "label": "Indo-Western",
+                    "href": "/category/cocktail"
+                  }
+                ]
+              }
+            ],
+            "featured": {
+              "title": "After Dark",
+              "subtitle": "Liquid sequins & tulle",
+              "href": "/category/cocktail",
+              "image": null
+            }
+          },
+          {
+            "label": "Sarees",
+            "slug": "sarees",
+            "columns": [
+              {
+                "title": "Weaves",
+                "links": [
+                  {
+                    "label": "Banarasi",
+                    "href": "/category/sarees?fabric=Banarasi Silk"
+                  },
+                  {
+                    "label": "Organza",
+                    "href": "/category/sarees?fabric=Organza"
+                  },
+                  {
+                    "label": "Tissue",
+                    "href": "/category/sarees?fabric=Tissue Silk"
+                  },
+                  {
+                    "label": "Georgette",
+                    "href": "/category/sarees?fabric=Georgette"
+                  }
+                ]
+              }
+            ],
+            "featured": {
+              "title": "The Weave Room",
+              "subtitle": "Loom to drape",
+              "href": "/category/sarees",
+              "image": null
+            }
+          },
+          {
+            "label": "Lehengas",
+            "slug": "lehengas",
+            "columns": [
+              {
+                "title": "Shop",
+                "links": [
+                  {
+                    "label": "Bridal Red",
+                    "href": "/category/lehengas?color=Rani Pink"
+                  },
+                  {
+                    "label": "Pastel",
+                    "href": "/category/lehengas?color=Ivory"
+                  },
+                  {
+                    "label": "Velvet",
+                    "href": "/category/lehengas?fabric=Velvet"
+                  },
+                  {
+                    "label": "Ready to Ship",
+                    "href": "/category/lehengas"
+                  }
+                ]
+              }
+            ],
+            "featured": {
+              "title": "Zardozi Heirlooms",
+              "subtitle": "240 hours per panel",
+              "href": "/category/lehengas",
+              "image": null
+            }
+          },
+          {
+            "label": "Gowns",
+            "slug": "gowns",
+            "columns": [
+              {
+                "title": "Shop",
+                "links": [
+                  {
+                    "label": "Cape Gowns",
+                    "href": "/category/gowns"
+                  },
+                  {
+                    "label": "Pre-draped",
+                    "href": "/category/gowns"
+                  },
+                  {
+                    "label": "Trails",
+                    "href": "/category/gowns?occasion=Reception"
+                  }
+                ]
+              }
+            ],
+            "featured": {
+              "title": "Sculpted Silhouettes",
+              "subtitle": "Couture atelier",
+              "href": "/category/gowns",
+              "image": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "men",
+        "label": "Menswear",
+        "blurb": "Sherwani, kurta sets and suiting",
+        "nav": [
+          {
+            "label": "Sherwani",
+            "slug": "sherwani"
+          },
+          {
+            "label": "Kurta Pyjama",
+            "slug": "kurta-pyjama"
+          },
+          {
+            "label": "Indo-Western",
+            "slug": "indo-western"
+          },
+          {
+            "label": "Suits & Blazers",
+            "slug": "suits"
+          },
+          {
+            "label": "Nehru Jackets",
+            "slug": "nehru-jackets"
+          }
+        ],
+        "hero": {
+          "eyebrow": "Menswear · Wedding 2026",
+          "heading": "Cut for the\nday he is watched",
+          "body": "Sherwanis, bandhgalas and hand-finished suiting — tailored to your measurements.",
+          "ctaPrimary": {
+            "label": "Shop Sherwani",
+            "href": "/category/sherwani"
+          },
+          "ctaSecondary": {
+            "label": "Explore New Arrivals",
+            "href": "/category/all?sort=new"
+          },
+          "image": null,
+          "imageAlt": "Menswear"
+        }
+      },
+      {
+        "id": "kids",
+        "label": "Kidswear",
+        "blurb": "Festive sets for boys and girls",
+        "nav": [
+          {
+            "label": "Boys Ethnic",
+            "slug": "boys-ethnic"
+          },
+          {
+            "label": "Girls Ethnic",
+            "slug": "girls-ethnic"
+          },
+          {
+            "label": "Festive Sets",
+            "slug": "kids-festive"
+          }
+        ],
+        "hero": {
+          "eyebrow": "Kidswear · Festive",
+          "heading": "Small people,\nbig occasions",
+          "body": "Festive sets for boys and girls, made in fabrics that survive a wedding.",
+          "ctaPrimary": {
+            "label": "Shop Festive Sets",
+            "href": "/category/kids-festive"
+          },
+          "ctaSecondary": {
+            "label": "Explore New Arrivals",
+            "href": "/category/all?sort=new"
+          },
+          "image": null,
+          "imageAlt": "Kidswear"
+        }
+      }
+    ],
+    "_heroReadme": "An audience may carry its own hero (eyebrow, heading, body, CTAs, image). Without one it uses config.hero, so a single-audience shop needs no duplication."
   }
 }

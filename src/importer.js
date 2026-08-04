@@ -28,6 +28,8 @@ const COLUMNS = [
   { key: 'sizes', label: 'sizes', list: true, hint: 'XS|S|M|L|XL' },
   { key: 'occasion', label: 'occasion', list: true, hint: 'Wedding|Reception' },
   { key: 'badge', label: 'badge', hint: 'Bestseller' },
+  { key: 'audience', label: 'audience', hint: 'men / women / kids — blank shows to everyone' },
+  { key: 'sizeChart', label: 'sizeChart', hint: 'which size chart applies, e.g. men' },
   { key: 'hsn', label: 'hsn', hint: '6211 — printed on the tax invoice' },
   { key: 'gstPercent', label: 'gstPercent', number: true, hint: '5 — blank uses the store default' },
   { key: 'cost', label: 'cost', number: true, hint: '42000 — your purchase cost, never shown to customers' },

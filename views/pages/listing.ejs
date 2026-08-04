@@ -11,11 +11,14 @@
   <header class="border-b border-line pb-7 pt-5 lg:pt-7">
     <h1 class="font-serif text-3xl lg:text-[2.75rem]"><%= heading %></h1>
     <% if (navEntry && navEntry.featured) { %>
-      <p class="mt-2 max-w-xl text-sm text-muted"><%= navEntry.featured.subtitle %> — made to order in our atelier, with free size customisation.</p>
+      <% const listingNote = fulfilment.listingNote(config); %>
+      <p class="mt-2 max-w-xl text-sm text-muted"><%= navEntry.featured.subtitle %><%= listingNote ? ' — ' + listingNote + '.' : '' %></p>
     <% } else if (filters.q) { %>
       <p class="mt-2 text-sm text-muted">Showing pieces matching your search.</p>
     <% } else { %>
-      <p class="mt-2 max-w-xl text-sm text-muted">Every piece is made to order. Delivery estimates are shown on each product.</p>
+      <p class="mt-2 max-w-xl text-sm text-muted">
+        <%= fulfilment.flags(config).madeToOrder ? 'Every piece is made to order. ' : '' %>Delivery estimates are shown on each product.
+      </p>
     <% } %>
   </header>
 

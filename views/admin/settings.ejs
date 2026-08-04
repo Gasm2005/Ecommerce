@@ -357,6 +357,29 @@
           <input type="checkbox" name="<%= f[0] %>" <%= cfg.features[f[0]] ? 'checked' : '' %>> <%= f[1] %>
         </label>
       <% }); %>
+
+      <%
+        /* How this shop makes what it sells. Off = a retail store, and every
+           promise about stitching, measurements and the atelier disappears from
+           the storefront, the checkout and the emails. A template must not make a
+           promise on a client's behalf that the client does not keep. */
+      %>
+      <p class="adm-label mt-4">How you sell</p>
+      <div class="space-y-2">
+        <% [
+          ['madeToOrder', 'Made to order', 'Pieces are stitched after the order. Off = ready stock, "Ready to ship".'],
+          ['customisation', 'Free size customisation', 'Adds the measurements field at checkout and the customisation promise.'],
+          ['orderNotes', 'Optional order notes', 'A notes box for delivery instructions when customisation is off.']
+        ].forEach(function (f) { %>
+          <label class="flex items-start gap-2">
+            <input type="checkbox" name="<%= f[0] %>" class="mt-1" <%= cfg.features[f[0]] ? 'checked' : '' %>>
+            <span>
+              <%= f[1] %>
+              <span class="block text-[10.5px] leading-relaxed text-muted"><%= f[2] %></span>
+            </span>
+          </label>
+        <% }); %>
+      </div>
       <div class="pt-2">
         <label class="adm-label" for="productsPerPage">Products per page</label>
         <input id="productsPerPage" name="productsPerPage" class="adm-input w-24" value="<%= cfg.features.productsPerPage %>">
