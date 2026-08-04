@@ -194,6 +194,21 @@ function decrement(product, { size, color }, qty) {
   ));
 }
 
+/**
+ * Pieces in one size, across every colour.
+ *
+ * Read from the stored rows, NOT by adding up the grid's cells: a size counted
+ * without a colour shows the same number in every colour column, so summing the
+ * cells counts it once per colour. That is how a shop with 12 pieces reads 24.
+ *
+ * Returns null when the size is not counted at all, which is different from 0.
+ */
+function sizeTotal(product, size) {
+  const mine = rows(product).filter((v) => same(v.size, size) && Number.isFinite(v.stock));
+  if (!mine.length) return null;
+  return mine.reduce((t, v) => t + Math.max(0, v.stock), 0);
+}
+
 /** Variants at or below the threshold — the buying list. */
 function lowVariants(product, threshold) {
   const limit = Number.isFinite(threshold) ? threshold : 3;
@@ -210,5 +225,5 @@ function label(variant) {
 
 module.exports = {
   same, tracksVariants, rowFor, stockFor, totalStock, isSoldOut, anyAvailable,
-  sizeAvailability, colourAvailability, matrix, setStock, decrement, lowVariants, label
+  sizeAvailability, colourAvailability, matrix, sizeTotal, setStock, decrement, lowVariants, label
 };

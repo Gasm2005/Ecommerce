@@ -220,16 +220,20 @@
       <h2 class="font-serif text-base">Restock list</h2>
       <a href="/admin/products?stock=low<%= adminToken ? '&token=' + adminToken : '' %>" class="text-[10px] uppercase tracking-[0.12em] text-maroon">Manage →</a>
     </div>
-    <% if (!lowStock.length) { %>
+    <p class="mb-2 text-[11.5px] text-muted">By size — a piece can be healthy overall and still be out of the size half your customers want.</p>
+    <% if (!lowStockVariants.length) { %>
       <p class="text-[12.5px] text-muted">Nothing at or below the low-stock threshold.</p>
     <% } %>
     <table class="adm-table">
       <tbody>
-        <% lowStock.forEach(function (p) { %>
+        <% lowStockVariants.forEach(function (r) { %>
           <tr>
-            <td><a href="/admin/products/<%= p.id %><%= tokenQs %>" class="text-ink hover:text-maroon"><%= p.name %></a></td>
-            <td class="num"><span class="pill pill-<%= p.outOfStock ? 'critical' : 'warning' %>"><%= p.outOfStock ? 'Out' : p.stock %></span></td>
-            <td class="num text-muted"><%= money(p.price) %></td>
+            <td>
+              <a href="/admin/products/<%= r.productId %><%= tokenQs %>" class="text-ink hover:text-maroon"><%= r.name %></a>
+              <span class="ml-1.5 text-[11px] text-muted"><%= r.label %></span>
+            </td>
+            <td class="num"><span class="pill pill-<%= r.outOfStock ? 'critical' : 'warning' %>"><%= r.outOfStock ? 'Out' : r.stock %></span></td>
+            <td class="num text-muted"><%= money(r.price) %></td>
           </tr>
         <% }); %>
       </tbody>

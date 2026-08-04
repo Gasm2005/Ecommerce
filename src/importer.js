@@ -27,6 +27,8 @@ const COLUMNS = [
   { key: 'fabric', label: 'fabric', hint: 'Raw Silk' },
   { key: 'sizes', label: 'sizes', list: true, hint: 'XS|S|M|L|XL' },
   { key: 'occasion', label: 'occasion', list: true, hint: 'Wedding|Reception' },
+  { key: 'stock', label: 'stock', number: true, hint: '4 — pieces in hand, all sizes together' },
+  { key: 'variantStock', label: 'variantStock', hint: 'S:4|M:2|L:0 or S/Red:4|S/Gold:2 — overrides stock' },
   { key: 'badge', label: 'badge', hint: 'Bestseller' },
   { key: 'audience', label: 'audience', hint: 'men / women / kids — blank shows to everyone' },
   { key: 'sizeChart', label: 'sizeChart', hint: 'which size chart applies, e.g. men' },
@@ -130,6 +132,35 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : NaN;
 }
 
+/**
+ * Reads a per-size stock column: "S:4|M:2|L:0", or "S/Red:4|S/Gold:2" when the
+ * count differs by colour.
+ *
+ * A size written as 0 is counted and sold out; a size left out of the string is
+ * NOT counted, which on the storefront also reads as unavailable. That asymmetry
+ * is deliberate — a spreadsheet that omits a size should not silently put stock
+ * on it — but it is why the importer warns when a listed size is missing here.
+ */
+function toVariants(value) {
+  const rows = [];
+  toList(value).forEach((part) => {
+    const at = part.lastIndexOf(':');
+    if (at < 0) return;
+
+    const where = part.slice(0, at).trim();
+    const n = toNumber(part.slice(at + 1));
+    if (!where || !Number.isFinite(n)) return;
+
+    const [size, color] = where.split('/').map((x) => x.trim());
+    if (!size) return;
+
+    const row = { size, stock: Math.max(0, Math.round(n)) };
+    if (color) row.color = color;
+    rows.push(row);
+  });
+  return rows;
+}
+
 /** Applies defaults and coerces types. Never throws — errors are reported separately. */
 function shape(raw, { today }) {
   const name = String(raw.name || '').trim();
@@ -157,8 +188,23 @@ function shape(raw, { today }) {
     fabricDetails: String(raw.fabricDetails || '').trim(),
     care: String(raw.care || '').trim(),
     deliveryDays: Number.isFinite(deliveryDays) ? deliveryDays : 10,
-    images: toList(raw.images)
+    images: toList(raw.images),
+    ...stockFields(raw)
   };
+}
+
+/**
+ * stock and variants together. When a variantStock column is given it wins, and
+ * product.stock becomes the sum of it — one number, derived, so no screen can
+ * disagree with another.
+ */
+function stockFields(raw) {
+  const variants = toVariants(raw.variantStock);
+  if (variants.length) {
+    return { variants, stock: variants.reduce((t, v) => t + v.stock, 0) };
+  }
+  const stock = toNumber(raw.stock);
+  return { stock: Number.isFinite(stock) ? Math.max(0, Math.round(stock)) : 0 };
 }
 
 function validate(p, raw) {
@@ -179,6 +225,21 @@ function validate(p, raw) {
   if (!p.images.length) warnings.push('no images — placeholder art will be generated');
   if (!p.description) warnings.push('no description');
   if (raw.colors === undefined || String(raw.colors || '').trim() === '') warnings.push('no colours — defaulted to “As shown”');
+
+  if (String(raw.variantStock || '').trim() && !p.variants) {
+    warnings.push(`variantStock "${raw.variantStock}" could not be read — expected S:4|M:2`);
+  }
+  if (p.variants) {
+    // A size counted here but not listed above can never be chosen on the storefront.
+    const unlisted = p.variants.filter((v) => !p.sizes.some((s2) => s2.toLowerCase() === v.size.toLowerCase()));
+    if (unlisted.length) errors.push(`variantStock names sizes that are not in sizes: ${unlisted.map((v) => v.size).join(', ')}`);
+
+    // And a listed size left out of the count reads as sold out, which surprises people.
+    const uncounted = p.sizes.filter((s2) => !p.variants.some((v) => v.size.toLowerCase() === s2.toLowerCase()));
+    if (uncounted.length) warnings.push(`no count for ${uncounted.join(', ')} — those sizes will show as sold out`);
+  } else if (!p.stock) {
+    warnings.push('stock is 0 — the piece will list as sold out');
+  }
 
   return { errors, warnings };
 }
@@ -311,6 +372,6 @@ function commit(analysis) {
 
 module.exports = {
   COLUMNS, LIST_SEPARATOR, PRODUCTS_PATH,
-  parseCsv, csvToObjects, templateCsv, slugify, shape, validate,
+  parseCsv, csvToObjects, templateCsv, slugify, shape, validate, toVariants,
   analyse, commit, backup, readProducts
 };

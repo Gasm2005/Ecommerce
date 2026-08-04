@@ -224,6 +224,8 @@ test dependencies:
 | `cod.test.js` | advance, pincode allow/block lists, plans |
 | `discounts.test.js` | expiry, usage limits, minimums |
 | `orders.test.js` | snapshots, refund accumulation, stock |
+| `variants.test.js` | per-size stock, matching, availability |
+| `stock-grid.test.js` | the admin grid, CSV columns, restock list |
 | `auth.test.js` | roles, hashing, lockout, single-use resets |
 | `license.test.js` | forgery, expiry, domain lock, entitlement |
 | `plan.test.js`, `plan-gate.test.js` | plan enforcement, including over HTTP |

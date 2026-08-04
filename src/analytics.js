@@ -572,6 +572,46 @@ function lowStock(config) {
     .sort((a, b) => a.stock - b.stock);
 }
 
+/**
+ * The restock list at the level a shop actually reorders: the SIZE.
+ *
+ * lowStock() above looks at the whole piece, which hides the case that costs the
+ * most sales — 60 pieces in stock but nothing left in M, the size half the
+ * customers want. A total is a comfortable number to read and the wrong number to
+ * buy against.
+ *
+ * Pieces that don't count sizes separately still appear, as a single row, so the
+ * list is the whole shop and not just the tracked half.
+ */
+function lowStockVariants(config) {
+  const variants = require('./variants');
+  const threshold = (config.inventory && config.inventory.lowStockThreshold) || 4;
+  const out = [];
+
+  catalog.all().forEach((p) => {
+    if (variants.tracksVariants(p)) {
+      variants.lowVariants(p, threshold).forEach((v) => {
+        out.push({
+          productId: p.id, name: p.name, price: p.price,
+          label: variants.label(v), stock: v.stock, outOfStock: v.stock <= 0,
+          tracked: true
+        });
+      });
+      return;
+    }
+
+    if (p.stock === undefined || p.stock === null || p.stock > threshold) return;
+    out.push({
+      productId: p.id, name: p.name, price: p.price,
+      label: 'All sizes', stock: p.stock, outOfStock: p.stock <= 0,
+      tracked: false
+    });
+  });
+
+  // Out first, then closest to running out: the order you would place the order in.
+  return out.sort((x, y) => x.stock - y.stock || x.name.localeCompare(y.name));
+}
+
 /** Sold in the window but never restocked — the "losing money" list. */
 function deadStock(rangeId, config, now = new Date()) {
   const sold = new Set(topProducts(rangeId, config, 999, now).map((r) => r.productId));
@@ -605,6 +645,6 @@ module.exports = {
   isMarketplace,
   belowTheLine,
   RANGES, resolveRange, windowFor, resolveWindow, summary, series, totals,
-  topProducts, byCategory, paymentSplit, statusSplit, lowStock, deadStock, customers,
+  topProducts, byCategory, paymentSplit, statusSplit, lowStock, lowStockVariants, deadStock, customers,
   byAttribution, byDiscount, couponSplit, fixedCosts
 };

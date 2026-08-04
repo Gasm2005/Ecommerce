@@ -1,0 +1,119 @@
+<%
+  /* Stock per size × colour. locals: p (product), threshold
+
+     EVERY size gets a box, even one that has never been counted. A missing row
+     reads as sold out on the storefront, and an owner who never typed in that box
+     would have no way to guess why a size vanished — so the grid shows the gap
+     instead of hiding it. */
+  const grid = variants.matrix(p);
+  const single = grid.colors.length === 1 && grid.colors[0] === null;
+
+  function tone(n) {
+    if (n === null) return 'info';
+    if (n <= 0) return 'critical';
+    if (n <= threshold) return 'warning';
+    return 'good';
+  }
+%>
+<div id="stock-grid-<%= p.id %>">
+  <% if (!grid.sizes.length) { %>
+    <p class="text-[12px] text-muted">
+      Add sizes above and save — then each size gets its own count here.
+    </p>
+  <% } else { %>
+
+    <div class="-mx-1 overflow-x-auto">
+      <table class="w-full min-w-[420px] border-separate border-spacing-1 text-[12px]">
+        <thead>
+          <tr>
+            <th class="w-20 px-1 pb-1 text-left font-normal uppercase tracking-[0.12em] text-muted">Size</th>
+            <% grid.colors.forEach(function (c) { %>
+              <th class="px-1 pb-1 text-left font-normal">
+                <% if (single) { %>
+                  <span class="uppercase tracking-[0.12em] text-muted">In stock</span>
+                <% } else { %>
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-line" style="background: <%= swatch(c) %>"></span>
+                    <span class="text-ink"><%= c %></span>
+                  </span>
+                <% } %>
+              </th>
+            <% }); %>
+            <th class="w-14 px-1 pb-1 text-right font-normal uppercase tracking-[0.12em] text-muted">Row</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% grid.sizes.forEach(function (size) { %>
+            <%
+              const cells = grid.colors.map(function (c) { return grid.cell(size, c); });
+              /* From the stored rows. Adding up the cells would count a size counted
+                 without a colour once per colour column — 12 pieces reading as 24. */
+              const rowTotal = variants.sizeTotal(p, size);
+              const counted = rowTotal !== null;
+            %>
+            <tr>
+              <th class="px-1 text-left font-normal text-ink"><%= size %></th>
+              <% cells.forEach(function (cell) { %>
+                <td class="px-1">
+                  <input type="number" min="0" inputmode="numeric"
+                         class="adm-input w-full py-1 text-center tabular-nums <%= cell.inherited ? 'text-muted' : (cell.stock === 0 ? 'text-maroon' : '') %>"
+                         value="<%= (cell.stock === null || cell.inherited) ? '' : cell.stock %>"
+                         placeholder="<%= cell.inherited ? cell.stock : '—' %>"
+                         title="<%= cell.inherited ? 'Counted for the size as a whole, shared across colours. Type here to count this colour on its own.' : '' %>"
+                         aria-label="Stock for <%= size %><%= cell.color ? ' in ' + cell.color : '' %>"
+                         hx-post="/admin/products/<%= p.id %>/variant-stock"
+                         hx-target="#stock-grid-<%= p.id %>" hx-swap="outerHTML"
+                         hx-trigger="change"
+                         name="count"
+                         hx-params="count,size,color,token"
+                         hx-vals='<%- JSON.stringify({ size: size, color: cell.color || "", token: adminToken || undefined }) %>'>
+                </td>
+              <% }); %>
+              <td class="px-1 text-right">
+                <span class="pill pill-<%= counted ? tone(rowTotal) : 'info' %> min-w-[38px] justify-center">
+                  <%= counted ? rowTotal : '—' %>
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-2">
+      <p class="text-[11px] leading-relaxed text-muted">
+        <% if (grid.tracked) { %>
+A <strong class="text-ink">grey</strong> number is counted for the size as a whole and shared across colours —
+          type over it to count that colour on its own.
+          An <strong class="text-ink">empty</strong> box is not counted and cannot be bought; type
+          <strong class="text-ink">0</strong> for a size you stock but have sold out of.
+        <% } else { %>
+          Nothing is counted per size yet, so the single Stock number above applies to every size.
+          Type a count into any box to start tracking sizes separately.
+        <% } %>
+      </p>
+      <p class="shrink-0 tabular-nums text-[12px]">
+        <span class="text-muted">Total</span>
+        <strong class="ml-1.5 text-ink"><%= grid.total %></strong>
+        <span class="text-muted"> pieces</span>
+      </p>
+    </div>
+
+    <%
+      const low = variants.lowVariants(p, threshold).filter(function (v) { return v.stock > 0; });
+      const out = variants.lowVariants(p, threshold).filter(function (v) { return v.stock <= 0; });
+    %>
+    <% if (out.length || low.length) { %>
+      <p class="mt-1.5 text-[11px] leading-relaxed">
+        <% if (out.length) { %>
+          <span class="text-maroon">Sold out:</span>
+          <%= out.map(function (v) { return variants.label(v); }).join(', ') %><%= low.length ? ' · ' : '' %>
+        <% } %>
+        <% if (low.length) { %>
+          <span class="text-gold">Running low:</span>
+          <%= low.map(function (v) { return variants.label(v) + ' (' + v.stock + ')'; }).join(', ') %>
+        <% } %>
+      </p>
+    <% } %>
+  <% } %>
+</div>

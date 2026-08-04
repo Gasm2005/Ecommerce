@@ -170,8 +170,11 @@
           <input id="mrp" name="mrp" class="adm-input" value="<%= val('mrp') %>" inputmode="numeric">
         </div>
         <div>
-          <label class="adm-label" for="stock">Stock</label>
+          <label class="adm-label" for="stock">Stock <span class="text-muted">(all sizes)</span></label>
           <input id="stock" name="stock" class="adm-input" value="<%= val('stock', 0) %>" inputmode="numeric">
+          <% if (p && p.id && variants.tracksVariants(p)) { %>
+            <p class="mt-1 text-[11px] text-muted">Counted per size below — this adds up on its own.</p>
+          <% } %>
         </div>
         <div>
           <label class="adm-label" for="deliveryDays">Production days</label>
@@ -187,6 +190,21 @@
         </div>
       </div>
     </div>
+
+    <% if (p && p.id) { %>
+      <!-- ============ stock per size ============ -->
+      <div class="card p-4">
+        <div class="flex items-start justify-between gap-2">
+          <h2 class="font-serif text-base">Stock per size</h2>
+          <span class="pill pill-info shrink-0">Saves as you type</span>
+        </div>
+        <p class="mb-3 mt-1 text-[11px] leading-relaxed text-muted">
+          A size counted here can run out on its own — the storefront strikes it through and refuses it,
+          while the rest of the piece keeps selling.
+        </p>
+        <%- include('fragments/stock-grid', { p: p, threshold: config.inventory.lowStockThreshold }) %>
+      </div>
+    <% } %>
 
     <!-- ============ admin-only economics ============ -->
     <div class="card border-l-2 border-l-maroon p-4">

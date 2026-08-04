@@ -175,6 +175,34 @@ function setVariantStock(id, choice, value) {
   return list[idx];
 }
 
+/**
+ * Removes the row for one size/colour, so it goes back to "not counted" rather
+ * than reading as a hard zero. Clearing the last row stops variant tracking
+ * altogether and the single product number takes over again.
+ */
+function clearVariantStock(id, choice) {
+  const variants = require('./variants');
+  const list = readRaw();
+  const idx = list.findIndex((x) => x.id === id);
+  if (idx < 0) return null;
+
+  const product = list[idx];
+  const rows = (Array.isArray(product.variants) ? product.variants : []).filter((v) => !(
+    variants.same(v.size, choice.size) && (
+      (v.color && choice.color && variants.same(v.color, choice.color)) || (!v.color && !choice.color)
+    )
+  ));
+
+  const next = { ...product, variants: rows };
+  // Only recompute the headline number while variants still say something; once
+  // the last row goes, the number the owner typed by hand is the truth again.
+  if (rows.length) next.stock = variants.totalStock(next);
+  list[idx] = next;
+
+  writeRaw(list, { skipBackup: true });
+  return next;
+}
+
 function setStock(id, value) {
   const list = readRaw();
   const idx = list.findIndex((p) => p.id === id);
@@ -219,4 +247,4 @@ function csv(list) {
 }
 
 module.exports = { readRaw, writeRaw, fieldsFromBody, create, update, remove, adjustStock, setStock,
-  adjustVariantStock, setVariantStock, renameCategory, removeCategory, csv };
+  adjustVariantStock, setVariantStock, clearVariantStock, renameCategory, removeCategory, csv };

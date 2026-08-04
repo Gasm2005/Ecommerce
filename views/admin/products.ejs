@@ -9,7 +9,7 @@
 
 <div class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
   <%- include('./partials/kpi', { label: 'Styles', value: totals.count.toLocaleString('en-IN'), delta: null, hint: rows.length + ' shown', spark: null }) %>
-  <%- include('./partials/kpi', { label: 'Units in stock', value: totals.stockUnits.toLocaleString('en-IN'), delta: null, hint: outOfStockCount + ' out of stock · ' + lowStockCount + ' low', spark: null }) %>
+  <%- include('./partials/kpi', { label: 'Units in stock', value: totals.stockUnits.toLocaleString('en-IN'), delta: null, hint: outOfStockCount + ' sizes out · ' + lowStockCount + ' running low', spark: null }) %>
   <%- include('./partials/kpi', { label: 'Stock value (cost)', value: money(totals.stockValue), delta: null, hint: 'Retail ' + money(totals.retailValue), spark: null }) %>
   <%- include('./partials/kpi', { label: 'Locked-up margin', value: money(totals.retailValue - totals.stockValue), delta: null, hint: 'If everything sells at list price', spark: null }) %>
 </div>

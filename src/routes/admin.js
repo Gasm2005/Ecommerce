@@ -115,8 +115,9 @@ router.use(adminGuard, (req, res, next) => {
   const all = orders.all();
   res.locals.pendingOrders = all.filter((o) => o.status === 'pending').length;
   res.locals.pendingReviews = reviews.all().filter((r) => r.status === 'pending').length;
-  res.locals.lowStockCount = analytics.lowStock(config).filter((p) => p.stock > 0).length;
-  res.locals.outOfStockCount = analytics.lowStock(config).filter((p) => p.stock <= 0).length;
+  const restock = analytics.lowStockVariants(config);
+  res.locals.lowStockCount = restock.filter((v) => v.stock > 0).length;
+  res.locals.outOfStockCount = restock.filter((v) => v.stock <= 0).length;
 
   next();
 });
@@ -775,6 +776,43 @@ router.post('/products/:id/stock', requireSection('products'), (req, res) => {
   res.render('admin/fragments/stock-cell', { p: updated, threshold: loadConfig().inventory.lowStockThreshold });
 });
 
+/**
+ * Sets the stock on ONE size/colour from the grid. The whole grid comes back, not
+ * just the cell, because a single edit moves the row total, the product total and
+ * the sold-out list with it.
+ */
+router.post('/products/:id/variant-stock', requireSection('products'), (req, res) => {
+  const choice = { size: String(req.body.size || '').trim(), color: String(req.body.color || '').trim() || null };
+  if (!choice.size) return res.status(400).send('');
+
+  /* Read from "count", not "stock". The grid lives inside the product edit form,
+     and HTMX sends that whole form with every cell edit — so a cell named "stock"
+     received the form's headline Stock number as well as the typed one, and the
+     wrong one won. Two bugs came out of that: a count of 9 saved as 0, then a
+     cleared box saved as 12. The name is now unique and hx-params pins the payload.
+
+     Still tolerant of an array: never let the shape of a request decide a number. */
+  const sent = Array.isArray(req.body.count)
+    ? req.body.count.map((v) => String(v).trim()).filter((v) => v !== '').pop()
+    : req.body.count;
+  const raw = String(sent === undefined || sent === null ? '' : sent).trim();
+
+  const n = Number(raw.replace(/[,s]/g, ''));
+  if (raw !== '' && !Number.isFinite(n)) return res.status(400).send('');
+
+  const updated = raw === ''
+    ? productsWrite.clearVariantStock(req.params.id, choice)
+    : productsWrite.setVariantStock(req.params.id, choice, n);
+  if (!updated) return res.status(404).send('');
+
+  const variants = require('../variants');
+  const shown = raw === '' ? 'not counted' : String(variants.stockFor(updated, choice));
+  activity.log('Inventory', `${updated.name} — ${variants.label(choice)} → ${shown}`, { id: updated.id });
+  notify(res, `${updated.name} · ${variants.label(choice)}: ${shown}`);
+
+  res.render('admin/fragments/stock-grid', { p: updated, threshold: loadConfig().inventory.lowStockThreshold });
+});
+
 router.post('/products/:id/delete', requireSection('products'), (req, res) => {
   const removed = productsWrite.remove(req.params.id);
   if (removed) activity.log('Products', `Deleted “${removed.name}”`, { id: removed.id });
@@ -925,6 +963,7 @@ router.get('/reports', requireSection('reports'), (req, res) => {
     monthly: monthlyRows(config),
     skus: skuRows(spec, config).slice(0, 15),
     lowStock: analytics.lowStock(config),
+    lowStockVariants: analytics.lowStockVariants(config),
     deadStock: analytics.deadStock('12m', config).slice(0, 10),
     couponSplit: analytics.couponSplit(spec, config),
     returnsOverview: returns.overview()
