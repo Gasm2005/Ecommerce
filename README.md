@@ -136,6 +136,22 @@ completely. CSV import takes `stock` for a single number, or `variantStock` as
 `S:4|M:2|L:0` (or `S/Red:4|S/Gold:2`); a row with neither imports as zero rather
 than unlimited, because overselling costs more than a listing an owner has to correct.
 
+### Sections, and shopping across them
+A shop selling menswear, womenswear and kidswear asks once which section a visitor
+wants, then keeps that choice. **Everything** is offered as its own answer, because a
+customer buying a sherwani for their son and a saree for themselves is one order, not
+two visits — and when it is chosen the menu merges every section's categories rather
+than falling back to one of them. The switcher lives in the phone drawer as well as
+the desktop header, so the welcome popup is never a one-way door. A single-audience
+client sees none of this: no popup, no switcher, nothing to explain.
+
+### Installing it as an app
+Chrome shows its own install banner once and buries it after that, so a shopper who
+dismissed it has no way back. The `beforeinstallprompt` event is held instead and
+offered from the menu whenever they are ready. On iOS, where Safari has no such event,
+the menu explains the Share sheet rather than showing a button that cannot work; in an
+already-installed app nothing is offered at all.
+
 ### Returning customers
 Recognised without an account. Most people buy ethnic wear two or three times a year,
 and asking them to invent a password for that is a checkout step that earns nothing.

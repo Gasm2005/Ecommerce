@@ -84,16 +84,28 @@
          is invisible to whoever didn't buy into it. */
     %>
     <% if (audiences.length > 1) { %>
+      <%
+        /* "Everything" is listed alongside the sections, not hidden behind a reset.
+           A shop selling menswear and womenswear has customers buying for the whole
+           family in one order, and making them flip sections between a sherwani and
+           a lehenga turns the chooser into a nuisance. */
+        const switcherOptions = audiences.concat([{ id: 'all', label: 'Everything' }]);
+      %>
       <div class="hidden justify-center gap-1 border-t border-line/70 pt-2 lg:flex">
-        <% audiences.forEach(function (a) { %>
+        <% switcherOptions.forEach(function (a) { %>
+          <%
+            const isOn = a.id === 'all' ? !audienceId : audienceId === a.id;
+          %>
           <form method="post" action="/audience">
             <input type="hidden" name="audience" value="<%= a.id %>">
-            <input type="hidden" name="next" value="/">
+            <!-- Back to the page they were reading, not to the homepage: switching
+                 section should not also lose their place. -->
+            <input type="hidden" name="next" value="<%= currentPath || '/' %>">
             <button type="submit"
                     class="px-3 py-1.5 text-[10px] uppercase tracking-luxe transition
-                           <%= audienceId === a.id ? 'text-maroon' : 'text-muted hover:text-ink' %>">
+                           <%= isOn ? 'text-maroon' : 'text-muted hover:text-ink' %>">
               <%= a.label %>
-              <% if (audienceId === a.id) { %>
+              <% if (isOn) { %>
                 <span class="mt-1 block h-px bg-maroon"></span>
               <% } %>
             </button>
@@ -184,9 +196,61 @@
           </div>
         </div>
       <% }); %>
+      <% if (audiences.length > 1) { %>
+        <!-- Phone is where most of these shoppers are, and until this existed the
+             audience chosen in the welcome popup was permanent on a phone. -->
+        <div class="border-b border-line/70 py-3.5">
+          <p class="text-[10px] uppercase tracking-luxe text-muted">Shopping for</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <% audiences.concat([{ id: 'all', label: 'Everything' }]).forEach(function (a) { %>
+              <% const isOn = a.id === 'all' ? !audienceId : audienceId === a.id; %>
+              <form method="post" action="/audience">
+                <input type="hidden" name="audience" value="<%= a.id %>">
+                <input type="hidden" name="next" value="<%= currentPath || '/' %>">
+                <button type="submit"
+                        class="border px-3 py-2 text-[11px] uppercase tracking-[0.12em] transition
+                               <%= isOn ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink' %>">
+                  <%= a.label %>
+                </button>
+              </form>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
       <a href="/category/all?sort=new" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em] text-maroon">New In</a>
       <a href="/wishlist" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em]">Wishlist</a>
-      <a href="/orders" class="block py-3.5 text-sm uppercase tracking-[0.14em]"><%= me && me.orderIds && me.orderIds.length ? 'Your orders' : 'Track order' %></a>
+      <a href="/orders" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em]"><%= me && me.orderIds && me.orderIds.length ? 'Your orders' : 'Track order' %></a>
+
+      <!-- Chrome shows its install banner once and buries it after that. This is the
+           way back to it, and it is only rendered where it can actually do something:
+           hidden in an installed app, and on iOS it explains the Share sheet instead
+           of offering a button Safari will not honour. -->
+      <div x-show="$store.ui.canInstall || $store.ui.iosInstall" x-cloak>
+        <button type="button"
+                x-show="$store.ui.canInstall"
+                @click="$store.ui.install()"
+                class="flex w-full items-center justify-between gap-3 py-3.5 text-left text-sm uppercase tracking-[0.14em]">
+          <span>Add to home screen</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-muted"><path d="M12 4v11m0 0-4-4m4 4 4-4"/><path d="M5 19h14"/></svg>
+        </button>
+
+        <button type="button"
+                x-show="$store.ui.iosInstall && !$store.ui.canInstall"
+                @click="$store.ui.showIosHelp = !$store.ui.showIosHelp"
+                class="flex w-full items-center justify-between gap-3 py-3.5 text-left text-sm uppercase tracking-[0.14em]">
+          <span>Add to home screen</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-muted"><path d="M12 4v11m0 0-4-4m4 4 4-4"/><path d="M5 19h14"/></svg>
+        </button>
+        <p x-show="$store.ui.showIosHelp" x-cloak x-collapse
+           class="pb-3.5 text-[12.5px] leading-relaxed text-muted">
+          In Safari, tap <strong class="text-ink">Share</strong> at the bottom, then
+          <strong class="text-ink">Add to Home Screen</strong>.
+        </p>
+      </div>
+
+      <p x-show="$store.ui.installed" x-cloak class="py-3.5 text-[12.5px] text-muted">
+        You’re using the installed app.
+      </p>
     </nav>
     <div class="border-t border-line px-5 py-4 text-xs text-muted">
       <p><%= config.brand.supportPhone %></p>

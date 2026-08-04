@@ -256,3 +256,98 @@ test('the next parameter cannot be used to send someone off-site', async () => {
   const location = res.headers.get('location') || '';
   assert.ok(!location.includes('evil.example'), 'open redirect: ' + location);
 });
+
+/* ------------------------------------------------- shopping for more than one ---- */
+
+/**
+ * "Everything" had to become a real answer.
+ *
+ * A shop selling menswear and womenswear has customers buying for a whole family in
+ * one order. Before this the only answers were "men", "women" or "kids", so a mother
+ * buying a sherwani for her son and a saree for herself had to keep flipping — and on
+ * a phone she could not flip at all, because the switcher was rendered lg:flex only.
+ * The welcome popup was therefore a one-way door on the device most of these shoppers
+ * use.
+ */
+test('"everything" means no audience in force, so the whole catalogue shows', () => {
+  assert.equal(audience.current(req('all'), multi), null, 'no audience = no filter');
+
+  const everything = catalog.all().filter((p) => audience.matches(p, null));
+  assert.equal(everything.length, catalog.all().length);
+  assert.deepEqual(names(everything), names(catalog.all()));
+});
+
+test('"everything" counts as having chosen, so the popup stops asking', () => {
+  assert.equal(audience.hasChosen(req('all'), multi), true);
+  assert.equal(audience.isEverything(req('all'), multi), true);
+
+  // A section is a choice too, but it is not "everything".
+  assert.equal(audience.isEverything(req('men'), multi), false);
+  // And never asked at all is still unchosen.
+  assert.equal(audience.hasChosen(req(), multi), false);
+});
+
+test('choosing everything stores it, so the shop stays that way', () => {
+  const jar = {};
+  const res = { cookie: (k, v) => { jar[k] = v; } };
+  const r = req();
+
+  const picked = audience.choose(r, res, multi, audience.EVERYTHING);
+  assert.equal(picked, null, 'null is the answer, not a failure');
+  assert.equal(jar[audience.COOKIE], 'all', 'it must survive the next request');
+  assert.equal(audience.current(r, multi), null);
+});
+
+test('a section can still be chosen after everything, and the other way round', () => {
+  const jar = {};
+  const res = { cookie: (k, v) => { jar[k] = v; } };
+  const r = req();
+
+  audience.choose(r, res, multi, audience.EVERYTHING);
+  assert.equal(audience.current(r, multi), null);
+
+  const men = audience.choose(r, res, multi, 'men');
+  assert.equal(men.id, 'men', 'the door must open both ways');
+  assert.equal(audience.current(r, multi).id, 'men');
+
+  audience.choose(r, res, multi, audience.EVERYTHING);
+  assert.equal(audience.current(r, multi), null);
+});
+
+test('a one-audience shop has nothing to switch, and says so', () => {
+  // No chooser, no "everything", nothing to explain — the feature stays invisible.
+  assert.equal(audience.isMultiple(single), false);
+  assert.equal(audience.isEverything(req('all'), single), false);
+  assert.equal(audience.current(req('all'), single).id, 'men', 'a single-audience shop ignores it');
+});
+
+test('a nonsense cookie is not mistaken for everything', () => {
+  assert.equal(audience.current(req('everything'), multi).id, 'women', 'falls back, not wide open');
+  assert.equal(audience.isEverything(req('everything'), multi), false);
+});
+
+test('"everything" gets a menu that means everything', () => {
+  /* navFor fell back to config.nav when no audience was in force, which is the
+     womenswear list — so a man browsing "Everything" had no Sherwani link under a
+     heading claiming the whole shop. */
+  const menu = audience.navFor(req('all'), multi);
+  const slugs = menu.map((x) => x.slug);
+
+  AUDIENCES.forEach((a) => {
+    (a.nav || []).forEach((item) => {
+      assert.ok(slugs.includes(item.slug), `${item.slug} is missing from the combined menu`);
+    });
+  });
+  assert.equal(slugs.length, new Set(slugs).size, 'two audiences can share a category — list it once');
+});
+
+test('one section still gets only its own menu', () => {
+  const men = audience.navFor(req('men'), multi).map((x) => x.slug);
+  assert.deepEqual(men, ['sherwani', 'kurta-pyjama']);
+  assert.equal(men.includes('bridal'), false, 'a menswear shopper should not be shown bridal');
+});
+
+test('a shop with no per-audience menus still gets a working one', () => {
+  const bare = { ...base.config, audiences: { list: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }] } };
+  assert.deepEqual(audience.navFor(req('all'), bare), bare.nav || []);
+});

@@ -26,6 +26,16 @@
  * from someone who was sent its URL.
  */
 
+/**
+ * "Show me everything" is a real answer, not the absence of one.
+ *
+ * A shop that sells menswear and womenswear has customers buying for a whole family
+ * in one order. Forcing them to flip sections between a sherwani and a lehenga makes
+ * the chooser a nuisance rather than a shortcut, so this is offered as its own
+ * option — and stored, so the shop stays that way until they say otherwise.
+ */
+const EVERYTHING = 'all';
+
 const COOKIE = 'aanya_audience';
 const COOKIE_OPTS = {
   httpOnly: false,          // the chooser reads it client-side to avoid a flash
@@ -63,9 +73,12 @@ function current(req, config) {
   if (!isMultiple(config)) return fallback(config);
 
   const asked = req && req.query && req.query.audience;
+  if (asked === EVERYTHING) return null;
   if (asked && byId(config, String(asked))) return byId(config, String(asked));
 
   const saved = req && req.cookies && req.cookies[COOKIE];
+  // No audience in force means no filter — the whole catalogue, on purpose.
+  if (saved === EVERYTHING) return null;
   if (saved && byId(config, String(saved))) return byId(config, String(saved));
 
   return fallback(config);
@@ -75,10 +88,17 @@ function current(req, config) {
 function hasChosen(req, config) {
   if (!isMultiple(config)) return true;
   const saved = req && req.cookies && req.cookies[COOKIE];
+  if (saved === EVERYTHING) return true;
   return !!(saved && byId(config, String(saved)));
 }
 
 function choose(req, res, config, id) {
+  if (String(id) === EVERYTHING) {
+    res.cookie(COOKIE, EVERYTHING, COOKIE_OPTS);
+    if (req.cookies) req.cookies[COOKIE] = EVERYTHING;
+    return null;   // null IS "everything" — see current()
+  }
+
   const found = byId(config, id);
   if (!found) return null;
   res.cookie(COOKIE, found.id, COOKIE_OPTS);
@@ -86,12 +106,37 @@ function choose(req, res, config, id) {
   return found;
 }
 
+/** Is this visitor browsing the whole shop rather than one section? */
+function isEverything(req, config) {
+  if (!isMultiple(config)) return false;
+  const saved = req && req.cookies && req.cookies[COOKIE];
+  return saved === EVERYTHING;
+}
+
 /** The nav for the audience in force — this is what the header renders. */
 function navFor(req, config) {
   const active = current(req, config);
   if (active && Array.isArray(active.nav) && active.nav.length) return active.nav;
-  // No per-audience nav configured: fall back to the site nav, so a half-filled
-  // config still produces a working shop.
+
+  /* No audience in force, in a shop that has several: that is "everything", and the
+     menu has to mean it. Falling back to config.nav showed only the womenswear
+     categories under a heading that claimed the whole shop — a man browsing
+     Everything had no Sherwani link at all. Merged in list order, deduped by slug,
+     since two audiences can share a category. */
+  if (!active && isMultiple(config)) {
+    const seen = new Set();
+    const merged = [];
+    list(config).forEach((a) => {
+      (a.nav || []).forEach((item) => {
+        if (!item || !item.slug || seen.has(item.slug)) return;
+        seen.add(item.slug);
+        merged.push(item);
+      });
+    });
+    if (merged.length) return merged;
+  }
+
+  // A half-filled config still has to produce a working shop.
   return (config && config.nav) || [];
 }
 
@@ -112,6 +157,7 @@ function slugsFor(audience) {
 }
 
 module.exports = {
+  EVERYTHING, isEverything,
   COOKIE, list, isMultiple, byId, fallback, current, hasChosen, choose,
   navFor, matches, slugsFor
 };

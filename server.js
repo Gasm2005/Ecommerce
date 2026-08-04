@@ -161,10 +161,17 @@ function storefrontFeature(id) {
  */
 app.post('/audience', (req, res) => {
   const config = loadConfig();
-  const picked = audience.choose(req, res, config, String(req.body.audience || ''));
+  const wanted = String(req.body.audience || '');
+  const picked = audience.choose(req, res, config, wanted);
+
+  /* "Everything" is a valid answer that resolves to no audience at all, so a null
+     return is not automatically a failure — only an unknown id is. Treating them the
+     same sent every "show me everything" click to the homepage as if it had erred. */
+  const accepted = wanted === audience.EVERYTHING || !!picked;
+
   const next = String(req.body.next || '/');
   const safe = next.startsWith('/') && !next.startsWith('//') ? next : '/';
-  if (!picked) return res.redirect('/');
+  if (!accepted) return res.redirect('/');
   if (res.locals.isHx) {
     res.set('HX-Redirect', safe);
     return res.status(200).send('');

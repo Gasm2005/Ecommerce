@@ -322,3 +322,109 @@ test('forget me really forgets', async () => {
   const after = await get('/orders');
   assert.match(after.text, /Nothing here yet/);
 });
+
+/* ------------------------------------------------------ switching section ---- */
+
+/**
+ * The switcher, over HTTP.
+ *
+ * Two things were wrong. The switcher only rendered at lg and above, so on a phone —
+ * where most of these shoppers are — the audience picked in the welcome popup could
+ * never be changed. And "everything" was not offered at all, so someone buying a
+ * sherwani for their son and a saree for themselves had to keep flipping sections.
+ *
+ * The route also treated "everything" as a failure, because choose() answers it with
+ * null and null was read as an unknown id. Every "show me everything" click landed on
+ * the homepage as if it had erred.
+ */
+test('switching section keeps you on the page you were reading', async () => {
+  const res = await post('/audience', { audience: 'men', next: '/cart' });
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get('location'), '/cart', 'switching must not also lose their place');
+});
+
+test('choosing everything is accepted, not treated as a bad id', async () => {
+  const res = await post('/audience', { audience: 'all', next: '/cart' });
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get('location'), '/cart', 'null from choose() is the answer, not an error');
+});
+
+test('an unknown section is still refused', async () => {
+  const res = await post('/audience', { audience: 'martians', next: '/cart' });
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get('location'), '/');
+});
+
+test('an off-site next is not followed', async () => {
+  const res = await post('/audience', { audience: 'men', next: 'https://evil.example/steal' });
+  assert.equal(res.headers.get('location'), '/');
+
+  const protocolRelative = await post('/audience', { audience: 'men', next: '//evil.example' });
+  assert.equal(protocolRelative.headers.get('location'), '/');
+});
+
+test('the switcher is reachable on a phone, not only on a desktop', async () => {
+  const page = await get('/');
+  assert.equal(page.status, 200);
+
+  // The drawer is the phone's only navigation, so the choice has to live in it.
+  assert.ok(page.text.includes('Shopping for'), 'the drawer must carry the audience switcher');
+
+  const at = page.text.indexOf('Shopping for');
+  // Up to the next drawer item, so this cannot pass on the desktop row instead.
+  const block = page.text.slice(at, page.text.indexOf('New In', at));
+  assert.match(block, /name="audience" value="all"/, 'including everything');
+  assert.match(block, /name="audience" value="men"/);
+  assert.match(block, /name="next"/, 'and it should return them to where they were');
+});
+
+test('the welcome popup offers everything as its own answer', async () => {
+  const fresh = new Map();
+  const page = await get('/', { jarOverride: fresh });
+  assert.match(page.text, /show me everything/i);
+});
+
+/* ------------------------------------------------------- installable app ---- */
+
+/**
+ * The browser's own install banner appears once, on its own schedule, and cannot be
+ * summoned back after it is dismissed — so the shop reads as having no app at all.
+ * The fix is to hold on to the beforeinstallprompt event and offer it from the menu.
+ *
+ * The behaviour is client-side, so what these hold is the contract: the event is
+ * captured rather than left to the browser, the entry only appears where it can do
+ * something, and iOS gets instructions instead of a button Safari will not honour.
+ */
+const appJs = require('fs').readFileSync(
+  require('path').join(__dirname, '..', 'public', 'js', 'app.js'), 'utf8'
+);
+
+test('the install event is captured instead of left to the browser', () => {
+  const at = appJs.indexOf("addEventListener('beforeinstallprompt'");
+  assert.ok(at > 0, 'the event must be listened for at all');
+
+  /* Inside the handler only. preventDefault appears elsewhere in this file, so a
+     whole-file match passed even with this one deleted — which is how a test can
+     look green while the mini-infobar is back in charge. */
+  const handler = appJs.slice(at, appJs.indexOf('});', at));
+  assert.match(handler, /preventDefault\(\)/, 'the mini-infobar must be stopped so the choice is ours to offer');
+  assert.match(handler, /deferredInstall = e/, 'and the event kept, or it cannot be replayed');
+});
+
+test('the offer disappears once the app is installed', () => {
+  assert.match(appJs, /addEventListener\('appinstalled'/);
+  assert.match(appJs, /function isStandalone/, 'already running installed = nothing to offer');
+});
+
+test('iOS is detected, since Safari has no install event at all', () => {
+  assert.match(appJs, /function isIos/);
+  assert.match(appJs, /maxTouchPoints/, 'iPadOS reports itself as a Mac');
+});
+
+test('the menu carries the install entry, gated on it being useful', async () => {
+  const page = await get('/');
+  assert.match(page.text, /Add to home screen/);
+  assert.match(page.text, /\$store\.ui\.install\(\)/, 'the entry must actually trigger the held prompt');
+  assert.match(page.text, /\$store\.ui\.canInstall \|\| \$store\.ui\.iosInstall/, 'hidden where it cannot work');
+  assert.match(page.text, /Add to Home Screen/, 'iOS needs the Share-sheet wording');
+});

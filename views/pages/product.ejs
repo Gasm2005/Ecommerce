@@ -557,10 +557,17 @@
      its callback, and the bar silently never appeared. A throttled read of two
      bounding rects is a few microseconds and is obvious to reason about. */
 %>
-<div x-data="{
+<div data-stock='<%= JSON.stringify(stockMap) %>'
+     x-data="{
        past: false,
        upsell: false,
-       size: '<%= p.sizes[0] %>',
+       size: '<%= openSize %>',
+       color: '<%= firstColour %>',
+       /* Its own copy of the map: this bar is a separate Alpine scope, and without
+          it the bar offered a size the buttons above had already refused. */
+       stock: JSON.parse($el.dataset.stock),
+       left(sz, c) { const v = this.stock[(sz + '|' + c).toLowerCase()]; return v === undefined ? null : v; },
+       canBuy() { const n = this.left(this.size, this.color); return n === null || n > 0; },
        /* Visible when this piece is still what the page is about: the real buttons
           have scrolled away, and the shopper has not started browsing other
           pieces. Phone shows it from the start — there the buttons leave the
@@ -575,12 +582,18 @@
          this.upsell = up ? up.getBoundingClientRect().top < window.innerHeight * 0.8 : false;
          this.readSize();
        },
-       readSize() { const el = document.querySelector('#atc-form input[name=size]'); if (el) this.size = el.value; }
+       readSize() {
+         const sz = document.querySelector('#atc-form input[name=size]');
+         const c = document.querySelector('#atc-form input[name=color]');
+         if (sz) this.size = sz.value;
+         if (c) this.color = c.value;
+       }
      }"
      x-init="measure()"
      @scroll.window.throttle.100ms="measure()"
      @resize.window.throttle.200ms="measure()"
-     @click.window="readSize()"
+     @click.window="$nextTick(() => readSize())"
+     @htmx:after-settle.window="readSize()"
      x-show="visible"
      x-transition.opacity
      class="fixed inset-x-0 bottom-[calc(4.4rem+env(safe-area-inset-bottom))] z-[71] border-t border-line bg-ivory/95 backdrop-blur lg:bottom-0">
@@ -602,15 +615,24 @@
     </p>
 
     <button type="button"
+            x-show="canBuy()"
             hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
             hx-on:htmx:after-request="window.location.href='/checkout'"
             class="hidden shrink-0 border border-ink px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon lg:block">
       Buy now
     </button>
+
+    <!-- Two buttons rather than one that changes label: a live control and a dead
+         one should not share an element, or a mid-swap click still posts. -->
     <button type="button"
+            x-show="canBuy()"
             hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
             class="shrink-0 bg-maroon px-7 py-3.5 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
       Add to bag
+    </button>
+    <button type="button" disabled x-show="!canBuy()" x-cloak
+            class="shrink-0 cursor-not-allowed border border-line px-7 py-3.5 text-[11px] uppercase tracking-luxe text-muted">
+      Sold out<span class="hidden lg:inline"> in <span x-text="size"></span></span>
     </button>
   </div>
 </div>

@@ -18,7 +18,7 @@
      role="dialog" aria-modal="true" aria-labelledby="audience-title">
 
   <div class="relative w-full max-w-2xl bg-ivory p-7 sm:p-10" @click.outside="open = false">
-    <!-- Skip is real: it keeps the default section and gets out of the way. -->
+    <!-- Closing without answering keeps the default section, same as before. -->
     <button type="button" @click="open = false"
             class="absolute right-4 top-4 text-[11px] uppercase tracking-[0.14em] text-muted hover:text-maroon">
       Skip
@@ -27,7 +27,8 @@
     <p class="text-[10px] uppercase tracking-luxe text-gold">Welcome to <%= config.brand.name %></p>
     <h2 id="audience-title" class="mt-2 font-serif text-2xl sm:text-3xl">What are you shopping for?</h2>
     <p class="mt-2 text-[14.5px] leading-relaxed text-muted">
-      We'll show you the right collection. You can switch any time.
+      We'll show you the right collection. You can switch any time — the menu keeps this
+      choice where you can change it.
     </p>
 
     <div class="mt-7 grid gap-3 sm:grid-cols-<%= Math.min(3, audiences.length) %>">
@@ -48,5 +49,15 @@
         </form>
       <% }); %>
     </div>
+
+    <!-- Buying for the whole family is one order, not two visits. Offered plainly
+         rather than left to whoever thinks to look for a reset. -->
+    <form method="post" action="/audience" class="mt-4">
+      <input type="hidden" name="audience" value="all">
+      <input type="hidden" name="next" value="<%= currentPath %>">
+      <button type="submit" class="text-[12.5px] text-muted underline underline-offset-4 transition hover:text-maroon">
+        Shopping for more than one — show me everything
+      </button>
+    </form>
   </div>
 </div>

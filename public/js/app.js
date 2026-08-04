@@ -15,6 +15,45 @@ function focusWhenVisible(selector, attempts = 12) {
   setTimeout(tick, 80);
 }
 
+/* -------------------------------------------------------- installable app */
+/**
+ * Chrome fires beforeinstallprompt once and then shows its own banner on its own
+ * schedule — dismiss that banner and there is no way back to it, so the shop reads as
+ * having no app at all. Holding on to the event lets the menu offer the real install
+ * dialog whenever the shopper is ready.
+ *
+ * The event has to be captured before Alpine boots, which is why this sits at the top
+ * level rather than inside alpine:init.
+ */
+let deferredInstall = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Stops the mini-infobar so the choice is ours to offer, not the browser's to bury.
+  e.preventDefault();
+  deferredInstall = e;
+  if (window.Alpine && Alpine.store('ui')) Alpine.store('ui').canInstall = true;
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstall = null;
+  if (window.Alpine && Alpine.store('ui')) Alpine.store('ui').canInstall = false;
+});
+
+/** Already running as an installed app — nothing left to offer. */
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+/**
+ * iOS has no beforeinstallprompt at all: Safari only installs from its own Share
+ * sheet. Detected so the menu can say how rather than showing a button that cannot
+ * work — and iPadOS reports itself as a Mac, hence the touch check.
+ */
+function isIos() {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
 /* ---------------------------------------------------------- Alpine store */
 document.addEventListener('alpine:init', () => {
   Alpine.store('ui', {
@@ -26,6 +65,23 @@ document.addEventListener('alpine:init', () => {
     appCats: false,
     deskSearch: false,
     mega: null,
+
+    /* Install: canInstall is set by the captured event, so the entry only appears
+       where it can actually do something. */
+    canInstall: false,
+    iosInstall: false,
+    installed: false,
+    showIosHelp: false,
+
+    async install() {
+      if (!deferredInstall) return;
+      deferredInstall.prompt();
+      const { outcome } = await deferredInstall.userChoice;
+      // One prompt per event: Chrome will not let the same one be reused.
+      deferredInstall = null;
+      this.canInstall = false;
+      if (outcome === 'accepted') this.installed = true;
+    },
     openQuick() { this.quick = true; },
     /* Desktop: the header shows a lens only; this expands the slim field. */
     toggleDeskSearch() {
@@ -43,6 +99,12 @@ document.addEventListener('alpine:init', () => {
       return this.cart || this.menu || this.quick || this.filters || this.appSearch || this.appCats;
     }
   });
+
+  /* Set once Alpine exists, since the event may have fired before it booted. */
+  const ui = Alpine.store('ui');
+  ui.installed = isStandalone();
+  ui.canInstall = !!deferredInstall && !ui.installed;
+  ui.iosInstall = isIos() && !ui.installed;
 
   // Lock body scroll while any overlay is open.
   Alpine.effect(() => {

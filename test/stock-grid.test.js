@@ -58,6 +58,15 @@ function fresh(id) {
   return catalog.all().find((p) => p.id === id);
 }
 
+/** The sticky bar's markup: from its own data-stock (the second on the page) on. */
+function stickyBar(html) {
+  const first = html.indexOf("data-stock='");
+  const mine = html.indexOf("data-stock='", first + 1);
+  // The class attribute sits after the x-data block, so anchoring on z-[71] would
+  // cut off the handlers being asserted.
+  return mine < 0 ? '' : html.slice(mine);
+}
+
 /** Undoes EJS's attribute escaping, the way a browser's parser would. */
 function unescapeXml(s) {
   return s
@@ -469,4 +478,47 @@ test('quick view knows what is left, like the product page does', async () => {
   // It opens on a size that can be bought, not on whichever is listed first.
   assert.match(res.text, /size: 'XS'/);
   assert.match(res.text, /Sold out in/);
+});
+
+/* -------------------------------------------------------- the sticky bar ---- */
+
+/**
+ * The sticky buy bar is its own Alpine scope, and it knew nothing about stock: the
+ * picker above disabled a sold-out size while the bar below still offered "Add to
+ * bag" for it. Reported from the shop, not caught here, because the bar's behaviour
+ * is client-side and these tests do not run Alpine.
+ *
+ * What they can hold is the contract in the markup — the bar carries the stock map,
+ * gates both buttons on it, and reads the colour as well as the size. That is enough
+ * to fail if the gate is ever taken back out.
+ */
+test('the sticky bar carries the stock map and gates its buttons on it', async () => {
+  const res = await get('/product/test-lehenga');
+  assert.equal(res.status, 200);
+
+  // Two maps: one for the picker, one for the bar's separate scope.
+  assert.equal((res.text.match(/data-stock='/g) || []).length, 2,
+    'the bar needs its own copy — it cannot see the picker\u2019s state');
+
+  const bar = stickyBar(res.text);
+  assert.match(bar, /x-show="canBuy\(\)"/, 'Add to bag must be gated');
+  assert.match(bar, /x-show="!canBuy\(\)"/, 'and a dead Sold out shown instead');
+  assert.match(bar, /Sold out/);
+});
+
+test('the sticky bar follows the colour too, not just the size', async () => {
+  const res = await get('/product/test-lehenga');
+  const bar = stickyBar(res.text);
+  assert.match(bar, /input\[name=color\]/, 'a sold-out colour was equally addable');
+});
+
+test('the sticky bar reads the form after Alpine has written to it', async () => {
+  const res = await get('/product/test-lehenga');
+  const bar = stickyBar(res.text);
+  /* The hidden inputs are bound to the picker's scope, so reading them during the
+     click event read the PREVIOUS size — the bar sat one selection behind. Harmless
+     while it only printed a label; not harmless once it decides whether Add to bag
+     appears. */
+  assert.match(bar, /\$nextTick\(\(\) => readSize\(\)\)/, 'read after the flush, not during the click');
+  assert.doesNotMatch(bar, /@click\.window="readSize\(\)"/);
 });
