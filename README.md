@@ -180,6 +180,19 @@ confirmation arrives. Two failures in a row with nothing succeeding since puts a
 warning on the admin dashboard and turns `npm run doctor` red; a single timeout does
 not, because warning about noise teaches an owner to ignore warnings.
 
+### Email you can tell has stopped
+Order confirmations, shipping and delivery updates, return and refund mail, and a
+thank-you when a review goes live — SMTP, Resend or Brevo, with a delivery log.
+
+Sending is deliberately non-fatal: a mail outage must never break a checkout somebody
+has already paid for. The cost of that is silence, so failures are surfaced rather than
+swallowed. `notifications.health()` reads the delivery log instead of the settings,
+because "configured" stops being the useful question the day after launch — an expired
+SMTP password or a revoked API key leaves every credential in place while not one
+confirmation arrives. Two failures in a row with nothing succeeding since puts a
+warning on the admin dashboard and turns `npm run doctor` red; a single timeout does
+not, because warning about noise teaches an owner to ignore warnings.
+
 ### GST & invoicing
 - Sequential tax invoices, one series per financial year, allocated once and never
   reused — a gap is what an auditor asks about
