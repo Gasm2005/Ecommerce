@@ -120,9 +120,21 @@ free-text search.
 
 ### Products
 Add and edit, per-SKU purchase cost and GST (admin-only, never shown to a
-customer), HSN, stock adjustments, low-stock and out-of-stock views, image and
-video upload with automatic compression, bulk CSV import with validation and a
-backup before every write.
+customer), HSN, image and video upload with automatic compression, bulk CSV import
+with validation and a backup before every write.
+
+**Stock is counted per size**, and per colour when a shop needs it. The grid on the
+edit page offers a box for every size a piece lists, whether or not it has ever been
+counted — a size with no count reads as sold out to a shopper, so a grid that only
+showed counted sizes would hide the one box that needed typing in. A blank box means
+"not counted"; a typed 0 means "stocked, currently sold out". Both are unbuyable, and
+the difference is the owner's intent.
+
+The restock list works at the same level. A piece can hold sixty pieces and still be
+empty in M — the size half the customers want — and a whole-product total hides that
+completely. CSV import takes `stock` for a single number, or `variantStock` as
+`S:4|M:2|L:0` (or `S/Red:4|S/Gold:2`); a row with neither imports as zero rather
+than unlimited, because overselling costs more than a listing an owner has to correct.
 
 ### GST & invoicing
 - Sequential tax invoices, one series per financial year, allocated once and never
