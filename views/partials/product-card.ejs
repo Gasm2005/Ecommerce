@@ -2,6 +2,16 @@
   const p = product;
   const eager = (typeof priority !== 'undefined') && priority;
   const hover = p.images[1] || p.images[0];
+
+  /* Sold out means nothing left in ANY size or colour. A piece with one size gone
+     is still very much for sale, so the card stays clean — the striking-through
+     belongs on the size picker, not here. */
+  const soldOut = !variants.anyAvailable(p);
+  // Sizes still buyable, so a shopper can see "only L and XL left" before clicking.
+  const openSizes = soldOut ? [] : variants.sizeAvailability(p)
+    .filter(function (s) { return s.available; })
+    .map(function (s) { return s.size; });
+  const someGone = !soldOut && openSizes.length && openSizes.length < (p.sizes || []).length;
 %>
 <article class="group relative">
   <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
@@ -16,7 +26,15 @@
       <img src="<%= hover %>" alt="" aria-hidden="true" loading="lazy" decoding="async"
            class="absolute inset-0 h-full w-full scale-[1.06] object-cover opacity-0 transition-all duration-[900ms] ease-out group-hover:scale-100 group-hover:opacity-100">
 
-      <% if (p.badge) { %>
+      <% if (soldOut) { %>
+        <!-- Dimmed, not hidden: a sold-out piece still tells a shopper what the
+             shop carries, and still earns a "notify me" one day. -->
+        <span class="absolute inset-0 z-10 flex items-center justify-center bg-ivory/70">
+          <span class="border border-ink/20 bg-ivory px-3 py-1.5 text-[9px] uppercase tracking-luxe text-muted">Sold out</span>
+        </span>
+      <% } %>
+
+      <% if (p.badge && !soldOut) { %>
         <span class="absolute left-3 top-3 z-10 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
       <% } %>
       <% if (p.discount >= 10) { %>
@@ -60,6 +78,11 @@
           <%= p.colors.length %> colour<%= p.colors.length > 1 ? 's' : '' %>
         </span>
       </span>
+
+      <% if (someGone) { %>
+        <!-- True scarcity, not a growth trick: these are the sizes actually left. -->
+        <p class="mt-1.5 text-[11px] text-muted">Only <%= openSizes.join(', ') %> left</p>
+      <% } %>
     </div>
   </a>
 </article>

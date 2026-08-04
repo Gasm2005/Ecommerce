@@ -23,6 +23,7 @@ const pincode = require('./src/pincode');
 const gstin = require('./src/gstin');
 const delivery = require('./src/delivery');
 const fulfilment = require('./src/fulfilment');
+const variants = require('./src/variants');
 const audience = require('./src/audience');
 const plans = require('./src/plan');
 const cod = require('./src/cod');
@@ -73,6 +74,7 @@ app.use((req, res, next) => {
   res.locals.cart = cart;
   res.locals.delivery = delivery;
   res.locals.fulfilment = fulfilment;
+  res.locals.variants = variants;
   /* Which section of the shop this visitor is in. A single-audience shop resolves
      to its only audience and never shows a chooser or a switcher. */
   res.locals.audience = audience.current(req, config);

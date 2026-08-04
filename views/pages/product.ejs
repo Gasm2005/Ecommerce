@@ -1,6 +1,23 @@
 <%- include('../partials/document-open', { title: product.name }) %>
 
-<% const p = product; const ship = config.shipping; %>
+<%
+  const p = product;
+  const ship = config.shipping;
+
+  /* Availability for every size × colour, handed to the page as a small lookup so
+     the pickers can react to a colour change without a round trip. `null` means
+     untracked — made to order — and must read as available, not as zero.
+
+     Keyed size|colour, lower-cased, because that is how the buttons will ask. */
+  const stockMap = {};
+  (p.sizes || []).forEach(function (sz) {
+    (p.colors && p.colors.length ? p.colors : ['']).forEach(function (c) {
+      stockMap[(sz + '|' + c).toLowerCase()] = variants.stockFor(p, { size: sz, color: c });
+    });
+  });
+  const tracked = variants.tracksVariants(p);
+  const soldOutEverywhere = !variants.anyAvailable(p);
+%>
 
 <div class="mx-auto max-w-[1600px] px-4 lg:px-8">
 
@@ -10,7 +27,37 @@
     <span class="text-ink"><%= p.name %></span>
   </nav>
 
-  <div x-data="{ size: '<%= p.sizes[0] %>', color: '<%= p.colors[0] %>' }"
+  <%
+    /* Open on a size that can actually be bought. Landing on a sold-out size and
+       finding the buy button dead is a worse first impression than landing on the
+       second size. */
+    const firstColour = (p.colors && p.colors[0]) || '';
+    const openSize = (p.sizes || []).find(function (sz) {
+      const n = stockMap[(sz + '|' + firstColour).toLowerCase()];
+      return n === null || n > 0;
+    }) || (p.sizes || [])[0];
+  %>
+  <%
+    /* The stock map travels in a SINGLE-quoted data attribute, because JSON is full
+       of double quotes and inlining it into the double-quoted x-data closed the
+       attribute early — Alpine then never initialised and every size looked
+       available. Reading it back with JSON.parse keeps the two quote styles apart. */
+  %>
+  <div data-stock='<%= JSON.stringify(stockMap) %>'
+       x-data="{
+         size: '<%= openSize %>',
+         color: '<%= firstColour %>',
+         stock: JSON.parse($el.dataset.stock),
+         /* null = untracked, so available. A missing key means the combination is
+            not on sale at all. */
+         left(sz, c) {
+           const key = ((sz === undefined ? this.size : sz) + '|' + (c === undefined ? this.color : c)).toLowerCase();
+           const n = this.stock[key];
+           return n === undefined ? 0 : n;
+         },
+         canBuy(sz, c) { const n = this.left(sz, c); return n === null || n > 0; },
+         isLow(sz, c) { const n = this.left(sz, c); return n !== null && n > 0 && n <= 2; }
+       }"
        class="grid gap-10 py-8 lg:grid-cols-12 lg:gap-12 lg:py-12 xl:gap-16">
 
     <!-- ============================= gallery ============================= -->
@@ -149,11 +196,21 @@
           <p class="text-[10px] uppercase tracking-luxe text-muted">Colour · <span class="text-ink" x-text="color"></span></p>
           <div class="mt-3 flex flex-wrap gap-2">
             <% p.colors.forEach(function (c) { %>
+              <%
+                /* Is this colour available in ANY size? A colour with nothing left
+                   is still clickable — the shopper may want to see it — but it says
+                   so, so nobody picks it and then wonders why every size is dead. */
+                const anySize = (p.sizes || []).some(function (sz) {
+                  const n = stockMap[(sz + '|' + c).toLowerCase()];
+                  return n === null || n > 0;
+                });
+              %>
               <button type="button" @click="color = '<%= c %>'"
                       :class="color === '<%= c %>' ? 'border-maroon text-ink ring-1 ring-maroon' : 'border-line text-muted'"
                       class="inline-flex items-center gap-2 border px-3.5 py-2 text-[13px] transition hover:border-gold">
                 <span class="h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-line" style="background: <%= swatch(c) %>"></span>
-                <%= c %>
+                <span <%= anySize ? '' : 'class="line-through decoration-1"' %>><%= c %></span>
+                <% if (!anySize) { %><span class="text-[10px] uppercase tracking-[0.1em] text-muted">Out</span><% } %>
               </button>
             <% }); %>
           </div>
@@ -169,11 +226,30 @@
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
             <% p.sizes.forEach(function (sz) { %>
+              <%
+                /* A sold-out size is disabled and struck through rather than hidden.
+                   Hiding it makes a shop look like it never stocked that size; showing
+                   it struck through tells the truth and invites a "notify me" later. */
+              %>
               <button type="button" @click="size = '<%= sz %>'"
-                      :class="size === '<%= sz %>' ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink hover:border-gold'"
+                      :disabled="!canBuy('<%= sz %>')"
+                      :title="canBuy('<%= sz %>') ? '' : 'Sold out in this colour'"
+                      :class="!canBuy('<%= sz %>')
+                        ? 'border-line/60 text-muted/50 line-through decoration-1 cursor-not-allowed'
+                        : (size === '<%= sz %>' ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink hover:border-gold')"
                       class="min-w-[52px] border px-3.5 py-2.5 text-[13px] transition"><%= sz %></button>
             <% }); %>
           </div>
+
+          <!-- Urgency only when it is true: two or fewer of the exact variant. -->
+          <p x-show="isLow()" x-cloak class="mt-2.5 text-[13px] text-maroon">
+            Only <span x-text="left()"></span> left in <span x-text="size"></span><span
+              x-show="color"> · <span x-text="color"></span></span>
+          </p>
+          <p x-show="!canBuy()" x-cloak class="mt-2.5 text-[13px] text-muted">
+            <span x-text="size"></span> is sold out<span x-show="color"> in <span x-text="color"></span></span>.
+            Try another size, or call <%= config.brand.supportPhone %>.
+          </p>
           <%
             /* Only claimed when the shop actually does it. A retail store selling
                ready-made kurtis promises nothing here. */
@@ -194,11 +270,22 @@
           <!-- id is the anchor the sticky bar watches: while this button is on
                screen the bar stays hidden, so the page is never wearing two of
                the same control at once. -->
+          <%
+            /* Disabled when the chosen variant has nothing left. The server refuses
+               it anyway — the cart cap is enforced there because anyone can POST —
+               but a button that looks alive and then does nothing is the worse
+               failure. */
+          %>
           <button type="button" id="atc-main"
                   hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
-                  class="relative flex-1 bg-maroon py-4 text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">
-            <span class="htmx-hide-on-request">Add to bag</span>
-            <span class="htmx-show-on-request">Adding…</span>
+                  :disabled="!canBuy()"
+                  :class="canBuy()
+                    ? 'bg-maroon text-ivory hover:bg-maroonDark'
+                    : 'bg-line text-muted cursor-not-allowed'"
+                  class="relative flex-1 py-4 text-[11px] uppercase tracking-luxe transition">
+            <span x-show="canBuy()" class="htmx-hide-on-request">Add to bag</span>
+            <span x-show="canBuy()" class="htmx-show-on-request">Adding…</span>
+            <span x-show="!canBuy()" x-cloak>Sold out</span>
           </button>
 
           <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
@@ -206,7 +293,7 @@
           <% } %>
         </form>
 
-        <button type="button"
+        <button type="button" x-show="canBuy()"
                 hx-post="/cart/add" hx-include="#atc-form" hx-target="#cart-panel" hx-swap="innerHTML"
                 hx-on:htmx:after-request="window.location.href='/checkout'"
                 class="mt-3 w-full border border-ink py-4 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon">

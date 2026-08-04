@@ -23,6 +23,15 @@
                 <div>
                   <a href="/product/<%= l.product.slug %>" class="font-serif text-base hover:text-maroon"><%= l.product.name %></a>
                   <p class="mt-1 text-xs text-muted"><%= l.size %><%= l.color ? ' · ' + l.color : '' %></p>
+                <%
+                  const leftOfThis = variants.stockFor(l.product, { size: l.size, color: l.color });
+                  const short = leftOfThis !== null && l.qty > leftOfThis;
+                %>
+                <% if (short) { %>
+                  <p class="mt-1 text-[12px] text-maroon">
+                    <%= leftOfThis === 0 ? 'Just sold out — remove to continue' : 'Only ' + leftOfThis + ' left · reduce the quantity' %>
+                  </p>
+                <% } %>
                   <p class="mt-1 text-xs text-muted">Ships in <%= l.product.deliveryDays %> days</p>
                 </div>
                 <p class="shrink-0 text-sm"><%= money(l.lineTotal) %></p>
