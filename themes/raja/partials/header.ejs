@@ -124,6 +124,14 @@
       height: auto;
       max-height: 76vh;
     }
+
+    /* The thumbnail rail never grows past the frame. Same cap, so with many views the rail
+       scrolls instead of stretching the gallery below the photograph — a rail sticking out
+       under the image is the sort of thing that reads as unfinished. */
+    .raja-rail {
+      max-height: 76vh;
+      scrollbar-width: thin;
+    }
   }
 </style>
 
@@ -147,9 +155,16 @@
      from the row when you scroll back up. Height is animated rather than display-toggled so
      the page does not jump under the reader. */
 %>
-<div x-data="{ small: false }"
-     x-init="small = window.scrollY > 120"
-     @scroll.window.throttle.100ms="small = window.scrollY > 120"
+<div x-data="{
+       small: false,
+       measure() {
+         const y = window.scrollY;
+         if (!this.small && y > 160) this.small = true;
+         else if (this.small && y < 60) this.small = false;
+       }
+     }"
+     x-init="small = window.scrollY > 160"
+     @scroll.window.passive="measure()"
      class="sticky top-0 z-50">
 <% if (marquee.length) { %>
   <!-- Two passes so the loop has no visible seam; the copy is aria-hidden so a screen

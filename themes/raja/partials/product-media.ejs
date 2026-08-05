@@ -59,7 +59,7 @@
 
            One frame, never taller than the viewport minus the header, with arrows, dots
            and a counter. The mobile rail above is untouched: swiping already worked. -->
-      <div class="hidden lg:block"
+      <div class="hidden lg:flex lg:gap-3"
            x-data="{
              i: 0,
              n: <%= p.images.length %>,
@@ -69,7 +69,34 @@
            @keydown.window.arrow-left="go(i - 1)"
            @keydown.window.arrow-right="go(i + 1)">
 
-        <div class="group relative overflow-hidden bg-cream">
+        <% if (p.images.length > 1) { %>
+          <!-- The rail stands up beside the frame rather than sitting under it.
+
+               Under the image it pushed the frame's own height down and ate into the row
+               the buy panel wanted; the column beside it was empty anyway. It is also
+               where every large shop puts it, so a shopper's eye already goes there.
+
+               Thumbnails as well as arrows: on a garment somebody wants the back view
+               directly, not three clicks to reach it. -->
+          <%
+            /* Narrow enough that six 4:5 thumbnails fit inside the frame's height — at
+               4.5rem they came to 580px against a 554px frame and stuck out below it. A
+               product with more views than that scrolls the rail rather than stretching
+               the gallery past the photograph. */
+          %>
+          <div class="raja-rail flex w-16 shrink-0 flex-col gap-2 overflow-y-auto">
+            <% p.images.forEach(function (img, i) { %>
+              <button type="button" @click="go(<%= i %>)" aria-label="View <%= i + 1 %>"
+                      :class="i === <%= i %> ? 'ring-1 ring-maroon' : 'ring-1 ring-line hover:ring-maroon/50'"
+                      class="aspect-[4/5] w-full overflow-hidden bg-cream transition">
+                <img src="<%= img %>" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover">
+              </button>
+            <% }); %>
+          </div>
+        <% } %>
+
+        <!-- min-w-0 so the frame shrinks to what is left rather than forcing the row wider -->
+        <div class="group relative min-w-0 flex-1 overflow-hidden bg-cream">
           <%
             /* x-show sits on a WRAPPER, never on the same element as :style.
 
@@ -122,18 +149,5 @@
           </span>
         </div>
 
-        <% if (p.images.length > 1) { %>
-          <!-- Thumbnails as well as dots: on a garment a shopper wants to pick the back
-               view directly, not click through three to reach it. -->
-          <div class="mt-3 flex gap-2">
-            <% p.images.forEach(function (img, i) { %>
-              <button type="button" @click="go(<%= i %>)" aria-label="View <%= i + 1 %>"
-                      :class="i === <%= i %> ? 'ring-1 ring-maroon' : 'ring-1 ring-line hover:ring-maroon/50'"
-                      class="h-20 w-16 overflow-hidden bg-cream transition">
-                <img src="<%= img %>" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover">
-              </button>
-            <% }); %>
-          </div>
-        <% } %>
       </div>
     </div>
