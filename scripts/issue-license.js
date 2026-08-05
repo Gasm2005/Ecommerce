@@ -21,16 +21,9 @@
  * private key existing in exactly one place.
  */
 
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
-
-const ROOT = path.join(__dirname, '..');
-const KEY_DIR = path.join(ROOT, '.license-keys');
-const PRIVATE_KEY = path.join(KEY_DIR, 'private.pem');
-const ISSUED_LOG = path.join(KEY_DIR, 'issued.json');
 
 const license = require('../src/license');
+const minting = require('../src/minting');
 const { PLANS } = require('../src/plan');
 
 /* ---------------------------------------------------------------- args ---- */
@@ -52,82 +45,46 @@ const args = parseArgs(process.argv.slice(2));
 /* -------------------------------------------------------------- keygen ---- */
 
 function keygen() {
-  if (fs.existsSync(PRIVATE_KEY) && !args.force) {
-    console.error(`\n  A private key already exists at ${path.relative(ROOT, PRIVATE_KEY)}.`);
-    console.error('  Generating a new one invalidates EVERY licence already issued.');
+  let out;
+  try {
+    out = minting.keygen({ force: !!args.force });
+  } catch (err) {
+    console.error('\n  ' + err.message);
     console.error('  Pass --force only if you mean that.\n');
     process.exit(1);
   }
 
-  const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
-  fs.mkdirSync(KEY_DIR, { recursive: true });
-  fs.writeFileSync(PRIVATE_KEY, privateKey.export({ format: 'pem', type: 'pkcs8' }), { mode: 0o600 });
-
-  const pub = publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
-
   console.log('\n  Keypair generated.\n');
-  console.log(`  Private key  ${path.relative(ROOT, PRIVATE_KEY)}   (mode 600, git-ignored)`);
+  console.log(`  Private key  ${out.privateKeyPath}   (mode 600, git-ignored)`);
   console.log('               Back this up. Losing it means reissuing every licence.\n');
   console.log('  Public key — paste into src/license.js as PUBLIC_KEY_B64:\n');
-  console.log(`    '${pub}'\n`);
+  console.log(`    '${out.publicKeyB64}'\n`);
 }
 
 /* --------------------------------------------------------------- issue ---- */
 
 function issue() {
-  if (!fs.existsSync(PRIVATE_KEY)) {
-    console.error('\n  No private key yet. Run:  node scripts/issue-license.js --keygen\n');
-    process.exit(1);
-  }
-  if (!args.store) {
-    console.error('\n  --store "Client Name" is required.\n');
-    process.exit(1);
-  }
-  const plan = String(args.plan || 'growth');
-  if (!PLANS.some((p) => p.id === plan)) {
-    console.error(`\n  Unknown plan "${plan}". Available: ${PLANS.map((p) => p.id).join(', ')}\n`);
-    process.exit(1);
-  }
+  const csv = (v) => (v ? String(v).split(',').map((s) => s.trim()).filter(Boolean) : []);
 
-  const months = Number(args.months || 12);
-  if (!Number.isFinite(months) || months <= 0) {
-    console.error('\n  --months must be a positive number.\n');
-    process.exit(1);
-  }
-
-  const issued = new Date();
-  const expires = new Date(issued);
-  expires.setMonth(expires.getMonth() + months);
-
-  const payload = {
-    v: 1,
-    id: crypto.randomUUID(),
-    store: String(args.store),
-    plan,
-    extras: args.extras ? String(args.extras).split(',').map((s) => s.trim()).filter(Boolean) : [],
-    domains: args.domains ? String(args.domains).split(',').map((s) => s.trim()).filter(Boolean) : [],
-    issued: issued.toISOString(),
-    expires: expires.toISOString(),
-    graceDays: Number(args.grace || license.GRACE_DAYS)
-  };
-
-  // Sign the exact bytes that will be transmitted, not a re-serialisation of
-  // them — otherwise a key-order difference breaks verification.
-  const privateKey = crypto.createPrivateKey(fs.readFileSync(PRIVATE_KEY));
-  const signedPart = Buffer.from(Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url'), 'utf8');
-  const signature = crypto.sign(null, signedPart, privateKey);
-  const token = license.encodeToken(payload, signature);
-
-  // Verify before printing: never hand over a key that does not work.
-  const check = license.verify(token);
-  if (!check.ok) {
-    console.error('\n  Refusing to issue: the generated key does not verify against the public key');
-    console.error('  compiled into src/license.js — they are from different keypairs.');
-    console.error(`  (${check.reason})\n`);
+  let out;
+  try {
+    // Signing lives in src/minting.js so the provisioning script produces identical
+    // bytes; it also verifies before returning, so nothing unusable gets printed.
+    out = minting.mint({
+      store: args.store,
+      plan: String(args.plan || 'growth'),
+      months: Number(args.months || 12),
+      extras: csv(args.extras),
+      domains: csv(args.domains),
+      graceDays: args.grace
+    });
+  } catch (err) {
+    console.error('\n  Refusing to issue: ' + err.message + '\n');
     process.exit(1);
   }
 
-  const planMeta = PLANS.find((p) => p.id === plan);
+  const { token, payload } = out;
+  const planMeta = PLANS.find((p) => p.id === payload.plan);
   const money = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
 
   console.log('\n  Licence issued\n');
@@ -135,28 +92,24 @@ function issue() {
   console.log(`    Plan       ${planMeta.label} (${money(planMeta.price)})`);
   if (payload.extras.length) console.log(`    Extras     ${payload.extras.join(', ')}`);
   console.log(`    Domains    ${payload.domains.length ? payload.domains.join(', ') : 'any (not domain-locked)'}`);
-  console.log(`    Valid      ${issued.toISOString().slice(0, 10)} → ${expires.toISOString().slice(0, 10)} (${months} months)`);
+  console.log(`    Valid      ${payload.issued.slice(0, 10)} → ${payload.expires.slice(0, 10)} (${out.months} months)`);
   console.log(`    Grace      ${payload.graceDays} days past expiry`);
-  console.log(`    Reference  ${license.shortId(payload)}`);
+  console.log(`    Reference  ${out.reference}`);
   console.log('\n  Key — paste into Admin → Licence, or set LICENSE_KEY:\n');
   console.log(`${token}\n`);
 
-  // A local record, so "what does this client have?" is answerable without
-  // asking them to read their key back over the phone.
-  const log = fs.existsSync(ISSUED_LOG) ? JSON.parse(fs.readFileSync(ISSUED_LOG, 'utf8')) : [];
-  log.push({ ...payload, reference: license.shortId(payload), token });
-  fs.writeFileSync(ISSUED_LOG, JSON.stringify(log, null, 2) + '\n', { mode: 0o600 });
-  console.log(`  Recorded in ${path.relative(ROOT, ISSUED_LOG)} (${log.length} licence${log.length === 1 ? '' : 's'} issued)\n`);
+  const count = minting.record({ ...payload, reference: out.reference, token });
+  console.log(`  Recorded in ${minting.relative(minting.ISSUED_LOG)} (${count} licence${count === 1 ? '' : 's'} issued)\n`);
 }
 
 /* ----------------------------------------------------------------- list ---- */
 
 function list() {
-  if (!fs.existsSync(ISSUED_LOG)) {
+  const log = minting.issuedLog();
+  if (!log.length) {
     console.log('\n  No licences issued yet.\n');
     return;
   }
-  const log = JSON.parse(fs.readFileSync(ISSUED_LOG, 'utf8'));
   console.log(`\n  ${log.length} licence(s) issued\n`);
   log.forEach((l) => {
     const days = Math.ceil((new Date(l.expires).getTime() - Date.now()) / 86400000);

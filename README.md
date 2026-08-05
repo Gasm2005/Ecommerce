@@ -180,6 +180,32 @@ confirmation arrives. Two failures in a row with nothing succeeding since puts a
 warning on the admin dashboard and turns `npm run doctor` red; a single timeout does
 not, because warning about noise teaches an owner to ignore warnings.
 
+### Sold to live
+```bash
+npm run provision -- --template > client.json    # a spec to fill in
+npm run provision -- --file client.json --dry-run # validate, change nothing
+npm run provision -- --file client.json           # do it
+```
+Brand, the tax details that make an invoice legal, which sections the shop sells to,
+the plan, the owner account with a generated password, and a domain-locked licence —
+in one pass. A spec file rather than prompts, because this runs once per client and a
+file can be filled in beforehand, checked by someone else, kept as the record of what
+was agreed, and re-run when a detail turns out to be wrong.
+
+Everything validates before anything is written, and a single failure means no file is
+touched: a half-provisioned store is worse than an untouched one, because the brand is
+the client's while the GSTIN is still somebody else's and no screen says which. The
+GSTIN is checked against its own check digit and against the state you named — the
+first two digits of a GSTIN *are* the state code, so a mismatch means one of them is
+wrong, and that field decides CGST+SGST versus IGST on every order the shop ever takes.
+
+It also clears what it cannot fill. Bank details are printed on the invoice, so an
+unspecified bank is emptied rather than inherited: no bank block is correct, while a
+customer paying a client's invoice into the demo account is a phone call nobody wants
+to make. The password is generated and shown once — never taken from the spec, because
+a password in a file lives in a chat thread forever. It finishes by listing what only
+the client can supply: photography, gateway keys, mail credentials.
+
 ### Email you can tell has stopped
 Order confirmations, shipping and delivery updates, return and refund mail, and a
 thank-you when a review goes live — SMTP, Resend or Brevo, with a delivery log.
@@ -301,6 +327,7 @@ test dependencies:
 | `checkout-flow.test.js` | the whole checkout over HTTP, no mocks |
 | `shopper.test.js` | cookie forgery, order privacy, saved addresses |
 | `notifications.test.js` | every template, every event, failure paths |
+| `provision.test.js` | spec validation, nothing of the demo store survives |
 
 Each test file gets a throwaway data directory, so tests never touch a real store.
 

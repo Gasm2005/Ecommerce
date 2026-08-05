@@ -106,8 +106,11 @@ function checkConfig() {
     return fail('Config', 'site.config.json will not parse: ' + err.message, 'Fix the JSON.');
   }
 
-  const demo = /aanya/i;
-  if (demo.test(config.brand.name) || demo.test(config.brand.supportEmail || '')) {
+  /* Shared with the provisioning script so the two cannot drift. It also strips
+     diacritics: the demo brand is "AANYÄ", and /aanya/i never matched it, so this
+     check had been passing on the support email alone. */
+  const { looksLikeDemo } = require('../src/provision');
+  if (looksLikeDemo(config.brand.name) || looksLikeDemo(config.brand.supportEmail)) {
     fail('Config', `Brand is still the demo one ("${config.brand.name}").`,
       'Run npm run provision, or edit config/site.config.json.');
   } else {
