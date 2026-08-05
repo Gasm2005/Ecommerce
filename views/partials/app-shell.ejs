@@ -22,7 +22,7 @@
     </button>
 
     <form action="/search" method="get" role="search" class="relative flex-1">
-      <input type="search" name="q" x-ref="appq" placeholder="Search lehengas, sarees, occasions…"
+      <input type="search" name="q" x-ref="appq" placeholder="<%= (config.copy && config.copy.searchPlaceholder) || 'Search lehengas, sarees, occasions…' %>"
              autocomplete="off" spellcheck="false" enterkeyhint="search"
              class="w-full border border-line bg-cream/50 py-3 pl-4 pr-10 text-sm text-ink placeholder:text-muted/80 focus:border-maroon focus:bg-ivory focus:outline-none"
              hx-get="/fragments/search-suggest"

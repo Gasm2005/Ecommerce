@@ -58,82 +58,14 @@
          canBuy(sz, c) { const n = this.left(sz, c); return n === null || n > 0; },
          isLow(sz, c) { const n = this.left(sz, c); return n !== null && n > 0 && n <= 2; }
        }"
+       id="product-layout"
        class="grid gap-10 py-8 lg:grid-cols-12 lg:gap-12 lg:py-12 xl:gap-16">
 
-    <!-- ============================= gallery ============================= -->
-    <div class="lg:col-span-7 xl:col-span-8">
-
-      <!-- phone/tablet: swipeable rail. Native scroll-snap, so swiping keeps
-           real momentum and there's no JS drag handling to go wrong. -->
-      <div class="lg:hidden" x-data="{ i: 0, n: <%= p.images.length %> }">
-        <div class="relative">
-          <div x-ref="rail"
-               @scroll.passive="i = Math.round($refs.rail.scrollLeft / $refs.rail.clientWidth)"
-               class="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain no-scrollbar">
-            <% p.images.forEach(function (img, i) { %>
-              <div class="w-full shrink-0 snap-center bg-cream">
-                <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
-                     <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
-                     class="aspect-[3/4] w-full object-cover">
-              </div>
-            <% }); %>
-          </div>
-
-          <span class="pointer-events-none absolute right-3 top-3 bg-ivory/85 px-2 py-1 text-[10px] tracking-[0.1em] text-muted"
-                x-text="`${i + 1} / ${n}`"></span>
-
-          <% if (p.badge) { %>
-            <span class="pointer-events-none absolute left-3 top-3 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
-          <% } %>
-        </div>
-
-        <div class="mt-3 flex items-center justify-center gap-1.5">
-          <% p.images.forEach(function (img, i) { %>
-            <button type="button" aria-label="Go to image <%= i + 1 %>"
-                    @click="$refs.rail.scrollTo({ left: $refs.rail.clientWidth * <%= i %>, behavior: 'smooth' })"
-                    :class="i === <%= i %> ? 'w-5 bg-maroon' : 'w-1.5 bg-line'"
-                    class="h-1.5 rounded-full transition-all duration-300"></button>
-          <% }); %>
-        </div>
-
-        <p class="mt-2 text-center text-[10px] uppercase tracking-[0.14em] text-muted">Swipe for more views</p>
-      </div>
-
-      <!-- desktop: two-up grid.
-           Not one giant frame: a single 3/4 image in this column is 827px tall —
-           taller than a laptop viewport — so the piece could only ever be seen one
-           view at a time, and everything else was pushed below the fold. Two
-           columns at 4/5 shows four views at once with a real gap between them,
-           which is both more of the garment and more air. Zoom per frame. -->
-      <div class="hidden grid-cols-2 gap-4 lg:grid">
-        <% p.images.forEach(function (img, i) { %>
-          <figure class="relative overflow-hidden bg-cream"
-                  x-data="{ z: false, ox: '50%', oy: '50%' }"
-                  @mouseenter="z = true" @mouseleave="z = false"
-                  @mousemove="ox = ((($event.clientX - $el.getBoundingClientRect().left) / $el.offsetWidth) * 100).toFixed(1) + '%';
-                              oy = ((($event.clientY - $el.getBoundingClientRect().top) / $el.offsetHeight) * 100).toFixed(1) + '%'"
-                  :style="`--zs: ${z ? 2 : 1}; --zx: ${ox}; --zy: ${oy}`">
-            <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
-                 <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
-                 style="transform: scale(var(--zs, 1)); transform-origin: var(--zx, 50%) var(--zy, 50%)"
-                 class="aspect-[4/5] w-full object-cover transition-transform duration-300 ease-out">
-
-            <% if (i === 0) { %>
-              <figcaption x-show="!z" x-cloak
-                          class="pointer-events-none absolute bottom-3 right-3 bg-ivory/85 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-muted">
-                Hover to zoom
-              </figcaption>
-              <% if (p.badge) { %>
-                <span class="pointer-events-none absolute left-3 top-3 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
-              <% } %>
-            <% } %>
-          </figure>
-        <% }); %>
-      </div>
-    </div>
+    <%- include(view('partials/product-media'), { p: p }) %>
 
     <!-- ===================== purchase panel (sticky) ===================== -->
-    <div class="lg:col-span-5 xl:col-span-4">
+    <!-- id is a styling hook: a theme can make this column sticky. -->
+    <div id="product-info" class="lg:col-span-5 xl:col-span-4">
       <!-- Not sticky, and deliberately long.
            A short sticky panel meant every other detail had to go into full-width
            sections below, where a paragraph column left ~440px of the page empty.
@@ -568,11 +500,18 @@
        stock: JSON.parse($el.dataset.stock),
        left(sz, c) { const v = this.stock[(sz + '|' + c).toLowerCase()]; return v === undefined ? null : v; },
        canBuy() { const n = this.left(this.size, this.color); return n === null || n > 0; },
-       /* Visible when this piece is still what the page is about: the real buttons
-          have scrolled away, and the shopper has not started browsing other
-          pieces. Phone shows it from the start — there the buttons leave the
-          screen immediately. */
-       get visible() { return !this.upsell && (this.past || window.innerWidth < 1024); },
+       /* Visible when this piece is still what the page is about AND the real buttons
+          have scrolled away — on every width.
+
+          This used to add `|| window.innerWidth < 1024`, on the theory that a phone
+          scrolls past the buttons immediately anyway. It does not: the size picker and
+          Add to bag sit mid-page, so on a phone the bar appeared while the real button
+          was still on screen and the page showed TWO Add to bag buttons at once. Which
+          one is the live one is not a question to make a customer answer.
+
+          `past` already handles the phone correctly — it is true the moment #atc-main
+          leaves the top of the viewport, which on a phone is very soon. */
+       get visible() { return !this.upsell && this.past; },
        measure() {
          const main = document.getElementById('atc-main');
          if (main) this.past = main.getBoundingClientRect().bottom < 70;

@@ -8,7 +8,7 @@
 
     <input type="search" name="q" x-ref="q<%= sid %>" id="q-<%= sid %>"
            value="<%= (typeof filters !== 'undefined' && filters.q) ? filters.q : '' %>"
-           placeholder="Search lehengas, Banarasi sarees, mehendi…"
+           placeholder="<%= (config.copy && config.copy.searchPlaceholder) || 'Search lehengas, Banarasi sarees, mehendi…' %>"
            autocomplete="off" spellcheck="false"
            class="w-full border border-line bg-cream/50 py-3 pl-11 pr-11 text-sm text-ink placeholder:text-muted/80 focus:border-maroon focus:bg-ivory focus:outline-none lg:py-2.5"
            hx-get="/fragments/search-suggest"

@@ -1,0 +1,127 @@
+<%
+  /* The product gallery, lifted out of product.ejs unchanged.
+
+     A theme that wants a different gallery — one image at a time, a carousel with
+     arrows — should not have to fork the 640-line product page to get it. That file
+     also holds the stock map, the sticky buy bar, the pincode box and the fulfilment
+     copy, and a copy of it in a theme is a copy that stops receiving fixes to any of
+     them. Extracting this is the base gaining a hook, which is what the contract asks
+     for when a theme needs one.
+
+     Locals: p (the product). */
+%>
+    <!-- ============================= gallery ============================= -->
+    <div class="lg:col-span-7 xl:col-span-8">
+
+      <!-- phone/tablet: swipeable rail. Native scroll-snap, so swiping keeps
+           real momentum and there's no JS drag handling to go wrong. -->
+      <div class="lg:hidden" x-data="{ i: 0, n: <%= p.images.length %> }">
+        <div class="relative">
+          <div x-ref="rail"
+               @scroll.passive="i = Math.round($refs.rail.scrollLeft / $refs.rail.clientWidth)"
+               class="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain no-scrollbar">
+            <% p.images.forEach(function (img, i) { %>
+              <div class="w-full shrink-0 snap-center bg-cream">
+                <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
+                     <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
+                     class="aspect-[3/4] w-full object-cover">
+              </div>
+            <% }); %>
+          </div>
+
+          <span class="pointer-events-none absolute right-3 top-3 bg-ivory/85 px-2 py-1 text-[10px] tracking-[0.1em] text-muted"
+                x-text="`${i + 1} / ${n}`"></span>
+
+          <% if (p.badge) { %>
+            <span class="pointer-events-none absolute left-3 top-3 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
+          <% } %>
+        </div>
+
+        <div class="mt-3 flex items-center justify-center gap-1.5">
+          <% p.images.forEach(function (img, i) { %>
+            <button type="button" aria-label="Go to image <%= i + 1 %>"
+                    @click="$refs.rail.scrollTo({ left: $refs.rail.clientWidth * <%= i %>, behavior: 'smooth' })"
+                    :class="i === <%= i %> ? 'w-5 bg-maroon' : 'w-1.5 bg-line'"
+                    class="h-1.5 rounded-full transition-all duration-300"></button>
+          <% }); %>
+        </div>
+
+        <p class="mt-2 text-center text-[10px] uppercase tracking-[0.14em] text-muted">Swipe for more views</p>
+      </div>
+
+      <!-- desktop: ONE image at a time, with arrows.
+
+           The base shows a two-up grid, which suits a bridal page: four views of one
+           lehenga at once, and the shopper is studying it. Here the complaint was the
+           right one — two tall frames pushed the price, the size picker and Add to bag
+           below the fold, so the page opened on photographs of something you could not
+           yet buy.
+
+           One frame, never taller than the viewport minus the header, with arrows, dots
+           and a counter. The mobile rail above is untouched: swiping already worked. -->
+      <div class="hidden lg:block"
+           x-data="{
+             i: 0,
+             n: <%= p.images.length %>,
+             go(k) { this.i = (k + this.n) % this.n; },
+             z: false, ox: '50%', oy: '50%'
+           }"
+           @keydown.window.arrow-left="go(i - 1)"
+           @keydown.window.arrow-right="go(i + 1)">
+
+        <div class="group relative overflow-hidden bg-cream">
+          <% p.images.forEach(function (img, i) { %>
+            <figure x-show="i === <%= i %>" <%= i === 0 ? '' : 'style="display:none"' %>
+                    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+                    @mouseenter="z = true" @mouseleave="z = false"
+                    @mousemove="ox = ((($event.clientX - $el.getBoundingClientRect().left) / $el.offsetWidth) * 100).toFixed(1) + '%';
+                                oy = ((($event.clientY - $el.getBoundingClientRect().top) / $el.offsetHeight) * 100).toFixed(1) + '%'"
+                    :style="`--zs: ${z ? 2 : 1}; --zx: ${ox}; --zy: ${oy}`">
+              <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
+                   <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
+                   style="transform: scale(var(--zs, 1)); transform-origin: var(--zx, 50%) var(--zy, 50%)"
+                   class="h-[min(74vh,780px)] w-full object-cover transition-transform duration-300 ease-out">
+            </figure>
+          <% }); %>
+
+          <% if (p.images.length > 1) { %>
+            <!-- Always visible, not hover-revealed: an arrow a shopper has to discover is
+                 an arrow most of them never use. -->
+            <button type="button" @click="go(i - 1)" aria-label="Previous image"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 border border-line bg-ivory/90 p-2.5 text-ink transition hover:bg-ivory hover:text-maroon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg>
+            </button>
+            <button type="button" @click="go(i + 1)" aria-label="Next image"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 border border-line bg-ivory/90 p-2.5 text-ink transition hover:bg-ivory hover:text-maroon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <span class="pointer-events-none absolute right-3 top-3 bg-ivory/85 px-2 py-1 text-[10px] tracking-[0.1em] text-muted"
+                  x-text="`${i + 1} / ${n}`"></span>
+          <% } %>
+
+          <% if (p.badge) { %>
+            <span class="pointer-events-none absolute left-3 top-3 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
+          <% } %>
+
+          <span x-show="!z" x-cloak
+                class="pointer-events-none absolute bottom-3 right-3 bg-ivory/85 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-muted">
+            Hover to zoom
+          </span>
+        </div>
+
+        <% if (p.images.length > 1) { %>
+          <!-- Thumbnails as well as dots: on a garment a shopper wants to pick the back
+               view directly, not click through three to reach it. -->
+          <div class="mt-3 flex gap-2">
+            <% p.images.forEach(function (img, i) { %>
+              <button type="button" @click="go(<%= i %>)" aria-label="View <%= i + 1 %>"
+                      :class="i === <%= i %> ? 'ring-1 ring-maroon' : 'ring-1 ring-line hover:ring-maroon/50'"
+                      class="h-20 w-16 overflow-hidden bg-cream transition">
+                <img src="<%= img %>" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover">
+              </button>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+    </div>

@@ -102,6 +102,28 @@ function checks(ctx) {
       must(maps >= 2, 'only one stock map on the page — a separate buy bar needs its own');
     }],
 
+    ['the page never shows two Add to bag buttons at once', async () => {
+      const res = await get(`/product/${product.slug}`);
+      const bar = res.text.slice(res.text.indexOf("data-stock='", res.text.indexOf("data-stock='") + 1));
+
+      /* Reported from a phone: the sticky bar showed from the first pixel on any screen
+         under 1024px, so while the real Add to bag was still on screen the page carried
+         two of them. Which one is live is not a question to make a customer answer.
+         The bar must wait for the real buttons to leave. */
+      /* Comments stripped first. This check failed against correct code because the
+         comment explaining the old bug quotes the old bug — the check was matching its own
+         documentation.
+
+         Plain string matching rather than a regex: braces and parens in a pattern this
+         shape are three escapes away from silently matching nothing. */
+      const code = bar.replace(/\/\*[\s\S]*?\*\//g, ' ');
+
+      must(code.includes('!this.upsell && this.past'),
+        'the sticky bar is not gated on the real buttons having scrolled away');
+      must(!code.includes('window.innerWidth < 1024'),
+        'the sticky bar shows unconditionally on small screens, alongside the real button');
+    }],
+
     ['a sold-out size cannot be added to the bag', async () => {
       if (!soldOutSize) return 'skipped — nothing is sold out in the demo catalogue';
 

@@ -65,6 +65,51 @@
 
   /* Letter-spacing that suited 10px caps crowds 12.5px ones. */
   .tracking-luxe { letter-spacing: 0.16em !important; }
+
+  /* --- the product page, first screenful --- */
+
+  @media (min-width: 1024px) {
+    /* 60/40, stated in fr rather than per cent.
+
+       The base is 7-and-5 of twelve, which is 58/42 — close, but 60/40 was asked for and
+       the gallery is the thing being sized, so it is stated rather than approximated.
+
+       Two arithmetic mistakes on the way here, both visible rather than subtle. Setting two
+       columns while the children still carried lg:col-span-7 and lg:col-span-5 made each
+       child span past the end of the grid, so the gallery filled the row and the buy panel
+       dropped below it. Then 60% + 40% plus the grid's gap came to more than the row, and
+       the second column ran off the right edge. fr divides what is left after the gap;
+       minmax(0, …) lets a long product name shrink its column instead of widening it. */
+    #product-layout {
+      grid-template-columns: minmax(0, 60fr) minmax(0, 40fr) !important;
+      /* Air between the photograph and the words. Below about 4rem the price starts to
+         look like a caption on the image rather than its own column. */
+      column-gap: 4.5rem !important;
+      padding-top: 2.5rem !important;
+    }
+    /* And air inside the right column, so the price, the pincode box, the colours and the
+       sizes read as separate decisions instead of one dense block. */
+    #product-info > * + * { margin-top: 1.6rem; }
+    #product-layout > :first-child { grid-column: 1 / 2 !important; }
+    #product-info { grid-column: 2 / 3 !important; }
+
+    /* The IMAGE is what stays put, and the detail column scrolls with the page.
+
+       This was the other way round first — a sticky buy panel with its own overflow-y —
+       and it was worse than doing nothing. A scroll container nested inside the page
+       scroll meant the wheel moved whichever one the pointer happened to be over, so
+       scrolling down took the size picker and Add to bag out of the panel while the image
+       sat still: neither the piece nor the way to buy it was usable at the same time.
+
+       Sticking the gallery instead is what every large shop does, and it works because
+       there is only one scroll: the photograph is always there, and the details, sizes and
+       Add to bag come up past it. */
+    #product-layout > :first-child {
+      position: sticky;
+      top: 7.5rem;
+      align-self: start;
+    }
+  }
 </style>
 
 
@@ -75,10 +120,27 @@
   const phone = String(config.brand.supportPhone || '').trim();
   const phoneDigits = phone.replace(/\D/g, '');
 %>
+
+
+<%
+  /* Collapses as you scroll. The four rows — offers, logo and search, sections,
+     categories — come to about 200px, a quarter of a laptop viewport spent on chrome
+     before the page begins. Past 120px of scroll the offer strip and the section row fold
+     away and the rows tighten, leaving the logo, the search, the phone and the categories.
+
+     Nothing is removed, only hidden: the sections are still switchable from the drawer and
+     from the row when you scroll back up. Height is animated rather than display-toggled so
+     the page does not jump under the reader. */
+%>
+<div x-data="{ small: false }"
+     x-init="small = window.scrollY > 120"
+     @scroll.window.throttle.100ms="small = window.scrollY > 120"
+     class="sticky top-0 z-50">
 <% if (marquee.length) { %>
   <!-- Two passes so the loop has no visible seam; the copy is aria-hidden so a screen
        reader does not read every offer twice. -->
-  <div class="overflow-hidden bg-maroon text-ivory">
+  <div class="overflow-hidden bg-maroon text-ivory transition-all duration-200"
+       :class="small ? 'max-h-0' : 'max-h-10'">
     <div class="flex w-max animate-[raja-marquee_30s_linear_infinite] gap-12 whitespace-nowrap py-2 pl-4 text-[10px] uppercase tracking-luxe sm:text-[11px]">
       <% for (let pass = 0; pass < 2; pass++) { %>
         <span class="flex gap-12" <%= pass ? 'aria-hidden="true"' : '' %>>
@@ -94,16 +156,17 @@
     /* Someone who asked the OS to stop moving things meant it. A still strip still reads;
        one they cannot stop is a reason to leave. */
     @media (prefers-reduced-motion: reduce) {
-      .animate-\[raja-marquee_30s_linear_infinite\] { animation: none; }
+      .animate-[raja-marquee_30s_linear_infinite] { animation: none; }
     }
   </style>
 <% } %>
 
-<header class="sticky top-0 z-50 border-b border-line bg-ivory/95 backdrop-blur supports-[backdrop-filter]:bg-ivory/80">
+<header class="border-b border-line bg-ivory/95 backdrop-blur supports-[backdrop-filter]:bg-ivory/80">
   <div class="mx-auto max-w-[1600px] px-4 lg:px-8">
 
     <!-- row 1 : logo · search · actions -->
-    <div class="flex items-center gap-3 py-3 lg:gap-8 lg:py-4">
+    <div class="flex items-center gap-3 transition-all duration-200 lg:gap-8"
+         :class="small ? 'py-1.5 lg:py-2' : 'py-3 lg:py-4'">
 
       <button class="-ml-1 p-2 lg:hidden" @click="$store.ui.menu = true" aria-label="Open menu">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -175,7 +238,7 @@
       <button type="button" @click="$store.ui.openAppSearch()"
               class="flex w-full items-center gap-3 border border-line bg-cream/50 px-4 py-3 text-left text-sm text-muted">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="shrink-0"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <span class="truncate"><%= (typeof filters !== 'undefined' && filters.q) ? filters.q : 'Search lehengas, sarees, occasions…' %></span>
+        <span class="truncate"><%= (typeof filters !== 'undefined' && filters.q) ? filters.q : ((config.copy && config.copy.searchPlaceholder) || 'Search lehengas, sarees, occasions…') %></span>
       </button>
     </div>
 
@@ -283,5 +346,7 @@
     </nav>
   </div>
 </header>
+
+</div>
 
 <%- include(view('partials/mobile-drawer')) %>
