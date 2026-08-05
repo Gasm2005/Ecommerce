@@ -18,7 +18,7 @@
 <% } else { %>
 
   <% result.items.forEach(function (p, i) { %>
-    <%- include('../partials/product-card', { product: p, priority: (!isAppend && i < 4) }) %>
+    <%- include(view('partials/product-card'), { product: p, priority: (!isAppend && i < 4) }) %>
   <% }); %>
 
   <% if (result.hasMore) { %>
@@ -53,7 +53,7 @@
     <%= result.total %> <%= result.total === 1 ? 'piece' : 'pieces' %>
   </p>
 
-  <%- include('../partials/active-chips', { oob: true }) %>
+  <%- include(view('partials/active-chips'), { oob: true }) %>
 
   <span id="filter-count" hx-swap-oob="true" class="<%= activeCount ? '' : 'hidden' %> ml-1 text-maroon">(<%= activeCount %>)</span>
 <% } %>

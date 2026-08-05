@@ -43,7 +43,7 @@
        attribute early — Alpine then never initialised and every size looked
        available. Reading it back with JSON.parse keeps the two quote styles apart. */
   %>
-  <div data-stock='<%= JSON.stringify(stockMap) %>'
+  <div data-stock="<%- JSON.stringify(stockMap) %>"
        x-data="{
          size: '<%= openSize %>',
          color: '<%= firstColour %>',
@@ -557,7 +557,7 @@
      its callback, and the bar silently never appeared. A throttled read of two
      bounding rects is a few microseconds and is obvious to reason about. */
 %>
-<div data-stock='<%= JSON.stringify(stockMap) %>'
+<div data-stock="<%- JSON.stringify(stockMap) %>"
      x-data="{
        past: false,
        upsell: false,

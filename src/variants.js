@@ -178,21 +178,11 @@ function setStock(product, { size, color }, stock) {
   return next;
 }
 
-/**
- * Takes stock off one variant when an order is placed. Returns a new array, or
- * null when this product does not track variants (the caller then falls back to
- * the whole-product number).
- */
-function decrement(product, { size, color }, qty) {
-  if (!tracksVariants(product)) return null;
-
-  const row = rowFor(product, { size, color });
-  if (!row || !Number.isFinite(row.stock)) return rows(product);
-
-  return rows(product).map((v) => (
-    v === row ? { ...v, stock: Math.max(0, v.stock - Math.max(0, qty)) } : { ...v }
-  ));
-}
+/* A decrement() lived here and nothing ever called it. Selling a piece goes through
+   products.adjustVariantStock(), which writes to disk; this one returned a new array and
+   left the caller to persist it. Two ways to take stock off a size, one of which quietly
+   does nothing, is a trap for whoever reaches for the wrong one — and the wrong one is
+   the one that reads as harmless. */
 
 /**
  * Pieces in one size, across every colour.
@@ -225,5 +215,5 @@ function label(variant) {
 
 module.exports = {
   same, tracksVariants, rowFor, stockFor, totalStock, isSoldOut, anyAvailable,
-  sizeAvailability, colourAvailability, matrix, sizeTotal, setStock, decrement, lowVariants, label
+  sizeAvailability, colourAvailability, matrix, sizeTotal, setStock, lowVariants, label
 };

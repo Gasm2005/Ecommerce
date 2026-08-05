@@ -3,14 +3,14 @@
 <!-- Desktop gets the full editorial footer; phone + tablet get a compact
      app-style one (socials, key links, support) above the bottom tab bar. -->
 <div class="hidden lg:block">
-  <%- include('./footer') %>
+  <%- include(view('partials/footer')) %>
 </div>
-<%- include('./app-footer') %>
+<%- include(view('partials/app-footer')) %>
 
-<%- include('./app-shell') %>
+<%- include(view('partials/app-shell')) %>
 
 <!-- Asks once, on a first visit, only when the shop has more than one section. -->
-<%- include('./audience-gate') %>
+<%- include(view('partials/audience-gate')) %>
 
 <!-- ========================= cart drawer (right) ========================= -->
 <div x-cloak x-show="$store.ui.cart" class="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-label="Shopping bag">
@@ -21,7 +21,7 @@
          x-transition:leave="transition ease-in duration-200" x-transition:leave-end="translate-x-full"
          class="absolute right-0 top-0 flex h-full w-full max-w-[26rem] flex-col bg-ivory shadow-2xl">
     <div id="cart-panel" class="flex h-full flex-col">
-      <%- include('../fragments/cart-drawer', { justAdded: null }) %>
+      <%- include(view('fragments/cart-drawer'), { justAdded: null }) %>
     </div>
   </aside>
 </div>

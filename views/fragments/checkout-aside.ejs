@@ -15,7 +15,7 @@
 <aside class="lg:col-span-5">
   <div class="space-y-3 lg:sticky lg:top-[132px]">
 
-    <%- include('../partials/order-summary') %>
+    <%- include(view('partials/order-summary')) %>
 
     <div class="border border-line bg-ivory p-4">
       <button type="button" hx-post="<%= primaryPost %>" hx-include="#step-form"

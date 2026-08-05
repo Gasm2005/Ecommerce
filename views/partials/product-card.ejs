@@ -15,7 +15,7 @@
 %>
 <article class="group relative">
   <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
-    <%- include('../fragments/wishlist-button', { product: p, variant: 'card' }) %>
+    <%- include(view('fragments/wishlist-button'), { product: p, variant: 'card' }) %>
   <% } %>
 
   <a href="/product/<%= p.slug %>" class="block">

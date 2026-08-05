@@ -223,7 +223,7 @@
       </div>
     </form>
 
-    <%- include('./checkout-aside', {
+    <%- include(view('fragments/checkout-aside'), {
       primaryLabel: 'Continue to delivery',
       primaryPost: '/checkout/step/2',
       busyLabel: null,
@@ -331,7 +331,7 @@
     </label>
   </form>
 
-  <%- include('./checkout-aside', {
+  <%- include(view('fragments/checkout-aside'), {
     primaryLabel: 'Continue to payment',
     primaryPost: '/checkout/step/3',
     busyLabel: null,
@@ -410,7 +410,7 @@
     <% if (err('paymentMethod')) { %><p class="mt-2 text-[13px] text-maroon">Please choose a payment method.</p><% } %>
   </form>
 
-  <%- include('./checkout-aside', {
+  <%- include(view('fragments/checkout-aside'), {
     primaryLabel: 'Place order · ' + money(cartSummary.total),
     primaryPost: '/checkout/place-order',
     busyLabel: 'Placing order…',

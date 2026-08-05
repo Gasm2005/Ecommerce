@@ -59,7 +59,7 @@
 
     <aside class="lg:col-span-5">
       <div class="lg:sticky lg:top-[190px]">
-        <%- include('../partials/order-summary') %>
+        <%- include(view('partials/order-summary')) %>
         <a href="/checkout" class="mt-4 block bg-maroon py-4 text-center text-[11px] uppercase tracking-luxe text-ivory transition hover:bg-maroonDark">Proceed to checkout</a>
         <% if (config.features.guestCheckout) { %>
           <p class="mt-2 text-center text-[10px] uppercase tracking-[0.14em] text-muted">Guest checkout · no account needed</p>
@@ -71,5 +71,5 @@
 <% } %>
 
 <% if (isHx) { %>
-  <%- include('./cart-badges') %>
+  <%- include(view('fragments/cart-badges')) %>
 <% } %>

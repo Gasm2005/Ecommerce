@@ -1,4 +1,4 @@
-<%- include('../partials/document-open', { title: 'Checkout' }) %>
+<%- include(view('partials/document-open'), { title: 'Checkout' }) %>
 
 <%
   /* Deliberately thin: the step fragment owns BOTH columns (fields + summary),
@@ -15,8 +15,8 @@
   </div>
 
   <div id="checkout-body" class="pt-5">
-    <%- include('../fragments/checkout-step') %>
+    <%- include(view('fragments/checkout-step')) %>
   </div>
 </div>
 
-<%- include('../partials/document-close') %>
+<%- include(view('partials/document-close')) %>

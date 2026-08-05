@@ -18,6 +18,7 @@ const marketing = require('./src/marketing');
 const discounts = require('./src/discounts');
 const attribution = require('./src/attribution');
 const shopper = require('./src/shopper');
+const theme = require('./src/theme');
 const returns = require('./src/returns');
 const invoice = require('./src/invoice');
 const pincode = require('./src/pincode');
@@ -39,7 +40,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+/* Theme first, views/ always last. A theme holds only the files whose look differs, so
+   anything it does not override falls through — and a missing theme cannot 404 a page.
+   Set per request as well (below), since the active theme is config, and config reloads. */
+app.set('views', theme.roots(loadConfig()));
 // Bulk uploads are pasted/read as text, so the limit needs headroom.
 app.use(express.urlencoded({ extended: true, limit: '8mb' }));
 app.use(express.json({ limit: '8mb' }));
@@ -76,6 +80,15 @@ app.use((req, res, next) => {
   res.locals.delivery = delivery;
   res.locals.fulfilment = fulfilment;
   res.locals.variants = variants;
+  /* Resolves a view name theme-first and hands back an ABSOLUTE path. Views must use
+     include(view('partials/header')) rather than a relative include: EJS resolves a
+     root-relative include against the including file's own directory before it looks at
+     the views roots, so a base page would find the base partial next to it and never
+     see the theme's. */
+  res.locals.view = theme.resolver(config);
+  app.set('views', theme.roots(config));
+  res.locals.themeName = theme.current(config);
+
   res.locals.shopper = shopper;
   /* Who this browser is, as far as a guest checkout can honestly say. Set here so
      the several places that render a checkout step cannot each forget it. */

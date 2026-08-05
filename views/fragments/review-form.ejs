@@ -64,7 +64,7 @@
       <!-- uploaded media lives inside the review form, so its tokens submit with it -->
       <div id="review-media-list" class="flex flex-wrap gap-2 <%= kept.length ? 'mb-1' : '' %>">
         <% kept.forEach(function (k) { %>
-          <%- include('./review-media-item', { item: k, error: null }) %>
+          <%- include(view('fragments/review-media-item'), { item: k, error: null }) %>
         <% }); %>
       </div>
 

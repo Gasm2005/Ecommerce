@@ -1,0 +1,12 @@
+<% const p = product; %>
+<article class="group relative">
+  <a href="/product/<%= p.slug %>" class="block">
+    <div class="relative aspect-square overflow-hidden bg-cream">
+      <img src="<%= p.images[0] %>" alt="<%= p.name %>" class="h-full w-full object-cover">
+    </div>
+    <div class="pt-3">
+      <h3 class="text-[15px]"><%= p.name %></h3>
+      <p class="mt-1 text-[15px]"><%= money(p.price) %></p>
+    </div>
+  </a>
+</article>

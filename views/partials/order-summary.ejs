@@ -25,7 +25,7 @@
           <span class="border border-gold/60 bg-gold/10 px-2 py-1 font-mono text-[13.5px]"><%= c.discountCode %></span>
           <span class="ml-2 text-maroon">− <%= money(c.discount) %></span>
         </p>
-        <button hx-post="/cart/coupon/remove" hx-target="#coupon-slot" hx-swap="none"
+        <button hx-post="/cart/coupon/remove" hx-swap="none"
                 hx-on:htmx:after-request="window.location.reload()"
                 class="text-[10px] uppercase tracking-[0.14em] text-muted hover:text-maroon">Remove</button>
       </div>

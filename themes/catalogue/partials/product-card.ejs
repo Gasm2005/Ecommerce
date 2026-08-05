@@ -1,0 +1,70 @@
+<%
+  /* Overlay card: name and price sit ON the image.
+     A dense grid of these reads as one block of stock, which is what a shopper
+     scanning forty pieces wants — the base theme's captioned cards read as a list.
+
+     The CONTRACT is unchanged and must stay that way: the same locals, the same
+     quick-view endpoint, the same sold-out truth from variants.js. Only the shape is
+     this theme's business. */
+  const p = product;
+  const eager = (typeof priority !== 'undefined') && priority;
+
+  const soldOut = !variants.anyAvailable(p);
+  const openSizes = soldOut ? [] : variants.sizeAvailability(p)
+    .filter(function (s) { return s.available; })
+    .map(function (s) { return s.size; });
+  const someGone = !soldOut && openSizes.length && openSizes.length < (p.sizes || []).length;
+%>
+<article class="group relative">
+  <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
+    <%- include(view('fragments/wishlist-button'), { product: p, variant: 'card' }) %>
+  <% } %>
+
+  <a href="/product/<%= p.slug %>" class="block">
+    <div class="relative aspect-[4/5] overflow-hidden bg-cream">
+      <img src="<%= p.images[0] %>" alt="<%= p.name %>"
+           <%= eager ? '' : 'loading="lazy"' %> decoding="async"
+           class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+
+      <!-- The gradient is what makes text on photography legible at all; without it a
+           pale hem behind the price is unreadable and nobody notices until launch. -->
+      <span class="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/85 via-ink/45 to-transparent"></span>
+
+      <% if (soldOut) { %>
+        <span class="absolute inset-0 z-10 flex items-center justify-center bg-ivory/70">
+          <span class="border border-ink/20 bg-ivory px-3 py-1.5 text-[9px] uppercase tracking-luxe text-muted">Sold out</span>
+        </span>
+      <% } %>
+
+      <% if (p.discount >= 10) { %>
+        <span class="absolute left-0 top-3 z-10 bg-maroon px-2.5 py-1 text-[9px] uppercase tracking-luxe text-ivory"><%= p.discount %>% off</span>
+      <% } %>
+
+      <div class="absolute inset-x-0 bottom-0 z-10 p-3">
+        <p class="truncate text-[13px] font-medium text-ivory"><%= p.name %></p>
+        <p class="mt-0.5 flex items-baseline gap-2">
+          <span class="text-[14px] text-ivory"><%= money(p.price) %></span>
+          <% if (config.features.showMrpStrikethrough && p.mrp > p.price) { %>
+            <span class="text-[12px] text-ivory/70 line-through"><%= money(p.mrp) %></span>
+          <% } %>
+        </p>
+        <% if (someGone) { %>
+          <p class="mt-0.5 text-[10.5px] text-ivory/75">Only <%= openSizes.join(', ') %> left</p>
+        <% } %>
+      </div>
+
+      <% if (config.features.quickView) { %>
+        <span class="absolute inset-x-0 top-0 z-20 -translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <button type="button"
+                  @click.prevent.stop="$store.ui.openQuick()"
+                  hx-get="/fragments/quick-view/<%= p.slug %>"
+                  hx-target="#quick-body" hx-swap="innerHTML"
+                  hx-indicator="#quick-loading"
+                  class="w-full bg-ink/85 py-2.5 text-[10px] uppercase tracking-luxe text-ivory backdrop-blur transition hover:bg-maroon">
+            Quick view
+          </button>
+        </span>
+      <% } %>
+    </div>
+  </a>
+</article>

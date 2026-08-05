@@ -4,7 +4,7 @@
      falls back to the store hero, so a single-audience shop configures one thing. */
   const hero = (audience && audience.hero) || config.hero;
 %>
-<%- include('../partials/document-open', { title: null }) %>
+<%- include(view('partials/document-open'), { title: null }) %>
 
 <!-- ================================ hero ================================ -->
 <section class="relative">
@@ -45,7 +45,7 @@
 <!-- ============================== sections ============================== -->
 <% (config.homeSections || []).forEach(function (section, i) { %>
   <% if (i === 0) { %>
-    <%- include('../fragments/home-section', { section: section, index: i, lazy: false }) %>
+    <%- include(view('fragments/home-section'), { section: section, index: i, lazy: false }) %>
   <% } else { %>
     <div hx-get="/fragments/home-section/<%= i %>" hx-trigger="revealed once" hx-swap="outerHTML"
          class="mx-auto max-w-[1600px] px-4 py-16 lg:px-8">
@@ -60,4 +60,4 @@
   <% } %>
 <% }); %>
 
-<%- include('../partials/document-close') %>
+<%- include(view('partials/document-close')) %>

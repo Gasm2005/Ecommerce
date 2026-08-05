@@ -27,27 +27,14 @@ const path = require('path');
 const notifications = require('../src/notifications');
 const ordersStore = require('../src/orders');
 const catalog = require('../src/catalog');
-const cart = require('../src/cart');
 
 /* ------------------------------------------------------------- a test rig ---- */
 
 /**
- * Swaps the email adapter for one that records instead of sending. Restores itself,
- * so a test that throws cannot leave the rig in place for the next one.
+ * Points the config at the 'log' provider, which needs no credentials and records every
+ * send in the same delivery log the admin and doctor read.
  */
-function withAdapter(fn, impl) {
-  const mod = require('../src/notifications');
-  // The adapters live on a private object; reach it the way the module does.
-  const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'notifications.js'), 'utf8');
-  assert.match(src, /const email = \{/, 'the adapter table moved — this rig needs updating');
-  return fn(mod, impl);
-}
-
-/** Everything a fake provider captured. */
-const sent = [];
-
-/** Points the config at a provider we control, and drains the outbox. */
-function useFakeProvider(behaviour = 'ok') {
+function useFakeProvider() {
   const next = {
     ...JSON.parse(fs.readFileSync(configPath, 'utf8')),
     notifications: {
@@ -63,7 +50,6 @@ function useFakeProvider(behaviour = 'ok') {
   };
   fs.writeFileSync(configPath, JSON.stringify(next, null, 2));
   require('../src/config').invalidate();
-  sent.length = 0;
   return require('../src/config').loadConfig();
 }
 

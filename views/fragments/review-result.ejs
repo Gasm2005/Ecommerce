@@ -7,5 +7,5 @@
     </p>
   </div>
 <% } else { %>
-  <%- include('./review-form', { product: product, reason: reason || 'Please check the highlighted details.', state: state || {}, keptMedia: keptMedia || [] }) %>
+  <%- include(view('fragments/review-form'), { product: product, reason: reason || 'Please check the highlighted details.', state: state || {}, keptMedia: keptMedia || [] }) %>
 <% } %>

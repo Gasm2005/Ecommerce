@@ -12,7 +12,8 @@
     "test": "node --test \"test/**/*.test.js\"",
     "doctor": "node scripts/doctor.js",
     "backup": "node scripts/backup.js",
-    "provision": "node scripts/provision.js"
+    "provision": "node scripts/provision.js",
+    "theme:check": "node scripts/theme-check.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
