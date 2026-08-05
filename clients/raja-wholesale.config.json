@@ -3,40 +3,65 @@
   "planExtras": [],
   "_planReadme": "Which tier this client bought: starter | growth | scale (see src/plan.js). planExtras adds individual feature ids on top of the tier, for the deal where a client pays for one extra thing. Changing this line is the ONLY difference between a Rs49k and a Rs1.99L store.",
   "_readme": [
-    "Raja Wholesale Cloth House, Gonda — demo config.",
-    "Run: SITE_CONFIG=clients/raja-wholesale.config.json THEME=raja npm start",
-    "Address, phone and GSTIN are PLACEHOLDERS until the shop confirms them."
+    "Raja Whole Sale, Gonda — a RETAIL shop whose rates are wholesale-like.",
+    "Run: npm run raja",
+    "CONFIRM BEFORE THE DEMO: the address (Justdial, unverified) and the email.",
+    "GSTIN and PAN are blank — needed before provisioning, not before the demo."
   ],
   "brand": {
-    "name": "Raja Wholesale Cloth House",
+    "name": "Raja Whole Sale",
     "monogram": "R",
     "logoText": "RAJA",
     "logoImage": null,
-    "logoSubtext": "WHOLESALE",
-    "tagline": "Wholesale and retail garments — Gonda",
-    "supportPhone": "+91 00000 00000",
-    "supportEmail": "orders@example.com",
-    "announcement": ""
+    "logoSubtext": "WHOLE SALE",
+    "tagline": "Wholesale rates, retail shop — Gonda",
+    "supportPhone": "+91 74086 90994",
+    "supportEmail": "rajawholesalegonda@gmail.com",
+    "announcement": "",
+    "marquee": [
+      "Free delivery in Gonda on orders above ₹999",
+      "Wholesale rates for everyone — no minimum quantity",
+      "Cash, UPI or card on delivery",
+      "New stock every week"
+    ],
+    "stats": [
+      {
+        "value": "4.3★",
+        "label": "Google rating"
+      },
+      {
+        "value": "2,000+",
+        "label": "Designs in stock"
+      },
+      {
+        "value": "Gonda",
+        "label": "Same-day delivery"
+      },
+      {
+        "value": "7 days",
+        "label": "Easy exchange"
+      }
+    ]
   },
   "theme": {
     "colors": {
-      "ivory": "#FFFFFF",
-      "cream": "#F4F5F8",
-      "sand": "#E7EAF0",
-      "line": "#DFE3EB",
-      "maroon": "#1E3A8A",
-      "maroonDark": "#152C6B",
-      "gold": "#C2410C",
-      "goldLight": "#FDBA74",
-      "ink": "#111827",
-      "muted": "#6B7280"
+      "ivory": "#FDFBF6",
+      "cream": "#F5EFE3",
+      "sand": "#EADFCB",
+      "line": "#E0D5C0",
+      "maroon": "#0E4D3C",
+      "maroonDark": "#08382B",
+      "gold": "#B08529",
+      "goldLight": "#DFC077",
+      "ink": "#14100C",
+      "muted": "#71695E"
     },
     "fonts": {
-      "heading": "Inter",
+      "heading": "Playfair Display",
       "body": "Inter"
     },
-    "cardRadius": "4px",
-    "buttonRadius": "4px",
+    "cardRadius": "2px",
+    "buttonRadius": "2px",
     "name": "raja"
   },
   "currency": {
@@ -143,10 +168,10 @@
     "outOfStockBehaviour": "hide-buy-button"
   },
   "shipping": {
-    "freeAbove": 4999,
-    "standardCharge": 199,
+    "freeAbove": 999,
+    "standardCharge": 60,
     "estimateDaysMetro": 3,
-    "estimateDaysOther": 6,
+    "estimateDaysOther": 5,
     "returnWindowDays": 7,
     "cod": {
       "_readme": "Three switches: enabled (COD at all), fullEnabled (nothing upfront — carries all the RTO risk, so off by default), partialEnabled (advance now, rest on delivery). Serviceability: either blocklists, or set pincodeMode to 'allow-list' so COD works ONLY at allowedPincodesOnly.",
@@ -172,43 +197,37 @@
       {
         "id": "standard",
         "title": "Standard",
-        "note": "{metro}-{other} working days after dispatch",
+        "note": "{metro}-{other} working days",
         "charge": null
       },
       {
         "id": "express",
         "title": "Express",
         "note": "Priority dispatch · 2-3 working days",
-        "charge": 499
-      },
-      {
-        "id": "nominated",
-        "title": "Nominated date",
-        "note": "Choose a delivery date before your function",
-        "charge": 899
+        "charge": 120
       }
     ],
     "_methodsReadme": "charge:null on a method means use the standard rules (freeAbove / standardCharge). Any number is a flat charge that always applies. {metro} and {other} in a note are replaced with estimateDays.",
     "giftWrapCharge": 0,
     "zones": [
       {
-        "id": "lucknow",
-        "label": "Lucknow city",
+        "id": "gonda",
+        "label": "Gonda city",
         "prefixes": [
-          "226"
+          "271"
         ],
         "cities": [
-          "Lucknow"
+          "Gonda"
         ],
-        "replacesDefaults": false,
+        "replacesDefaults": true,
         "methods": [
           {
             "id": "local-sameday",
             "title": "Same-day delivery",
-            "note": "Delivered by us today, 6pm-9pm",
+            "note": "Delivered by the shop today, 6pm-9pm",
             "charge": 0,
             "fulfilment": "own",
-            "cutoff": "14:00",
+            "cutoff": "16:00",
             "days": [
               "mon",
               "tue",
@@ -224,17 +243,9 @@
             "maxMakeDays": 0
           },
           {
-            "id": "local-nextday",
-            "title": "Next-day delivery",
-            "note": "Delivered by us tomorrow",
-            "charge": 0,
-            "fulfilment": "own",
-            "maxMakeDays": 0
-          },
-          {
             "id": "store-pickup",
-            "title": "Collect from the store",
-            "note": "Ready in 2 hours - Hazratganj, Lucknow",
+            "title": "Collect from the shop",
+            "note": "Ready in 2 hours — Utraula Road, Gonda",
             "charge": 0,
             "fulfilment": "pickup",
             "maxMakeDays": 0
@@ -246,178 +257,79 @@
   },
   "nav": [
     {
-      "label": "Bridal",
-      "slug": "bridal",
-      "columns": [
-        {
-          "title": "By Silhouette",
-          "links": [
-            {
-              "label": "Bridal Lehengas",
-              "href": "/category/lehengas?occasion=Wedding"
-            },
-            {
-              "label": "Wedding Sarees",
-              "href": "/category/sarees?occasion=Wedding"
-            },
-            {
-              "label": "Reception Gowns",
-              "href": "/category/gowns?occasion=Reception"
-            },
-            {
-              "label": "Trousseau Edit",
-              "href": "/category/bridal"
-            }
-          ]
-        },
-        {
-          "title": "By Ceremony",
-          "links": [
-            {
-              "label": "Mehendi",
-              "href": "/category/bridal?occasion=Mehendi"
-            },
-            {
-              "label": "Sangeet",
-              "href": "/category/bridal?occasion=Sangeet"
-            },
-            {
-              "label": "Pheras",
-              "href": "/category/bridal?occasion=Wedding"
-            },
-            {
-              "label": "Reception",
-              "href": "/category/bridal?occasion=Reception"
-            }
-          ]
-        }
-      ],
-      "featured": {
-        "title": "The Benaras Bride",
-        "subtitle": "Hand-woven kadhwa, 2026",
-        "href": "/category/bridal",
-        "image": null
-      }
-    },
-    {
-      "label": "Festive",
-      "slug": "festive",
+      "label": "Shirts",
+      "slug": "shirts",
       "columns": [
         {
           "title": "Shop",
           "links": [
             {
-              "label": "Anarkalis",
-              "href": "/category/festive?fabric=Chanderi"
-            },
-            {
-              "label": "Sharara Sets",
-              "href": "/category/festive"
-            },
-            {
-              "label": "Kurta Sets",
-              "href": "/category/festive"
-            },
-            {
-              "label": "Under ₹25,000",
-              "href": "/category/festive?price=0-25000"
-            }
-          ]
-        },
-        {
-          "title": "Occasion",
-          "links": [
-            {
-              "label": "Diwali",
-              "href": "/category/festive?occasion=Festive"
-            },
-            {
-              "label": "Karwa Chauth",
-              "href": "/category/festive?occasion=Festive"
-            },
-            {
-              "label": "Haldi",
-              "href": "/category/festive?occasion=Haldi"
-            },
-            {
-              "label": "Puja",
-              "href": "/category/festive?occasion=Festive"
+              "label": "All Shirts",
+              "href": "/category/shirts"
             }
           ]
         }
-      ],
-      "featured": {
-        "title": "Festive Ateliers",
-        "subtitle": "Chanderi & tissue silk",
-        "href": "/category/festive",
-        "image": null
-      }
+      ]
     },
     {
-      "label": "Cocktail",
-      "slug": "cocktail",
+      "label": "Jeans",
+      "slug": "jeans",
       "columns": [
         {
           "title": "Shop",
           "links": [
             {
-              "label": "Draped Gowns",
-              "href": "/category/gowns"
-            },
-            {
-              "label": "Cocktail Sarees",
-              "href": "/category/cocktail"
-            },
-            {
-              "label": "Sequin Edit",
-              "href": "/category/cocktail?fabric=Sequin"
-            },
-            {
-              "label": "Indo-Western",
-              "href": "/category/cocktail"
+              "label": "All Jeans",
+              "href": "/category/jeans"
             }
           ]
         }
-      ],
-      "featured": {
-        "title": "After Dark",
-        "subtitle": "Liquid sequins & tulle",
-        "href": "/category/cocktail",
-        "image": null
-      }
+      ]
+    },
+    {
+      "label": "Trousers",
+      "slug": "trousers",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            {
+              "label": "All Trousers",
+              "href": "/category/trousers"
+            }
+          ]
+        }
+      ]
     },
     {
       "label": "Sarees",
       "slug": "sarees",
       "columns": [
         {
-          "title": "Weaves",
+          "title": "Shop",
           "links": [
             {
-              "label": "Banarasi",
-              "href": "/category/sarees?fabric=Banarasi Silk"
-            },
-            {
-              "label": "Organza",
-              "href": "/category/sarees?fabric=Organza"
-            },
-            {
-              "label": "Tissue",
-              "href": "/category/sarees?fabric=Tissue Silk"
-            },
-            {
-              "label": "Georgette",
-              "href": "/category/sarees?fabric=Georgette"
+              "label": "All Sarees",
+              "href": "/category/sarees"
             }
           ]
         }
-      ],
-      "featured": {
-        "title": "The Weave Room",
-        "subtitle": "Loom to drape",
-        "href": "/category/sarees",
-        "image": null
-      }
+      ]
+    },
+    {
+      "label": "Suits & Kurtis",
+      "slug": "suits",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            {
+              "label": "All Suits & Kurtis",
+              "href": "/category/suits"
+            }
+          ]
+        }
+      ]
     },
     {
       "label": "Lehengas",
@@ -427,95 +339,58 @@
           "title": "Shop",
           "links": [
             {
-              "label": "Bridal Red",
-              "href": "/category/lehengas?color=Rani Pink"
-            },
-            {
-              "label": "Pastel",
-              "href": "/category/lehengas?color=Ivory"
-            },
-            {
-              "label": "Velvet",
-              "href": "/category/lehengas?fabric=Velvet"
-            },
-            {
-              "label": "Ready to Ship",
+              "label": "All Lehengas",
               "href": "/category/lehengas"
             }
           ]
         }
-      ],
-      "featured": {
-        "title": "Zardozi Heirlooms",
-        "subtitle": "240 hours per panel",
-        "href": "/category/lehengas",
-        "image": null
-      }
+      ]
     },
     {
-      "label": "Gowns",
-      "slug": "gowns",
+      "label": "Boys",
+      "slug": "boys",
       "columns": [
         {
           "title": "Shop",
           "links": [
             {
-              "label": "Cape Gowns",
-              "href": "/category/gowns"
-            },
-            {
-              "label": "Pre-draped",
-              "href": "/category/gowns"
-            },
-            {
-              "label": "Trails",
-              "href": "/category/gowns?occasion=Reception"
+              "label": "All Boys",
+              "href": "/category/boys"
             }
           ]
         }
-      ],
-      "featured": {
-        "title": "Sculpted Silhouettes",
-        "subtitle": "Couture atelier",
-        "href": "/category/gowns",
-        "image": null
-      }
+      ]
     }
   ],
   "hero": {
-    "eyebrow": "Wholesale & retail · Gonda",
-    "heading": "Poore parivaar ke kapde,\nek hi dukaan mein",
-    "body": "Jeans, shirts, trousers, t-shirts, sarees, lehengas and ladies suits — wholesale rates for shops and traders, retail for everyone else.",
+    "eyebrow": "Gonda · Utraula Road",
+    "heading": "Everything the family wears,\nat wholesale rates",
+    "body": "Shirts, jeans, trousers and t-shirts for men. Sarees, suits and lehengas for women. School and festive wear for children. All in stock, all at the price a shop pays.",
     "ctaPrimary": {
-      "label": "Shop everything",
+      "label": "Shop the collection",
       "href": "/category/all"
     },
     "ctaSecondary": {
-      "label": "Wholesale enquiry",
-      "href": "/returns"
+      "label": "Call the shop",
+      "href": "tel:7408690994"
     },
-    "image": "",
-    "imageAlt": "Raja Wholesale Cloth House, Gonda"
+    "image": "/ph.svg?seed=raja-hero&w=1920&h=1080&kind=hero&label=Raja%20Whole%20Sale",
+    "imageAlt": "Raja Whole Sale, Utraula Road, Gonda"
   },
   "occasions": [
     {
+      "label": "Everyday",
+      "href": "/category/all?occasion=Everyday",
+      "image": null
+    },
+    {
+      "label": "Office",
+      "href": "/category/all?occasion=Office",
+      "image": null
+    },
+    {
       "label": "Wedding",
       "href": "/category/all?occasion=Wedding",
-      "image": null
-    },
-    {
-      "label": "Mehendi",
-      "href": "/category/all?occasion=Mehendi",
-      "image": null
-    },
-    {
-      "label": "Sangeet",
-      "href": "/category/all?occasion=Sangeet",
-      "image": null
-    },
-    {
-      "label": "Reception",
-      "href": "/category/all?occasion=Reception",
       "image": null
     },
     {
@@ -524,54 +399,51 @@
       "image": null
     },
     {
-      "label": "Haldi",
-      "href": "/category/all?occasion=Haldi",
+      "label": "Party",
+      "href": "/category/all?occasion=Party",
       "image": null
     },
     {
-      "label": "Engagement",
-      "href": "/category/all?occasion=Engagement",
+      "label": "School",
+      "href": "/category/all?occasion=School",
       "image": null
     }
   ],
   "homeSections": [
     {
       "type": "occasions",
-      "title": "Shop by Occasion",
-      "subtitle": "Seven ceremonies, one wardrobe"
+      "title": "Shop by occasion",
+      "subtitle": "Everyday to wedding"
     },
     {
       "type": "grid",
       "key": "bestsellers",
-      "title": "The Bestsellers",
-      "subtitle": "Most coveted this season",
+      "title": "Most bought",
+      "subtitle": "Moving fastest this month",
       "href": "/category/all?sort=popular"
     },
     {
       "type": "editorial",
-      "title": "Inside the Atelier",
-      "subtitle": "Karigari",
-      "body": "Every zardozi motif is drawn by hand, transferred to organza, then embroidered over 200+ hours by our third-generation karigars in Lucknow.",
-      "cta": {
-        "label": "Our Craft",
-        "href": "/category/bridal"
-      }
+      "title": "One counter, every size",
+      "subtitle": "Since 1998",
+      "body": "Raja Whole Sale has sold readymade garments on Utraula Road for two decades — the same rate to a family buying one shirt as to a shop buying twenty. Walk in, or order and have it delivered in Gonda the same day.",
+      "image": "/ph.svg?seed=raja-shop&w=1400&h=1000&label=The%20shop"
     },
     {
       "type": "grid",
       "key": "new",
-      "title": "New Arrivals",
-      "subtitle": "Fresh off the loom",
+      "title": "New arrivals",
+      "subtitle": "Just off the truck",
       "href": "/category/all?sort=new"
     },
     {
       "type": "testimonials",
-      "title": "Words from our brides"
+      "title": "What Gonda says"
     },
     {
       "type": "newsletter",
-      "title": "Join the inner circle",
-      "subtitle": "Early access to trunk shows, private previews and atelier notes."
+      "title": "New stock alerts",
+      "subtitle": "A message when fresh stock lands"
     }
   ],
   "testimonials": [
@@ -595,7 +467,7 @@
     }
   ],
   "footer": {
-    "blurb": "Raja Wholesale Cloth House stocks readymade garments for the whole family — wholesale for traders, retail for families. Gonda, Uttar Pradesh.",
+    "blurb": "Raja Whole Sale stocks readymade garments for the whole family at wholesale rates — shirts, jeans, trousers, sarees, suits, lehengas and kidswear. Utraula Road, Gonda.",
     "columns": [
       {
         "title": "Shop",
@@ -725,24 +597,24 @@
       "Net Banking",
       "COD"
     ],
-    "copyright": "© Raja Wholesale Cloth House. All rights reserved."
+    "copyright": "© Raja Whole Sale, Gonda. All rights reserved."
   },
   "trustBadges": [
     {
       "title": "Wholesale rates",
-      "text": "Better price on bulk"
+      "text": "The price a shop pays"
     },
     {
-      "title": "GST invoice",
-      "text": "On every order"
+      "title": "Every size",
+      "text": "Men, women and children"
     },
     {
-      "title": "All sizes",
-      "text": "Men, women and kids"
+      "title": "Same-day in Gonda",
+      "text": "Delivered by the shop"
     },
     {
-      "title": "Cash or UPI",
-      "text": "Pay how you like"
+      "title": "Easy exchange",
+      "text": "7 days, unworn, with the bill"
     }
   ],
   "payments": {
@@ -756,11 +628,11 @@
     "_readme": "Email/WhatsApp is per-store too. Credentials live in data/secrets.json. emailProvider: log | smtp | resend | brevo.",
     "emailProvider": "log",
     "whatsappProvider": "off",
-    "fromName": "Raja Wholesale Cloth House",
+    "fromName": "Raja Whole Sale",
     "fromEmail": "",
-    "replyTo": "orders@example.com",
-    "storeEmail": "orders@example.com",
-    "storePhone": "+91 98200 00000",
+    "replyTo": "rajawholesalegonda@gmail.com",
+    "storeEmail": "rajawholesalegonda@gmail.com",
+    "storePhone": "+91 74086 90994",
     "events": {
       "order.placed": true,
       "order.placed.admin": true,
@@ -775,21 +647,22 @@
   },
   "business": {
     "_readme": "Legal entity details printed on GST invoices. Fill these before issuing invoices — src/invoice.js reports what is missing.",
-    "legalName": "Raja Wholesale Cloth House",
-    "tradeName": "Raja Wholesale",
+    "legalName": "Raja Whole Sale",
+    "tradeName": "Raja Whole Sale",
     "gstin": "",
     "pan": "",
     "addressLines": [
-      "Utraula Road, Karbala",
-      "Gonda 271003"
+      "Karbala, Circular Road",
+      "Utraula Road, Gonda 271003",
+      "Uttar Pradesh"
     ],
     "state": "Uttar Pradesh",
     "stateCode": "09",
-    "phone": "",
-    "email": "",
-    "invoicePrefix": "RWC",
+    "phone": "+91 74086 90994",
+    "email": "rajawholesalegonda@gmail.com",
+    "invoicePrefix": "RWS",
     "defaultHsn": "6211",
-    "signatureName": "",
+    "signatureName": "For Raja Whole Sale",
     "bank": {
       "name": "",
       "accountName": "",
@@ -922,6 +795,105 @@
             "text": "Full sleeve unless stated."
           }
         ]
+      },
+      {
+        "id": "men",
+        "label": "Men",
+        "columns": [
+          "Size",
+          "Chest",
+          "Waist",
+          "Shoulder"
+        ],
+        "rows": [
+          [
+            "S (38)",
+            "38",
+            "32",
+            "17"
+          ],
+          [
+            "M (40)",
+            "40",
+            "34",
+            "17.5"
+          ],
+          [
+            "L (42)",
+            "42",
+            "36",
+            "18"
+          ],
+          [
+            "XL (44)",
+            "44",
+            "38",
+            "18.5"
+          ],
+          [
+            "XXL (46)",
+            "46",
+            "40",
+            "19"
+          ]
+        ],
+        "notes": [
+          {
+            "label": "Jeans & trousers",
+            "text": "Sizes are waist in inches — 30, 32, 34, 36, 38."
+          },
+          {
+            "label": "Between sizes",
+            "text": "Take the larger one; cotton shrinks a little on the first wash."
+          }
+        ]
+      },
+      {
+        "id": "kids",
+        "label": "Kids",
+        "columns": [
+          "Age",
+          "Height",
+          "Chest"
+        ],
+        "rows": [
+          [
+            "2-3Y",
+            "92-98",
+            "21"
+          ],
+          [
+            "4-5Y",
+            "104-110",
+            "23"
+          ],
+          [
+            "6-7Y",
+            "116-122",
+            "25"
+          ],
+          [
+            "8-9Y",
+            "128-134",
+            "27"
+          ],
+          [
+            "10-11Y",
+            "140-146",
+            "29"
+          ],
+          [
+            "12-13Y",
+            "152-158",
+            "31"
+          ]
+        ],
+        "notes": [
+          {
+            "label": "Growing room",
+            "text": "Most parents take one size up. Height is in cm."
+          }
+        ]
       }
     ]
   },
@@ -929,325 +901,238 @@
     "_readme": "Who this shop sells to. ONE entry = a single-audience shop: no chooser, no switcher, and its nav is the site nav. TWO OR MORE = visitors are asked once which section they want, and everything (nav, listing, search, home) follows that choice. Delete the ones a client does not sell and the feature disappears cleanly. Each product carries an audience id; products with none show to everyone.",
     "list": [
       {
-        "id": "women",
-        "label": "Womenswear",
-        "blurb": "Bridal, festive and occasion wear",
+        "id": "men",
+        "label": "Men",
+        "blurb": "Shirts, jeans, trousers, ethnic",
         "nav": [
           {
-            "label": "Bridal",
-            "slug": "bridal",
+            "label": "Shirts",
+            "slug": "shirts",
             "columns": [
               {
-                "title": "By Silhouette",
+                "title": "Menswear",
                 "links": [
                   {
-                    "label": "Bridal Lehengas",
-                    "href": "/category/lehengas?occasion=Wedding"
-                  },
-                  {
-                    "label": "Wedding Sarees",
-                    "href": "/category/sarees?occasion=Wedding"
-                  },
-                  {
-                    "label": "Reception Gowns",
-                    "href": "/category/gowns?occasion=Reception"
-                  },
-                  {
-                    "label": "Trousseau Edit",
-                    "href": "/category/bridal"
-                  }
-                ]
-              },
-              {
-                "title": "By Ceremony",
-                "links": [
-                  {
-                    "label": "Mehendi",
-                    "href": "/category/bridal?occasion=Mehendi"
-                  },
-                  {
-                    "label": "Sangeet",
-                    "href": "/category/bridal?occasion=Sangeet"
-                  },
-                  {
-                    "label": "Pheras",
-                    "href": "/category/bridal?occasion=Wedding"
-                  },
-                  {
-                    "label": "Reception",
-                    "href": "/category/bridal?occasion=Reception"
+                    "label": "All Shirts",
+                    "href": "/category/shirts"
                   }
                 ]
               }
-            ],
-            "featured": {
-              "title": "The Benaras Bride",
-              "subtitle": "Hand-woven kadhwa, 2026",
-              "href": "/category/bridal",
-              "image": null
-            }
+            ]
           },
           {
-            "label": "Festive",
-            "slug": "festive",
+            "label": "T-Shirts",
+            "slug": "t-shirts",
             "columns": [
               {
-                "title": "Shop",
+                "title": "Menswear",
                 "links": [
                   {
-                    "label": "Anarkalis",
-                    "href": "/category/festive?fabric=Chanderi"
-                  },
-                  {
-                    "label": "Sharara Sets",
-                    "href": "/category/festive"
-                  },
-                  {
-                    "label": "Kurta Sets",
-                    "href": "/category/festive"
-                  },
-                  {
-                    "label": "Under ₹25,000",
-                    "href": "/category/festive?price=0-25000"
-                  }
-                ]
-              },
-              {
-                "title": "Occasion",
-                "links": [
-                  {
-                    "label": "Diwali",
-                    "href": "/category/festive?occasion=Festive"
-                  },
-                  {
-                    "label": "Karwa Chauth",
-                    "href": "/category/festive?occasion=Festive"
-                  },
-                  {
-                    "label": "Haldi",
-                    "href": "/category/festive?occasion=Haldi"
-                  },
-                  {
-                    "label": "Puja",
-                    "href": "/category/festive?occasion=Festive"
+                    "label": "All T-Shirts",
+                    "href": "/category/t-shirts"
                   }
                 ]
               }
-            ],
-            "featured": {
-              "title": "Festive Ateliers",
-              "subtitle": "Chanderi & tissue silk",
-              "href": "/category/festive",
-              "image": null
-            }
+            ]
           },
           {
-            "label": "Cocktail",
-            "slug": "cocktail",
+            "label": "Jeans",
+            "slug": "jeans",
             "columns": [
               {
-                "title": "Shop",
+                "title": "Menswear",
                 "links": [
                   {
-                    "label": "Draped Gowns",
-                    "href": "/category/gowns"
-                  },
-                  {
-                    "label": "Cocktail Sarees",
-                    "href": "/category/cocktail"
-                  },
-                  {
-                    "label": "Sequin Edit",
-                    "href": "/category/cocktail?fabric=Sequin"
-                  },
-                  {
-                    "label": "Indo-Western",
-                    "href": "/category/cocktail"
+                    "label": "All Jeans",
+                    "href": "/category/jeans"
                   }
                 ]
               }
-            ],
-            "featured": {
-              "title": "After Dark",
-              "subtitle": "Liquid sequins & tulle",
-              "href": "/category/cocktail",
-              "image": null
-            }
+            ]
           },
+          {
+            "label": "Trousers",
+            "slug": "trousers",
+            "columns": [
+              {
+                "title": "Menswear",
+                "links": [
+                  {
+                    "label": "All Trousers",
+                    "href": "/category/trousers"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Kurta Pyjama",
+            "slug": "kurta-pyjama",
+            "columns": [
+              {
+                "title": "Menswear",
+                "links": [
+                  {
+                    "label": "All Kurta Pyjama",
+                    "href": "/category/kurta-pyjama"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Sherwani & Suits",
+            "slug": "sherwani",
+            "columns": [
+              {
+                "title": "Menswear",
+                "links": [
+                  {
+                    "label": "All Sherwani & Suits",
+                    "href": "/category/sherwani"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "women",
+        "label": "Women",
+        "blurb": "Sarees, suits, lehengas",
+        "nav": [
           {
             "label": "Sarees",
             "slug": "sarees",
             "columns": [
               {
-                "title": "Weaves",
+                "title": "Womenswear",
                 "links": [
                   {
-                    "label": "Banarasi",
-                    "href": "/category/sarees?fabric=Banarasi Silk"
-                  },
-                  {
-                    "label": "Organza",
-                    "href": "/category/sarees?fabric=Organza"
-                  },
-                  {
-                    "label": "Tissue",
-                    "href": "/category/sarees?fabric=Tissue Silk"
-                  },
-                  {
-                    "label": "Georgette",
-                    "href": "/category/sarees?fabric=Georgette"
+                    "label": "All Sarees",
+                    "href": "/category/sarees"
                   }
                 ]
               }
-            ],
-            "featured": {
-              "title": "The Weave Room",
-              "subtitle": "Loom to drape",
-              "href": "/category/sarees",
-              "image": null
-            }
+            ]
+          },
+          {
+            "label": "Suits & Kurtis",
+            "slug": "suits",
+            "columns": [
+              {
+                "title": "Womenswear",
+                "links": [
+                  {
+                    "label": "All Suits & Kurtis",
+                    "href": "/category/suits"
+                  }
+                ]
+              }
+            ]
           },
           {
             "label": "Lehengas",
             "slug": "lehengas",
             "columns": [
               {
-                "title": "Shop",
+                "title": "Womenswear",
                 "links": [
                   {
-                    "label": "Bridal Red",
-                    "href": "/category/lehengas?color=Rani Pink"
-                  },
-                  {
-                    "label": "Pastel",
-                    "href": "/category/lehengas?color=Ivory"
-                  },
-                  {
-                    "label": "Velvet",
-                    "href": "/category/lehengas?fabric=Velvet"
-                  },
-                  {
-                    "label": "Ready to Ship",
+                    "label": "All Lehengas",
                     "href": "/category/lehengas"
                   }
                 ]
               }
-            ],
-            "featured": {
-              "title": "Zardozi Heirlooms",
-              "subtitle": "240 hours per panel",
-              "href": "/category/lehengas",
-              "image": null
-            }
+            ]
           },
           {
-            "label": "Gowns",
-            "slug": "gowns",
+            "label": "Dress Material",
+            "slug": "dress-material",
             "columns": [
               {
-                "title": "Shop",
+                "title": "Womenswear",
                 "links": [
                   {
-                    "label": "Cape Gowns",
-                    "href": "/category/gowns"
-                  },
-                  {
-                    "label": "Pre-draped",
-                    "href": "/category/gowns"
-                  },
-                  {
-                    "label": "Trails",
-                    "href": "/category/gowns?occasion=Reception"
+                    "label": "All Dress Material",
+                    "href": "/category/dress-material"
                   }
                 ]
               }
-            ],
-            "featured": {
-              "title": "Sculpted Silhouettes",
-              "subtitle": "Couture atelier",
-              "href": "/category/gowns",
-              "image": null
-            }
+            ]
+          },
+          {
+            "label": "Leggings & Bottoms",
+            "slug": "bottoms",
+            "columns": [
+              {
+                "title": "Womenswear",
+                "links": [
+                  {
+                    "label": "All Leggings & Bottoms",
+                    "href": "/category/bottoms"
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
       {
-        "id": "men",
-        "label": "Menswear",
-        "blurb": "Sherwani, kurta sets and suiting",
-        "nav": [
-          {
-            "label": "Sherwani",
-            "slug": "sherwani"
-          },
-          {
-            "label": "Kurta Pyjama",
-            "slug": "kurta-pyjama"
-          },
-          {
-            "label": "Indo-Western",
-            "slug": "indo-western"
-          },
-          {
-            "label": "Suits & Blazers",
-            "slug": "suits"
-          },
-          {
-            "label": "Nehru Jackets",
-            "slug": "nehru-jackets"
-          }
-        ],
-        "hero": {
-          "eyebrow": "Menswear · Wedding 2026",
-          "heading": "Cut for the\nday he is watched",
-          "body": "Sherwanis, bandhgalas and hand-finished suiting — tailored to your measurements.",
-          "ctaPrimary": {
-            "label": "Shop Sherwani",
-            "href": "/category/sherwani"
-          },
-          "ctaSecondary": {
-            "label": "Explore New Arrivals",
-            "href": "/category/all?sort=new"
-          },
-          "image": null,
-          "imageAlt": "Menswear"
-        }
-      },
-      {
         "id": "kids",
-        "label": "Kidswear",
-        "blurb": "Festive sets for boys and girls",
+        "label": "Kids",
+        "blurb": "Boys, girls, ethnic",
         "nav": [
           {
-            "label": "Boys Ethnic",
-            "slug": "boys-ethnic"
+            "label": "Boys",
+            "slug": "boys",
+            "columns": [
+              {
+                "title": "Kidswear",
+                "links": [
+                  {
+                    "label": "All Boys",
+                    "href": "/category/boys"
+                  }
+                ]
+              }
+            ]
           },
           {
-            "label": "Girls Ethnic",
-            "slug": "girls-ethnic"
+            "label": "Girls",
+            "slug": "girls",
+            "columns": [
+              {
+                "title": "Kidswear",
+                "links": [
+                  {
+                    "label": "All Girls",
+                    "href": "/category/girls"
+                  }
+                ]
+              }
+            ]
           },
           {
-            "label": "Festive Sets",
-            "slug": "kids-festive"
+            "label": "Ethnic for Kids",
+            "slug": "kids-ethnic",
+            "columns": [
+              {
+                "title": "Kidswear",
+                "links": [
+                  {
+                    "label": "All Ethnic for Kids",
+                    "href": "/category/kids-ethnic"
+                  }
+                ]
+              }
+            ]
           }
-        ],
-        "hero": {
-          "eyebrow": "Kidswear · Festive",
-          "heading": "Small people,\nbig occasions",
-          "body": "Festive sets for boys and girls, made in fabrics that survive a wedding.",
-          "ctaPrimary": {
-            "label": "Shop Festive Sets",
-            "href": "/category/kids-festive"
-          },
-          "ctaSecondary": {
-            "label": "Explore New Arrivals",
-            "href": "/category/all?sort=new"
-          },
-          "image": null,
-          "imageAlt": "Kidswear"
-        }
+        ]
       }
     ],
-    "_heroReadme": "An audience may carry its own hero (eyebrow, heading, body, CTAs, image). Without one it uses config.hero, so a single-audience shop needs no duplication."
+    "_heroReadme": "An audience may carry its own hero (eyebrow, heading, body, CTAs, image). Without one it uses config.hero, so a single-audience shop needs no duplication.",
+    "default": "all"
   }
 }

@@ -1,0 +1,101 @@
+<%
+  /* The phone navigation, lifted out of header.ejs unchanged.
+
+     A theme that wants a different header should not have to fork this with it: it
+     carries the category tree, the section switcher and the add-to-home-screen entry,
+     and a copy of it in every theme is a copy that stops getting fixes. Extracting it
+     is the base gaining a hook, which is what the contract asks for when a theme needs
+     one. */
+%>
+<!-- mobile slide-in menu -->
+<div x-cloak x-show="$store.ui.menu" class="fixed inset-0 z-[80] lg:hidden">
+  <div x-show="$store.ui.menu" x-transition.opacity @click="$store.ui.menu=false" class="absolute inset-0 bg-ink/40"></div>
+  <aside x-show="$store.ui.menu"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-end="-translate-x-full"
+         class="relative flex h-full w-[86%] max-w-sm flex-col bg-ivory">
+    <div class="flex items-center justify-between border-b border-line px-5 py-4">
+      <span class="font-serif text-lg tracking-[0.18em]"><%= config.brand.logoText %></span>
+      <button @click="$store.ui.menu=false" class="p-1 text-2xl leading-none text-muted" aria-label="Close">&times;</button>
+    </div>
+    <nav class="flex-1 overflow-y-auto px-5 py-4" x-data="{ open: null }">
+      <% nav.forEach(function (item, i) { %>
+        <div class="border-b border-line/70">
+          <button @click="open = open === <%= i %> ? null : <%= i %>"
+                  class="flex w-full items-center justify-between py-3.5 text-left text-sm uppercase tracking-[0.14em]">
+            <%= item.label %>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 :class="open === <%= i %> ? 'rotate-45' : ''" class="transition"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div x-show="open === <%= i %>" x-collapse class="pb-3">
+            <a href="/category/<%= item.slug %>" class="block py-2 text-sm text-maroon">Shop all <%= item.label %></a>
+            <% (item.columns || []).forEach(function (col) { %>
+              <% col.links.forEach(function (l) { %>
+                <a href="<%= l.href %>" class="block py-2 text-sm text-muted"><%= l.label %></a>
+              <% }); %>
+            <% }); %>
+          </div>
+        </div>
+      <% }); %>
+      <% if (audiences.length > 1) { %>
+        <!-- Phone is where most of these shoppers are, and until this existed the
+             audience chosen in the welcome popup was permanent on a phone. -->
+        <div class="border-b border-line/70 py-3.5">
+          <p class="text-[10px] uppercase tracking-luxe text-muted">Shopping for</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <% audiences.concat([{ id: 'all', label: 'Everything' }]).forEach(function (a) { %>
+              <% const isOn = a.id === 'all' ? !audienceId : audienceId === a.id; %>
+              <form method="post" action="/audience">
+                <input type="hidden" name="audience" value="<%= a.id %>">
+                <input type="hidden" name="next" value="<%= currentPath || '/' %>">
+                <button type="submit"
+                        class="border px-3 py-2 text-[11px] uppercase tracking-[0.12em] transition
+                               <%= isOn ? 'border-maroon bg-maroon text-ivory' : 'border-line text-ink' %>">
+                  <%= a.label %>
+                </button>
+              </form>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+      <a href="/category/all?sort=new" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em] text-maroon">New In</a>
+      <a href="/wishlist" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em]">Wishlist</a>
+      <a href="/orders" class="block border-b border-line/70 py-3.5 text-sm uppercase tracking-[0.14em]"><%= me && me.orderIds && me.orderIds.length ? 'Your orders' : 'Track order' %></a>
+
+      <!-- Chrome shows its install banner once and buries it after that. This is the
+           way back to it, and it is only rendered where it can actually do something:
+           hidden in an installed app, and on iOS it explains the Share sheet instead
+           of offering a button Safari will not honour. -->
+      <div x-show="$store.ui.canInstall || $store.ui.iosInstall" x-cloak>
+        <button type="button"
+                x-show="$store.ui.canInstall"
+                @click="$store.ui.install()"
+                class="flex w-full items-center justify-between gap-3 py-3.5 text-left text-sm uppercase tracking-[0.14em]">
+          <span>Add to home screen</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-muted"><path d="M12 4v11m0 0-4-4m4 4 4-4"/><path d="M5 19h14"/></svg>
+        </button>
+
+        <button type="button"
+                x-show="$store.ui.iosInstall && !$store.ui.canInstall"
+                @click="$store.ui.showIosHelp = !$store.ui.showIosHelp"
+                class="flex w-full items-center justify-between gap-3 py-3.5 text-left text-sm uppercase tracking-[0.14em]">
+          <span>Add to home screen</span>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="shrink-0 text-muted"><path d="M12 4v11m0 0-4-4m4 4 4-4"/><path d="M5 19h14"/></svg>
+        </button>
+        <p x-show="$store.ui.showIosHelp" x-cloak x-collapse
+           class="pb-3.5 text-[12.5px] leading-relaxed text-muted">
+          In Safari, tap <strong class="text-ink">Share</strong> at the bottom, then
+          <strong class="text-ink">Add to Home Screen</strong>.
+        </p>
+      </div>
+
+      <p x-show="$store.ui.installed" x-cloak class="py-3.5 text-[12.5px] text-muted">
+        You’re using the installed app.
+      </p>
+    </nav>
+    <div class="border-t border-line px-5 py-4 text-xs text-muted">
+      <p><%= config.brand.supportPhone %></p>
+      <p><%= config.brand.supportEmail %></p>
+    </div>
+  </aside>
+</div>

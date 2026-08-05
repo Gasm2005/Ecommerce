@@ -81,7 +81,7 @@ function roots(config) {
 function resolver(config) {
   const search = roots(config);
 
-  return function view(name) {
+  function view(name) {
     const clean = String(name || '').replace(/\.ejs$/, '');
     for (const dir of search) {
       const candidate = path.join(dir, clean + '.ejs');
@@ -92,7 +92,26 @@ function resolver(config) {
     throw new Error(
       `No view "${clean}" in ${search.map((d) => path.relative(ROOT, d)).join(' or ')}`
     );
+  }
+
+  /**
+   * The BASE version of a view, skipping the theme's own.
+   *
+   * For a theme that overrides a dispatcher and only handles some of its cases — a home
+   * section renderer that restyles the grid but has nothing to say about the editorial
+   * block. Without this, falling through to the base would resolve to the theme's own
+   * file again and recurse until the stack gave out; the alternative is mirroring every
+   * case the base handles, which is how a theme quietly stops rendering a section the
+   * shop configured a year later.
+   */
+  view.base = function base(name) {
+    const clean = String(name || '').replace(/\.ejs$/, '');
+    const candidate = path.join(BASE_DIR, clean + '.ejs');
+    if (fs.existsSync(candidate)) return candidate;
+    throw new Error(`No base view "${clean}" in ${path.relative(ROOT, BASE_DIR)}`);
   };
+
+  return view;
 }
 
 /** Which files a theme actually overrides — the diff, for tooling and for the harness. */

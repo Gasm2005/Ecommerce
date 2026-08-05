@@ -1,85 +1,137 @@
 <%
-  /* Raja's card. Price-first, dense, and loud about the discount.
-     The base card puts the name in a serif above a quiet price, because a bridal
-     shopper is choosing a piece. This shopper is comparing forty prices, so the
-     price is the largest thing on the card and the saving is next to it.
+  /* Raja's card.
+     The base card, with three changes and nothing else.
 
-     The contract is unchanged: same locals, same quick-view endpoint, and
+     An earlier version of this file threw the base's proportions away — square-ish image,
+     cramped type, everything shouting — and the result looked cheap. The base card is well
+     made: 3:4 image, a quiet hover swap, generous line spacing. All of that stays. What
+     changes is only what this shop's business requires:
+
+       1. The price is set in the heavier weight and reads before the name, because this
+          shopper is comparing across a rail rather than considering one piece.
+       2. A discount badge, because the shop's whole pitch is the rate.
+       3. An action on the card itself, so comparing forty pieces does not cost forty page
+          loads.
+
+     Contract untouched: same locals, same /cart/add fields, same quick-view endpoint, and
      availability still comes only from variants.js. */
   const p = product;
   const eager = (typeof priority !== 'undefined') && priority;
   const hover = p.images[1] || p.images[0];
 
   const soldOut = !variants.anyAvailable(p);
-  const openSizes = soldOut ? [] : variants.sizeAvailability(p)
-    .filter(function (s) { return s.available; })
-    .map(function (s) { return s.size; });
+  const sizes = variants.sizeAvailability(p);
+  const openSizes = soldOut ? [] : sizes.filter(function (s) { return s.available; }).map(function (s) { return s.size; });
   const someGone = !soldOut && openSizes.length && openSizes.length < (p.sizes || []).length;
 
-  const saving = p.mrp > p.price ? p.mrp - p.price : 0;
+  // One buyable size leaves nothing to ask, so the card can add it outright. Several
+  // sizes open quick view — guessing someone's size for them is how a return happens.
+  const onlySize = openSizes.length === 1 ? openSizes[0] : null;
+  const firstColour = (p.colors || [])[0] || '';
 %>
-<article class="group relative">
+<article class="group relative flex flex-col">
   <% if ((config.features.wishlist && hasFeature('wishlist'))) { %>
     <%- include(view('fragments/wishlist-button'), { product: p, variant: 'card' }) %>
   <% } %>
 
   <a href="/product/<%= p.slug %>" class="block">
-    <!-- 4:5 rather than 3:4: a touch taller fits garment-on-hanger photography, which
-         is what a rack shop actually has, without cropping heads off. -->
-    <div class="relative aspect-[4/5] overflow-hidden bg-cream">
+    <div class="relative aspect-[3/4] overflow-hidden bg-cream">
       <img src="<%= p.images[0] %>" alt="<%= p.name %>"
            <%= eager ? '' : 'loading="lazy"' %> decoding="async"
-           class="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 group-hover:opacity-0">
+           class="absolute inset-0 h-full w-full object-cover transition-all duration-[900ms] ease-out group-hover:scale-[1.06] group-hover:opacity-0">
       <img src="<%= hover %>" alt="" aria-hidden="true" loading="lazy" decoding="async"
-           class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+           class="absolute inset-0 h-full w-full scale-[1.06] object-cover opacity-0 transition-all duration-[900ms] ease-out group-hover:scale-100 group-hover:opacity-100">
 
       <% if (soldOut) { %>
-        <span class="absolute inset-0 z-10 flex items-center justify-center bg-ivory/75">
-          <span class="bg-ink px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-ivory">Sold out</span>
+        <span class="absolute inset-0 z-10 flex items-center justify-center bg-ivory/70">
+          <span class="border border-ink/20 bg-ivory px-3 py-1.5 text-[9px] uppercase tracking-luxe text-muted">Sold out</span>
         </span>
       <% } %>
 
-      <!-- The saving, as a number and not only a percentage. "₹600 off" lands harder
-           than "40% off" on a ₹1,500 shirt, and this is a value shop. -->
-      <% if (!soldOut && saving > 0) { %>
-        <span class="absolute left-0 top-2 z-10 bg-maroon px-2 py-1 text-[10px] font-semibold text-ivory">
-          <%= money(saving) %> off
+      <!-- Kept to the base's badge language — small caps, letter-spaced, no fill fighting
+           the photograph — so the rate reads as confident rather than as a sale sticker. -->
+      <% if (!soldOut && p.discount >= 5) { %>
+        <span class="absolute left-3 top-3 z-10 bg-maroon px-2.5 py-1 text-[9px] uppercase tracking-luxe text-ivory">
+          <%= p.discount %>% off
         </span>
       <% } %>
-      <% if (p.badge && !soldOut && !saving) { %>
-        <span class="absolute left-0 top-2 z-10 bg-gold px-2 py-1 text-[10px] font-semibold uppercase text-ink"><%= p.badge %></span>
+      <% if (p.badge && !soldOut && p.discount < 5) { %>
+        <span class="absolute left-3 top-3 z-10 bg-ivory/95 px-2.5 py-1 text-[9px] uppercase tracking-luxe text-maroon"><%= p.badge %></span>
       <% } %>
 
       <% if (config.features.quickView) { %>
-        <span class="absolute inset-x-0 bottom-0 z-10 translate-y-full opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+        <span class="absolute inset-x-0 bottom-0 z-10 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <button type="button"
                   @click.prevent.stop="$store.ui.openQuick()"
                   hx-get="/fragments/quick-view/<%= p.slug %>"
                   hx-target="#quick-body" hx-swap="innerHTML"
                   hx-indicator="#quick-loading"
-                  class="w-full bg-ink/90 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-ivory backdrop-blur transition hover:bg-maroon">
+                  class="w-full bg-ink/85 py-3 text-[10px] uppercase tracking-luxe text-ivory backdrop-blur transition hover:bg-maroon">
             Quick view
           </button>
         </span>
       <% } %>
     </div>
+  </a>
 
-    <div class="pt-2">
-      <!-- Price first, and biggest. Everything else on this card is a caption to it. -->
-      <p class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-        <span class="text-[17px] font-semibold text-ink"><%= money(p.price) %></span>
+  <div class="flex flex-1 flex-col pt-3.5">
+    <a href="/product/<%= p.slug %>" class="block">
+      <!-- Price first and in the heavier weight; the name is the caption. The base has
+           these the other way round, which is right for a shop selling one lehenga. -->
+      <p class="flex items-baseline gap-2">
+        <span class="text-[16px] font-medium text-ink"><%= money(p.price) %></span>
         <% if (config.features.showMrpStrikethrough && p.mrp > p.price) { %>
           <span class="text-[13px] text-muted line-through"><%= money(p.mrp) %></span>
-          <span class="text-[12px] font-semibold text-maroon"><%= p.discount %>% off</span>
         <% } %>
       </p>
+      <h3 class="mt-1 font-serif text-[15px] leading-snug text-ink transition group-hover:text-maroon"><%= p.name %></h3>
+      <p class="mt-0.5 truncate text-[13px] text-muted"><%= p.subtitle || p.fabric %></p>
+    </a>
 
-      <h3 class="mt-0.5 truncate text-[13.5px] text-ink"><%= p.name %></h3>
-      <p class="truncate text-[12px] text-muted"><%= p.fabric %><%= p.colors.length > 1 ? ' · ' + p.colors.length + ' colours' : '' %></p>
+    <span class="mt-2 flex items-center gap-1.5">
+      <% p.colors.slice(0, 4).forEach(function (c) { %>
+        <span title="<%= c %>" class="h-2.5 w-2.5 rounded-full ring-1 ring-line" style="background: <%= swatch(c) %>"></span>
+      <% }); %>
+      <% if (p.colors.length > 1) { %>
+        <span class="ml-0.5 text-[10px] uppercase tracking-[0.12em] text-muted"><%= p.colors.length %> colours</span>
+      <% } %>
+    </span>
 
-      <% if (someGone) { %>
-        <p class="mt-1 text-[11.5px] text-maroon">Only <%= openSizes.join(', ') %> left</p>
+    <% if (someGone) { %>
+      <p class="mt-1.5 text-[11px] text-muted">Only <%= openSizes.join(', ') %> left</p>
+    <% } %>
+
+    <!-- mt-auto so the buttons line up across a row of names that wrap differently -->
+    <div class="mt-auto pt-3">
+      <% if (soldOut) { %>
+        <button type="button" disabled
+                class="w-full cursor-not-allowed border border-line py-2.5 text-[10px] uppercase tracking-luxe text-muted">
+          Sold out
+        </button>
+      <% } else if (onlySize) { %>
+        <form id="qa-<%= p.id %>" class="contents">
+          <input type="hidden" name="id" value="<%= p.id %>">
+          <input type="hidden" name="size" value="<%= onlySize %>">
+          <input type="hidden" name="color" value="<%= firstColour %>">
+          <input type="hidden" name="qty" value="1">
+          <button type="button"
+                  hx-post="/cart/add" hx-include="#qa-<%= p.id %>"
+                  hx-target="#cart-panel" hx-swap="innerHTML"
+                  class="w-full border border-ink py-2.5 text-[10px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:bg-maroon hover:text-ivory">
+            <span class="htmx-hide-on-request">Add to bag</span>
+            <span class="htmx-show-on-request">Adding…</span>
+          </button>
+        </form>
+      <% } else { %>
+        <button type="button"
+                @click="$store.ui.openQuick()"
+                hx-get="/fragments/quick-view/<%= p.slug %>"
+                hx-target="#quick-body" hx-swap="innerHTML"
+                hx-indicator="#quick-loading"
+                class="w-full border border-ink py-2.5 text-[10px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:bg-maroon hover:text-ivory">
+          Select size
+        </button>
       <% } %>
     </div>
-  </a>
+  </div>
 </article>

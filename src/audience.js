@@ -36,6 +36,11 @@
  */
 const EVERYTHING = 'all';
 
+/* How many categories the combined menu may show. Eight is what fits one row at 1280px
+   without wrapping; past that the nav looks broken rather than well stocked. The rest of
+   the tree is still reachable from the mega menu and the phone drawer. */
+const MERGED_NAV_LIMIT = 8;
+
 const COOKIE = 'aanya_audience';
 const COOKIE_OPTS = {
   httpOnly: false,          // the chooser reads it client-side to avoid a flash
@@ -58,8 +63,22 @@ function byId(config, id) {
   return list(config).find((a) => a.id === id) || null;
 }
 
-/** The default: the first configured audience. */
+/**
+ * What a visitor with no cookie sees.
+ *
+ * The first configured audience, unless the shop says otherwise. A family shop wants
+ * EVERYTHING here: with menswear listed first, a first-time visitor to a shop selling to
+ * the whole family saw only the men's rail, and the women's stock — most of the
+ * catalogue — was invisible until they found the switcher. Set
+ * `audiences.default: "all"` for that.
+ */
 function fallback(config) {
+  const wanted = config && config.audiences && config.audiences.default;
+  if (wanted === EVERYTHING) return null;
+  if (wanted) {
+    const named = byId(config, String(wanted));
+    if (named) return named;
+  }
   return list(config)[0] || null;
 }
 
@@ -126,13 +145,25 @@ function navFor(req, config) {
   if (!active && isMultiple(config)) {
     const seen = new Set();
     const merged = [];
-    list(config).forEach((a) => {
-      (a.nav || []).forEach((item) => {
-        if (!item || !item.slug || seen.has(item.slug)) return;
+
+    /* Round-robin across the sections, not one section after another.
+       Three sections with six, five and three categories merge to fourteen, which wraps
+       onto a second line and pushes the last item half off the row — it reads as a broken
+       page rather than a big shop. Taking the first eight in list order would have given
+       all of menswear and two of womenswear, so this takes one from each in turn: the top
+       category of every section shows before the second category of any of them. */
+    const trees = list(config).map((a) => (a.nav || []).filter((n) => n && n.slug));
+    const deepest = Math.max(0, ...trees.map((t) => t.length));
+
+    for (let rank = 0; rank < deepest && merged.length < MERGED_NAV_LIMIT; rank += 1) {
+      for (const tree of trees) {
+        const item = tree[rank];
+        if (!item || seen.has(item.slug) || merged.length >= MERGED_NAV_LIMIT) continue;
         seen.add(item.slug);
         merged.push(item);
-      });
-    });
+      }
+    }
+
     if (merged.length) return merged;
   }
 

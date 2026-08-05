@@ -99,7 +99,13 @@ app.use((req, res, next) => {
   res.locals.audience = audience.current(req, config);
   res.locals.audienceId = res.locals.audience ? res.locals.audience.id : null;
   res.locals.audiences = audience.list(config);
-  res.locals.audienceChoiceNeeded = audience.isMultiple(config) && !audience.hasChosen(req, config);
+  /* Asked only when the answer changes what they see. A shop whose default is EVERYTHING
+     already shows a first-time visitor the whole catalogue, so a popup asking which
+     section they want is friction that buys nothing — the header switcher is there for
+     anyone who does want to narrow. */
+  res.locals.audienceChoiceNeeded = audience.isMultiple(config)
+    && (config.audiences || {}).default !== audience.EVERYTHING
+    && !audience.hasChosen(req, config);
   // The header renders THIS nav, not config.nav — menswear must not show Sarees.
   res.locals.nav = audience.navFor(req, config);
   res.locals.hasFeature = (id) => plans.hasFeature(config, id);

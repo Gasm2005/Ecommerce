@@ -1,12 +1,102 @@
-<% const wishCount = wishlistIds.length; %>
+<%
+  /* Raja's header: the BASE header, with a marquee offer strip, an always-open search
+     field and a call button. Nothing else.
 
-<% if (config.brand.announcement) { %>
-<div x-data="{show:true}" x-show="show" x-cloak class="bg-maroon text-ivory">
-  <div class="relative mx-auto flex max-w-[1600px] items-center justify-center gap-3 px-9 py-2 text-[10px] uppercase tracking-luxe sm:text-[11px]">
-    <span class="text-center"><%= config.brand.announcement %></span>
-    <button @click="show=false" class="absolute right-3 text-ivory/60 hover:text-ivory" aria-label="Dismiss">&times;</button>
+     An earlier version rebuilt this from scratch — dense rows, sans-serif logo, no
+     letter-spacing — and it read as a utility page rather than a shop. The base header is
+     considered: it has rhythm, and it carries the drawer, the mega menu, the section
+     switcher and the install entry. Starting from it and adding three things is both a
+     better-looking header and a much smaller thing to maintain.
+
+     The three additions, and why:
+
+     The offer strip scrolls. It is the one place a value shop says what is on today, and
+     a line that sits still gets read once and then stops being seen.
+
+     The search field is open rather than behind a lens. A bridal shopper browses; this one
+     arrives knowing they want "jeans 34", and the lens costs them a click for nothing.
+
+     The phone number is a button. In this trade a rate is a conversation, and the number
+     being visible is the difference between a call and a closed tab. */
+%>
+<% const wishCount = wishlistIds.length; %>
+<%
+  /* Type scale, one notch up across the whole shop.
+
+     The base is set for a couture house: 10 and 11px letter-spaced caps, which reads as
+     restraint on a bridal page and as tiny on a 1600px desktop selling shirts. This
+     shopper is scanning prices and sizes, often at arm's length on a shop counter's
+     screen, and nothing here benefits from being delicate.
+
+     Done as a scale override rather than by editing the three overridden files, because
+     the listing, the bag and the checkout are the base's and would otherwise stay small —
+     a shop whose homepage is legible and whose checkout is not reads as broken. Each step
+     goes up roughly 15%, keeping the base's relative hierarchy intact.
+
+     Arbitrary-value classes need their brackets escaped in a CSS selector — .text-\[11px\]
+     and not .text-[11px], which matches nothing at all and fails silently.
+     !important because Tailwind's own utility has identical specificity. */
+%>
+<style id="raja-type-scale">
+  /* One notch, not two. A 20px body was tried and read as oversized rather than
+     comfortable — the cards lost their proportion and the nav started to crowd. About
+     15% up is the step that makes the shop legible at a counter without making it look
+     like an accessibility mode. */
+  .text-\[8px\]    { font-size: 9.5px  !important; }
+  .text-\[9px\]    { font-size: 10.5px !important; }
+  .text-\[9\.5px\]  { font-size: 11px   !important; }
+  .text-\[10px\]   { font-size: 11.5px !important; }
+  .text-\[10\.5px\] { font-size: 12px   !important; }
+  .text-\[11px\]   { font-size: 12.5px !important; }
+  .text-\[11\.5px\] { font-size: 13px   !important; }
+  .text-\[12px\]   { font-size: 13.5px !important; }
+  .text-\[12\.5px\] { font-size: 14px   !important; }
+  .text-\[13px\]   { font-size: 14.5px !important; }
+  .text-\[13\.5px\] { font-size: 15px   !important; }
+  .text-\[14\.5px\] { font-size: 16px   !important; }
+  .text-\[15px\]   { font-size: 16.5px !important; }
+  .text-\[16px\]   { font-size: 18px   !important; }
+  .text-\[17px\]   { font-size: 19px   !important; }
+
+  /* Tailwind's named steps, used for body copy and headings. */
+  .text-xs   { font-size: 0.83rem !important; }
+  .text-sm   { font-size: 0.96rem !important; }
+  .text-base { font-size: 1.08rem !important; }
+
+  /* Letter-spacing that suited 10px caps crowds 12.5px ones. */
+  .tracking-luxe { letter-spacing: 0.16em !important; }
+</style>
+
+
+<%
+  const marquee = (config.brand.marquee && config.brand.marquee.length)
+    ? config.brand.marquee
+    : [config.brand.announcement].filter(Boolean);
+  const phone = String(config.brand.supportPhone || '').trim();
+  const phoneDigits = phone.replace(/\D/g, '');
+%>
+<% if (marquee.length) { %>
+  <!-- Two passes so the loop has no visible seam; the copy is aria-hidden so a screen
+       reader does not read every offer twice. -->
+  <div class="overflow-hidden bg-maroon text-ivory">
+    <div class="flex w-max animate-[raja-marquee_30s_linear_infinite] gap-12 whitespace-nowrap py-2 pl-4 text-[10px] uppercase tracking-luxe sm:text-[11px]">
+      <% for (let pass = 0; pass < 2; pass++) { %>
+        <span class="flex gap-12" <%= pass ? 'aria-hidden="true"' : '' %>>
+          <% marquee.forEach(function (line) { %>
+            <span class="flex items-center gap-3"><span class="text-goldLight">&#9670;</span><%= line %></span>
+          <% }); %>
+        </span>
+      <% } %>
+    </div>
   </div>
-</div>
+  <style>
+    @keyframes raja-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    /* Someone who asked the OS to stop moving things meant it. A still strip still reads;
+       one they cannot stop is a reason to leave. */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-\[raja-marquee_30s_linear_infinite\] { animation: none; }
+    }
+  </style>
 <% } %>
 
 <header class="sticky top-0 z-50 border-b border-line bg-ivory/95 backdrop-blur supports-[backdrop-filter]:bg-ivory/80">
@@ -36,12 +126,32 @@
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/></svg>
       </a>
 
+      <!-- Open, not behind a lens: this shopper arrives knowing the size they want. -->
+      <div class="mx-4 hidden min-w-0 flex-1 lg:block">
+        <form action="/search" method="get" role="search" class="relative"
+              x-data="{ open: false }" @click.outside="open = false">
+          <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </span>
+          <input type="search" name="q" value="" autocomplete="off" spellcheck="false"
+                 placeholder="Search shirts, sarees, jeans, size 34&hellip;"
+                 class="w-full border border-line bg-cream/50 py-2.5 pl-11 pr-4 text-sm text-ink placeholder:text-muted/80 focus:border-maroon focus:bg-ivory focus:outline-none"
+                 hx-get="/fragments/search-suggest"
+                 hx-trigger="keyup changed delay:300ms"
+                 hx-target="#suggest-raja"
+                 @focus="open = true" @input="open = true">
+          <div id="suggest-raja" x-show="open" x-cloak class="absolute inset-x-0 top-full z-50 pt-2"></div>
+        </form>
+      </div>
+
       <nav class="ml-auto hidden items-center gap-1 lg:flex lg:gap-2">
-        <!-- lens only: the field expands below the header on click (or "/") -->
-        <button @click="$store.ui.toggleDeskSearch()" class="rounded-btn p-2 text-ink transition hover:text-maroon"
-                :class="$store.ui.deskSearch ? 'text-maroon' : ''" aria-label="Search">
-          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        </button>
+        <% if (phone) { %>
+          <a href="tel:<%= phoneDigits %>"
+             class="mr-1 hidden items-center gap-2 border border-line px-4 py-2 text-[11px] uppercase tracking-luxe text-ink transition hover:border-maroon hover:text-maroon lg:inline-flex">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="shrink-0"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a16 16 0 0 1-16-16Z"/></svg>
+            <%= phone %>
+          </a>
+        <% } %>
 
         <a href="/wishlist" class="relative rounded-btn p-2 text-ink transition hover:text-maroon" aria-label="Wishlist">
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 20.5s-7.5-4.6-7.5-9.7A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 3.2c0 5.1-7.5 9.7-7.5 9.7Z"/></svg>
@@ -58,15 +168,6 @@
           <%= me && me.orderIds && me.orderIds.length ? 'Your orders' : 'Track order' %>
         </a>
       </nav>
-    </div>
-
-    <!-- row 1b (desktop) : slim search, collapsed until the lens is clicked -->
-    <div class="hidden lg:block">
-      <div x-cloak x-show="$store.ui.deskSearch" x-collapse>
-        <div class="mx-auto max-w-2xl pb-4">
-          <%- include(view('partials/search'), { sid: 'd' }) %>
-        </div>
-      </div>
     </div>
 
     <!-- row 2 (phone/tablet) : full-width tap-to-search, opens the app search sheet -->
