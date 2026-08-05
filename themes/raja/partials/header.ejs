@@ -81,10 +81,12 @@
        the second column ran off the right edge. fr divides what is left after the gap;
        minmax(0, …) lets a long product name shrink its column instead of widening it. */
     #product-layout {
-      grid-template-columns: minmax(0, 60fr) minmax(0, 40fr) !important;
-      /* Air between the photograph and the words. Below about 4rem the price starts to
-         look like a caption on the image rather than its own column. */
-      column-gap: 4.5rem !important;
+      /* 40 image · 10 air · 50 detail, adding to exactly 100. Stated in per cent with the
+         gap counted as one of the three parts, rather than in fr with the gap added on
+         top — that is the arithmetic that put a horizontal scrollbar on this page once
+         already. */
+      grid-template-columns: 40% 50% !important;
+      column-gap: 10% !important;
       padding-top: 2.5rem !important;
     }
     /* And air inside the right column, so the price, the pincode box, the colours and the
@@ -110,11 +112,18 @@
       align-self: start;
     }
 
-    /* The frame height, in one place. Sized so the image and the whole buy panel — price,
-       pincode, colours, sizes, Add to bag — fit one screen together on a laptop, which was
-       the whole complaint. Capped in px as well so it does not become a mural on a large
-       monitor. */
-    .raja-frame { height: min(62vh, 640px); }
+    /* The frame is now sized by SHAPE, not by viewport height.
+
+       A fixed 62vh was right when the gallery held 60% of the row. At 30% the column is
+       about 440px on a laptop, and 640px of height in 440px of width is a letterbox stood
+       on end — it flatters no garment. A 4:5 frame keeps the proportion a clothes
+       photograph wants at any column width, with a cap so it cannot outgrow the screen on
+       a large monitor. */
+    .raja-frame {
+      aspect-ratio: 4 / 5;
+      height: auto;
+      max-height: 76vh;
+    }
   }
 </style>
 
