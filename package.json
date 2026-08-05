@@ -13,7 +13,8 @@
     "doctor": "node scripts/doctor.js",
     "backup": "node scripts/backup.js",
     "provision": "node scripts/provision.js",
-    "theme:check": "node scripts/theme-check.js"
+    "theme:check": "node scripts/theme-check.js",
+    "raja": "SITE_CONFIG=clients/raja-wholesale.config.json THEME=raja node server.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
