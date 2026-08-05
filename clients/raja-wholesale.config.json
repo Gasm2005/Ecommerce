@@ -261,8 +261,41 @@
       "slug": "shirts",
       "columns": [
         {
-          "title": "Shop",
+          "title": "By fabric",
           "links": [
+            {
+              "label": "Cotton Shirts",
+              "href": "/category/shirts?fabric=Cotton"
+            },
+            {
+              "label": "Rayon Shirts",
+              "href": "/category/shirts?fabric=Rayon"
+            },
+            {
+              "label": "Linen Shirts",
+              "href": "/category/shirts?fabric=Linen"
+            },
+            {
+              "label": "Denim Shirts",
+              "href": "/category/shirts?fabric=Denim"
+            }
+          ]
+        },
+        {
+          "title": "By wear",
+          "links": [
+            {
+              "label": "Office Wear",
+              "href": "/category/shirts?occasion=Office"
+            },
+            {
+              "label": "Party Wear",
+              "href": "/category/shirts?occasion=Party"
+            },
+            {
+              "label": "Everyday",
+              "href": "/category/shirts?occasion=Everyday"
+            },
             {
               "label": "All Shirts",
               "href": "/category/shirts"
@@ -276,8 +309,33 @@
       "slug": "jeans",
       "columns": [
         {
-          "title": "Shop",
+          "title": "By fabric",
           "links": [
+            {
+              "label": "Denim",
+              "href": "/category/jeans?fabric=Denim"
+            },
+            {
+              "label": "Stretch Denim",
+              "href": "/category/jeans?fabric=Stretch%20Denim"
+            },
+            {
+              "label": "Cotton",
+              "href": "/category/jeans?fabric=Cotton"
+            }
+          ]
+        },
+        {
+          "title": "By wear",
+          "links": [
+            {
+              "label": "Everyday",
+              "href": "/category/jeans?occasion=Everyday"
+            },
+            {
+              "label": "Party Wear",
+              "href": "/category/jeans?occasion=Party"
+            },
             {
               "label": "All Jeans",
               "href": "/category/jeans"
@@ -291,8 +349,33 @@
       "slug": "trousers",
       "columns": [
         {
-          "title": "Shop",
+          "title": "By fabric",
           "links": [
+            {
+              "label": "Cotton / Chinos",
+              "href": "/category/trousers?fabric=Cotton"
+            },
+            {
+              "label": "Formal Poly",
+              "href": "/category/trousers?fabric=Polyester"
+            },
+            {
+              "label": "Linen",
+              "href": "/category/trousers?fabric=Linen"
+            }
+          ]
+        },
+        {
+          "title": "By wear",
+          "links": [
+            {
+              "label": "Office Wear",
+              "href": "/category/trousers?occasion=Office"
+            },
+            {
+              "label": "Everyday",
+              "href": "/category/trousers?occasion=Everyday"
+            },
             {
               "label": "All Trousers",
               "href": "/category/trousers"
@@ -306,8 +389,49 @@
       "slug": "sarees",
       "columns": [
         {
-          "title": "Shop",
+          "title": "By fabric",
           "links": [
+            {
+              "label": "Cotton Sarees",
+              "href": "/category/sarees?fabric=Cotton"
+            },
+            {
+              "label": "Silk Sarees",
+              "href": "/category/sarees?fabric=Silk"
+            },
+            {
+              "label": "Georgette",
+              "href": "/category/sarees?fabric=Georgette"
+            },
+            {
+              "label": "Banarasi",
+              "href": "/category/sarees?fabric=Banarasi"
+            },
+            {
+              "label": "Chiffon",
+              "href": "/category/sarees?fabric=Chiffon"
+            }
+          ]
+        },
+        {
+          "title": "By wear",
+          "links": [
+            {
+              "label": "Everyday",
+              "href": "/category/sarees?occasion=Everyday"
+            },
+            {
+              "label": "Festive",
+              "href": "/category/sarees?occasion=Festive"
+            },
+            {
+              "label": "Wedding",
+              "href": "/category/sarees?occasion=Wedding"
+            },
+            {
+              "label": "Party Wear",
+              "href": "/category/sarees?occasion=Party"
+            },
             {
               "label": "All Sarees",
               "href": "/category/sarees"
@@ -321,8 +445,41 @@
       "slug": "suits",
       "columns": [
         {
-          "title": "Shop",
+          "title": "By fabric",
           "links": [
+            {
+              "label": "Cotton",
+              "href": "/category/suits?fabric=Cotton"
+            },
+            {
+              "label": "Rayon",
+              "href": "/category/suits?fabric=Rayon"
+            },
+            {
+              "label": "Silk",
+              "href": "/category/suits?fabric=Silk"
+            },
+            {
+              "label": "Chikankari",
+              "href": "/category/suits?fabric=Chikankari"
+            }
+          ]
+        },
+        {
+          "title": "By wear",
+          "links": [
+            {
+              "label": "Everyday",
+              "href": "/category/suits?occasion=Everyday"
+            },
+            {
+              "label": "Office Wear",
+              "href": "/category/suits?occasion=Office"
+            },
+            {
+              "label": "Festive",
+              "href": "/category/suits?occasion=Festive"
+            },
             {
               "label": "All Suits & Kurtis",
               "href": "/category/suits"
@@ -339,6 +496,18 @@
           "title": "Shop",
           "links": [
             {
+              "label": "Wedding",
+              "href": "/category/lehengas?occasion=Wedding"
+            },
+            {
+              "label": "Festive",
+              "href": "/category/lehengas?occasion=Festive"
+            },
+            {
+              "label": "Party Wear",
+              "href": "/category/lehengas?occasion=Party"
+            },
+            {
               "label": "All Lehengas",
               "href": "/category/lehengas"
             }
@@ -353,6 +522,18 @@
         {
           "title": "Shop",
           "links": [
+            {
+              "label": "School",
+              "href": "/category/boys?occasion=School"
+            },
+            {
+              "label": "Everyday",
+              "href": "/category/boys?occasion=Everyday"
+            },
+            {
+              "label": "Festive",
+              "href": "/category/boys?occasion=Festive"
+            },
             {
               "label": "All Boys",
               "href": "/category/boys"
@@ -389,8 +570,8 @@
       "image": null
     },
     {
-      "label": "Wedding",
-      "href": "/category/all?occasion=Wedding",
+      "label": "Party",
+      "href": "/category/all?occasion=Party",
       "image": null
     },
     {
@@ -399,8 +580,8 @@
       "image": null
     },
     {
-      "label": "Party",
-      "href": "/category/all?occasion=Party",
+      "label": "Wedding",
+      "href": "/category/all?occasion=Wedding",
       "image": null
     },
     {
@@ -910,8 +1091,41 @@
             "slug": "shirts",
             "columns": [
               {
-                "title": "Menswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Cotton Shirts",
+                    "href": "/category/shirts?fabric=Cotton"
+                  },
+                  {
+                    "label": "Rayon Shirts",
+                    "href": "/category/shirts?fabric=Rayon"
+                  },
+                  {
+                    "label": "Linen Shirts",
+                    "href": "/category/shirts?fabric=Linen"
+                  },
+                  {
+                    "label": "Denim Shirts",
+                    "href": "/category/shirts?fabric=Denim"
+                  }
+                ]
+              },
+              {
+                "title": "By wear",
+                "links": [
+                  {
+                    "label": "Office Wear",
+                    "href": "/category/shirts?occasion=Office"
+                  },
+                  {
+                    "label": "Party Wear",
+                    "href": "/category/shirts?occasion=Party"
+                  },
+                  {
+                    "label": "Everyday",
+                    "href": "/category/shirts?occasion=Everyday"
+                  },
                   {
                     "label": "All Shirts",
                     "href": "/category/shirts"
@@ -925,8 +1139,20 @@
             "slug": "t-shirts",
             "columns": [
               {
-                "title": "Menswear",
+                "title": "By style",
                 "links": [
+                  {
+                    "label": "Round Neck",
+                    "href": "/category/t-shirts?fabric=Cotton"
+                  },
+                  {
+                    "label": "Collar / Polo",
+                    "href": "/category/t-shirts?fabric=Pique"
+                  },
+                  {
+                    "label": "Printed",
+                    "href": "/category/t-shirts?occasion=Everyday"
+                  },
                   {
                     "label": "All T-Shirts",
                     "href": "/category/t-shirts"
@@ -940,8 +1166,33 @@
             "slug": "jeans",
             "columns": [
               {
-                "title": "Menswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Denim",
+                    "href": "/category/jeans?fabric=Denim"
+                  },
+                  {
+                    "label": "Stretch Denim",
+                    "href": "/category/jeans?fabric=Stretch%20Denim"
+                  },
+                  {
+                    "label": "Cotton",
+                    "href": "/category/jeans?fabric=Cotton"
+                  }
+                ]
+              },
+              {
+                "title": "By wear",
+                "links": [
+                  {
+                    "label": "Everyday",
+                    "href": "/category/jeans?occasion=Everyday"
+                  },
+                  {
+                    "label": "Party Wear",
+                    "href": "/category/jeans?occasion=Party"
+                  },
                   {
                     "label": "All Jeans",
                     "href": "/category/jeans"
@@ -955,8 +1206,33 @@
             "slug": "trousers",
             "columns": [
               {
-                "title": "Menswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Cotton / Chinos",
+                    "href": "/category/trousers?fabric=Cotton"
+                  },
+                  {
+                    "label": "Formal Poly",
+                    "href": "/category/trousers?fabric=Polyester"
+                  },
+                  {
+                    "label": "Linen",
+                    "href": "/category/trousers?fabric=Linen"
+                  }
+                ]
+              },
+              {
+                "title": "By wear",
+                "links": [
+                  {
+                    "label": "Office Wear",
+                    "href": "/category/trousers?occasion=Office"
+                  },
+                  {
+                    "label": "Everyday",
+                    "href": "/category/trousers?occasion=Everyday"
+                  },
                   {
                     "label": "All Trousers",
                     "href": "/category/trousers"
@@ -970,8 +1246,33 @@
             "slug": "kurta-pyjama",
             "columns": [
               {
-                "title": "Menswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Cotton",
+                    "href": "/category/kurta-pyjama?fabric=Cotton"
+                  },
+                  {
+                    "label": "Silk",
+                    "href": "/category/kurta-pyjama?fabric=Silk"
+                  },
+                  {
+                    "label": "Chikankari",
+                    "href": "/category/kurta-pyjama?fabric=Chikankari"
+                  }
+                ]
+              },
+              {
+                "title": "By wear",
+                "links": [
+                  {
+                    "label": "Festive",
+                    "href": "/category/kurta-pyjama?occasion=Festive"
+                  },
+                  {
+                    "label": "Wedding",
+                    "href": "/category/kurta-pyjama?occasion=Wedding"
+                  },
                   {
                     "label": "All Kurta Pyjama",
                     "href": "/category/kurta-pyjama"
@@ -985,8 +1286,16 @@
             "slug": "sherwani",
             "columns": [
               {
-                "title": "Menswear",
+                "title": "Shop",
                 "links": [
+                  {
+                    "label": "Sherwani",
+                    "href": "/category/sherwani?occasion=Wedding"
+                  },
+                  {
+                    "label": "Party Wear",
+                    "href": "/category/sherwani?occasion=Party"
+                  },
                   {
                     "label": "All Sherwani & Suits",
                     "href": "/category/sherwani"
@@ -1007,8 +1316,49 @@
             "slug": "sarees",
             "columns": [
               {
-                "title": "Womenswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Cotton Sarees",
+                    "href": "/category/sarees?fabric=Cotton"
+                  },
+                  {
+                    "label": "Silk Sarees",
+                    "href": "/category/sarees?fabric=Silk"
+                  },
+                  {
+                    "label": "Georgette",
+                    "href": "/category/sarees?fabric=Georgette"
+                  },
+                  {
+                    "label": "Banarasi",
+                    "href": "/category/sarees?fabric=Banarasi"
+                  },
+                  {
+                    "label": "Chiffon",
+                    "href": "/category/sarees?fabric=Chiffon"
+                  }
+                ]
+              },
+              {
+                "title": "By wear",
+                "links": [
+                  {
+                    "label": "Everyday",
+                    "href": "/category/sarees?occasion=Everyday"
+                  },
+                  {
+                    "label": "Festive",
+                    "href": "/category/sarees?occasion=Festive"
+                  },
+                  {
+                    "label": "Wedding",
+                    "href": "/category/sarees?occasion=Wedding"
+                  },
+                  {
+                    "label": "Party Wear",
+                    "href": "/category/sarees?occasion=Party"
+                  },
                   {
                     "label": "All Sarees",
                     "href": "/category/sarees"
@@ -1022,8 +1372,41 @@
             "slug": "suits",
             "columns": [
               {
-                "title": "Womenswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Cotton",
+                    "href": "/category/suits?fabric=Cotton"
+                  },
+                  {
+                    "label": "Rayon",
+                    "href": "/category/suits?fabric=Rayon"
+                  },
+                  {
+                    "label": "Silk",
+                    "href": "/category/suits?fabric=Silk"
+                  },
+                  {
+                    "label": "Chikankari",
+                    "href": "/category/suits?fabric=Chikankari"
+                  }
+                ]
+              },
+              {
+                "title": "By wear",
+                "links": [
+                  {
+                    "label": "Everyday",
+                    "href": "/category/suits?occasion=Everyday"
+                  },
+                  {
+                    "label": "Office Wear",
+                    "href": "/category/suits?occasion=Office"
+                  },
+                  {
+                    "label": "Festive",
+                    "href": "/category/suits?occasion=Festive"
+                  },
                   {
                     "label": "All Suits & Kurtis",
                     "href": "/category/suits"
@@ -1037,8 +1420,20 @@
             "slug": "lehengas",
             "columns": [
               {
-                "title": "Womenswear",
+                "title": "Shop",
                 "links": [
+                  {
+                    "label": "Wedding",
+                    "href": "/category/lehengas?occasion=Wedding"
+                  },
+                  {
+                    "label": "Festive",
+                    "href": "/category/lehengas?occasion=Festive"
+                  },
+                  {
+                    "label": "Party Wear",
+                    "href": "/category/lehengas?occasion=Party"
+                  },
                   {
                     "label": "All Lehengas",
                     "href": "/category/lehengas"
@@ -1052,8 +1447,20 @@
             "slug": "dress-material",
             "columns": [
               {
-                "title": "Womenswear",
+                "title": "By fabric",
                 "links": [
+                  {
+                    "label": "Cotton",
+                    "href": "/category/dress-material?fabric=Cotton"
+                  },
+                  {
+                    "label": "Chiffon",
+                    "href": "/category/dress-material?fabric=Chiffon"
+                  },
+                  {
+                    "label": "Silk",
+                    "href": "/category/dress-material?fabric=Silk"
+                  },
                   {
                     "label": "All Dress Material",
                     "href": "/category/dress-material"
@@ -1067,8 +1474,16 @@
             "slug": "bottoms",
             "columns": [
               {
-                "title": "Womenswear",
+                "title": "Shop",
                 "links": [
+                  {
+                    "label": "Everyday",
+                    "href": "/category/bottoms?occasion=Everyday"
+                  },
+                  {
+                    "label": "Office Wear",
+                    "href": "/category/bottoms?occasion=Office"
+                  },
                   {
                     "label": "All Leggings & Bottoms",
                     "href": "/category/bottoms"
@@ -1089,8 +1504,20 @@
             "slug": "boys",
             "columns": [
               {
-                "title": "Kidswear",
+                "title": "Shop",
                 "links": [
+                  {
+                    "label": "School",
+                    "href": "/category/boys?occasion=School"
+                  },
+                  {
+                    "label": "Everyday",
+                    "href": "/category/boys?occasion=Everyday"
+                  },
+                  {
+                    "label": "Festive",
+                    "href": "/category/boys?occasion=Festive"
+                  },
                   {
                     "label": "All Boys",
                     "href": "/category/boys"
@@ -1104,8 +1531,20 @@
             "slug": "girls",
             "columns": [
               {
-                "title": "Kidswear",
+                "title": "Shop",
                 "links": [
+                  {
+                    "label": "School",
+                    "href": "/category/girls?occasion=School"
+                  },
+                  {
+                    "label": "Everyday",
+                    "href": "/category/girls?occasion=Everyday"
+                  },
+                  {
+                    "label": "Festive",
+                    "href": "/category/girls?occasion=Festive"
+                  },
                   {
                     "label": "All Girls",
                     "href": "/category/girls"
@@ -1119,8 +1558,16 @@
             "slug": "kids-ethnic",
             "columns": [
               {
-                "title": "Kidswear",
+                "title": "Shop",
                 "links": [
+                  {
+                    "label": "Festive",
+                    "href": "/category/kids-ethnic?occasion=Festive"
+                  },
+                  {
+                    "label": "Wedding",
+                    "href": "/category/kids-ethnic?occasion=Wedding"
+                  },
                   {
                     "label": "All Ethnic for Kids",
                     "href": "/category/kids-ethnic"

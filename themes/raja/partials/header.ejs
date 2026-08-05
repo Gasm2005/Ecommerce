@@ -248,13 +248,31 @@
                    class="absolute left-0 top-full z-40 pt-1">
                 <!-- pt-1 above the card, inside the hover area: the gap the pointer
                      crosses stays part of the menu, so it does not close mid-reach. -->
-                <div class="min-w-[13rem] border border-line bg-ivory py-2 shadow-[0_18px_40px_-24px_rgba(23,19,15,.45)]">
-                  <% (item.columns || []).forEach(function (col) { %>
-                    <% (col.links || []).forEach(function (l) { %>
-                      <a href="<%= l.href %>"
-                         class="block whitespace-nowrap px-4 py-2 text-[13px] text-ink transition hover:bg-cream hover:text-maroon"><%= l.label %></a>
+                <%
+                  /* Grouped, since the groups are the point: a customer thinks "cotton or
+                     rayon" and "office or party", and flattening those into one list of
+                     eight makes them read the whole thing to find either.
+
+                     Two columns when there are two groups, one when there is one. Still
+                     sized to its contents and still anchored to the item — the reason this
+                     stopped being a full-width panel has not changed. */
+                  const groups = (item.columns || []).filter(function (c) { return (c.links || []).length; });
+                  const named = groups.filter(function (c) { return c.title; }).length > 0 && groups.length > 1;
+                %>
+                <div class="border border-line bg-ivory px-1 py-2.5 shadow-[0_18px_40px_-24px_rgba(23,19,15,.45)]">
+                  <div class="flex gap-1">
+                    <% groups.forEach(function (col, gi) { %>
+                      <div class="min-w-[10.5rem] <%= gi ? 'border-l border-line/70 pl-1' : '' %>">
+                        <% if (named) { %>
+                          <p class="px-3 pb-1.5 pt-0.5 text-[9.5px] uppercase tracking-luxe text-gold"><%= col.title %></p>
+                        <% } %>
+                        <% col.links.forEach(function (l) { %>
+                          <a href="<%= l.href %>"
+                             class="block whitespace-nowrap px-3 py-1.5 text-[13px] text-ink transition hover:bg-cream hover:text-maroon"><%= l.label %></a>
+                        <% }); %>
+                      </div>
                     <% }); %>
-                  <% }); %>
+                  </div>
                 </div>
               </div>
             <% } %>
