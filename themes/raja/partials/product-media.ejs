@@ -70,18 +70,30 @@
            @keydown.window.arrow-right="go(i + 1)">
 
         <div class="group relative overflow-hidden bg-cream">
+          <%
+            /* x-show sits on a WRAPPER, never on the same element as :style.
+
+               Both write to the style attribute: x-show puts display:none there, and :style
+               rewrites the whole attribute — on every mousemove, for the zoom origin. The
+               :style binding won, so all four frames stayed visible and the gallery came out
+               2,086px tall with the arrows a thousand pixels below the fold. It looked like
+               the height cap had failed; the cap was fine and the frames were stacked.
+
+               One element per job: the wrapper hides, the figure zooms. */
+          %>
           <% p.images.forEach(function (img, i) { %>
-            <figure x-show="i === <%= i %>" <%= i === 0 ? '' : 'style="display:none"' %>
-                    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
-                    @mouseenter="z = true" @mouseleave="z = false"
-                    @mousemove="ox = ((($event.clientX - $el.getBoundingClientRect().left) / $el.offsetWidth) * 100).toFixed(1) + '%';
-                                oy = ((($event.clientY - $el.getBoundingClientRect().top) / $el.offsetHeight) * 100).toFixed(1) + '%'"
-                    :style="`--zs: ${z ? 2 : 1}; --zx: ${ox}; --zy: ${oy}`">
-              <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
-                   <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
-                   style="transform: scale(var(--zs, 1)); transform-origin: var(--zx, 50%) var(--zy, 50%)"
-                   class="h-[min(74vh,780px)] w-full object-cover transition-transform duration-300 ease-out">
-            </figure>
+            <div x-show="i === <%= i %>" <%= i === 0 ? '' : 'style="display:none"' %>
+                 x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0">
+              <figure @mouseenter="z = true" @mouseleave="z = false"
+                      @mousemove="ox = ((($event.clientX - $el.getBoundingClientRect().left) / $el.offsetWidth) * 100).toFixed(1) + '%';
+                                  oy = ((($event.clientY - $el.getBoundingClientRect().top) / $el.offsetHeight) * 100).toFixed(1) + '%'"
+                      :style="`--zs: ${z ? 2 : 1}; --zx: ${ox}; --zy: ${oy}`">
+                <img src="<%= img %>" alt="<%= p.name %> — view <%= i + 1 %>"
+                     <%= i === 0 ? 'fetchpriority="high"' : 'loading="lazy"' %> decoding="async"
+                     style="transform: scale(var(--zs, 1)); transform-origin: var(--zx, 50%) var(--zy, 50%)"
+                     class="raja-frame w-full object-cover transition-transform duration-300 ease-out">
+              </figure>
+            </div>
           <% }); %>
 
           <% if (p.images.length > 1) { %>
