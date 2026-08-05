@@ -206,6 +206,32 @@ because a check nobody has watched fail is decoration that happens to be green.
 Admin and email templates are deliberately **not** themed: every client gets the same
 sober admin, and an email template that breaks sends nothing at all.
 
+### A different storefront per client, one codebase
+```bash
+THEME=meera npm start            # run a theme
+npm run theme:check -- meera     # does it still sell?
+npm run theme:check -- --all     # every theme
+```
+A theme lives in `themes/<name>/`, mirroring `views/`, and contains **only the files
+whose look differs** — everything else falls through. Two files is a normal theme. The
+contract a theme must not break is [themes/CONTRACT.md](themes/CONTRACT.md); that is the
+file to hand to whoever is doing the redesign.
+
+Handing over code works the same as ever: flatten base + theme and the client owns a
+complete repo on their own domain, hosting and database. What stays on this side is one
+base every theme is built against, so a fix is a fix once. Every bug found in a day of
+work on this template was in `src/` — the stock matching, the mail health check, the
+audience switch — and a fork would have carried each into every client.
+
+`theme:check` drives a real server on the theme and asserts the contract: a sold-out size
+cannot be bought, a card admits when a piece is gone, the tax line is present, the ids
+HTMX swaps into still exist. It says whether the shop **sells**, not whether it looks
+good. `--self-test` runs it against a deliberately broken theme, because a check nobody
+has watched fail is decoration that happens to be green.
+
+Admin and email templates are deliberately **not** themed: every client gets the same
+sober admin, and a broken email template sends nothing at all.
+
 ### Sold to live
 ```bash
 npm run provision -- --template > client.json    # a spec to fill in
