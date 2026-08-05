@@ -265,7 +265,11 @@ function listingModel(req, res) {
     facets: catalog.facets(slug, res.locals.audienceId),
     priceRanges: catalog.PRICE_RANGES,
     sorts: catalog.SORTS,
-    heading: navEntry ? navEntry.label : (filters.q ? `Results for “${filters.q}”` : 'All Couture'),
+    /* "All Couture" is the demo store's word for its whole catalogue and reads oddly on a
+       shop selling trousers. Configurable, defaulting to the couture wording so nothing
+       changes for a store that does not set it. */
+    heading: navEntry ? navEntry.label
+      : (filters.q ? `Results for “${filters.q}”` : ((config.copy && config.copy.allCategoryHeading) || 'All Couture')),
     navEntry,
     activeCount: catalog.activeFilterCount(filters)
   };

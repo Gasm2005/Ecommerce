@@ -14,7 +14,7 @@
     "backup": "node scripts/backup.js",
     "provision": "node scripts/provision.js",
     "theme:check": "node scripts/theme-check.js",
-    "raja": "SITE_CONFIG=clients/raja-wholesale.config.json THEME=raja node server.js"
+    "raja": "SITE_CONFIG=clients/raja-wholesale.config.json DATA_DIR=clients/raja-data THEME=raja node server.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

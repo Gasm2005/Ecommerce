@@ -63,9 +63,22 @@ function metaForProduct(product, config) {
 function metaForCategory(slug, label, config) {
   const d = data();
   const override = d.seo.categories[slug] || {};
+
+  /* The default templates read "designer jeans online" and "Shop made-to-order jeans",
+     which is right for a couture house and wrong for a shop selling school uniforms —
+     "made-to-order" is a promise it does not make. A store can supply its own patterns;
+     {label} and {lower} are the only placeholders, and the defaults keep the couture
+     wording so nothing changes for a shop that says nothing. */
+  const copy = (config && config.copy) || {};
+  const fill = (pattern) => String(pattern)
+    .split('{label}').join(label)
+    .split('{lower}').join(label.toLowerCase())
+    .split('{brand}').join((config.brand && config.brand.name) || '');
+
   return {
-    title: (override.title || `${label} — designer ${label.toLowerCase()} online`) + (d.seo.titleSuffix || ''),
-    description: override.description || `Shop made-to-order ${label.toLowerCase()} from ${config.brand.name}. ${d.seo.defaultDescription}`.trim(),
+    title: (override.title || fill(copy.categoryTitle || '{label} — designer {lower} online')) + (d.seo.titleSuffix || ''),
+    description: override.description
+      || `${fill(copy.categoryDescription || 'Shop made-to-order {lower} from {brand}.')} ${d.seo.defaultDescription}`.trim(),
     keywords: (override.keywords && override.keywords.length ? override.keywords : d.seo.keywords).join(', '),
     indexable: override.indexable !== false && d.seo.indexable !== false
   };

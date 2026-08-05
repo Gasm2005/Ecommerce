@@ -22,3 +22,7 @@ data/activity.json
 
 # local backup archives — copy these off the machine, do not commit them
 backups/
+
+# A client's own store data — real customers, real orders, its own secrets.
+# Only the config and the theme belong in the repo.
+clients/*-data/

@@ -1,0 +1,76 @@
+<%
+  /* Raja's filters: the base's, minus the price bands.
+
+     The base bands are a bridal ladder — under ₹25,000, then up to ₹1.5 lakh and above —
+     and Raja's rail runs from a ₹400 t-shirt to a ₹15,000 lehenga. Every band rendered
+     with a count of 0 beside it, which reads as a shop with nothing in it rather than as
+     a filter that does not apply.
+
+     Bands could be made configurable per client instead, and one day they should be. For
+     this shop they are not needed at all: "Price: Low to High" is already in the sort
+     dropdown and does the same job in one click rather than five, and a shopper who wants
+     the cheapest shirt wants them in order, not bucketed.
+
+     Colour swatches come from src/swatches.js (exposed as the `swatch` helper). */
+  const GROUPS = [
+    { name: 'occasion', label: 'Occasion', items: facets.occasion, type: 'plain' },
+    { name: 'color', label: 'Colour', items: facets.color, type: 'swatch' },
+    { name: 'fabric', label: 'Fabric', items: facets.fabric, type: 'plain' },
+    { name: 'size', label: 'Size', items: facets.size, type: 'chip' }
+  ];
+%>
+
+<form id="filter-form"
+      hx-get="/fragments/products/<%= slug %>"
+      hx-target="#product-grid"
+      hx-swap="innerHTML swap:170ms"
+      hx-trigger="change"
+      autocomplete="off">
+
+  <input type="hidden" name="q" value="<%= filters.q %>">
+
+  <div class="flex items-center justify-between border-b border-line pb-3">
+    <p class="text-[11px] uppercase tracking-luxe text-ink">Filters
+      <span id="filter-count" class="<%= activeCount ? '' : 'hidden' %> ml-1 text-maroon">(<%= activeCount %>)</span>
+    </p>
+    <button type="button" onclick="clearFilters()"
+            class="text-[10px] uppercase tracking-[0.14em] text-muted underline decoration-line underline-offset-4 transition hover:text-maroon">Clear all</button>
+  </div>
+
+  <% GROUPS.forEach(function (g, gi) { %>
+    <% if (!g.items.length) return; %>
+    <details <%= gi < 3 ? 'open' : '' %> class="group border-b border-line/70 py-4">
+      <summary class="flex cursor-pointer list-none items-center justify-between text-[11px] uppercase tracking-[0.14em] text-ink">
+        <%= g.label %>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             class="transition group-open:rotate-45"><path d="M12 5v14M5 12h14"/></svg>
+      </summary>
+
+      <div class="<%= g.type === 'chip' ? 'mt-4 flex flex-wrap gap-2' : 'mt-4 max-h-60 space-y-2.5 overflow-y-auto pr-1' %>">
+        <% g.items.forEach(function (it) { %>
+          <%
+            const value = it.value;
+            const label = it.label || value;
+            const checked = filters[g.name].includes(value);
+          %>
+          <% if (g.type === 'chip') { %>
+            <label class="cursor-pointer">
+              <input type="checkbox" name="<%= g.name %>" value="<%= value %>" <%= checked ? 'checked' : '' %> class="peer sr-only">
+              <span class="block border border-line px-3 py-1.5 text-xs text-muted transition peer-checked:border-maroon peer-checked:bg-maroon peer-checked:text-ivory hover:border-maroon"><%= label %></span>
+            </label>
+          <% } else { %>
+            <label class="flex cursor-pointer items-center gap-2.5 text-sm text-muted transition hover:text-ink">
+              <input type="checkbox" name="<%= g.name %>" value="<%= value %>" <%= checked ? 'checked' : '' %>
+                     class="peer h-[15px] w-[15px] shrink-0 appearance-none border border-line bg-ivory transition checked:border-maroon checked:bg-maroon focus:outline-none focus:ring-1 focus:ring-gold">
+              <% if (g.type === 'swatch') { %>
+                <span class="h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-line" style="background: <%= swatch(value) %>"></span>
+              <% } %>
+              <span class="flex-1 peer-checked:text-ink"><%= label %></span>
+              <span class="text-[11px] text-muted/70"><%= it.count %></span>
+            </label>
+          <% } %>
+        <% }); %>
+      </div>
+    </details>
+  <% }); %>
+</form>

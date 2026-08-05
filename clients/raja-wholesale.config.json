@@ -1134,5 +1134,11 @@
     ],
     "_heroReadme": "An audience may carry its own hero (eyebrow, heading, body, CTAs, image). Without one it uses config.hero, so a single-audience shop needs no duplication.",
     "default": "all"
+  },
+  "copy": {
+    "_readme": "Wording the base defaults to couture language for. {label} {lower} {brand} are the placeholders.",
+    "allCategoryHeading": "Everything in stock",
+    "categoryTitle": "{label} in Gonda",
+    "categoryDescription": "Buy {lower} at wholesale rates from {brand}, Utraula Road, Gonda. Men, women and children."
   }
 }
