@@ -108,7 +108,9 @@
        Add to bag come up past it. */
     #product-layout > :first-child {
       position: sticky;
-      top: 7.5rem;
+      /* 1.25rem, not 7.5: the header scrolls away on this page, so there is nothing above
+         to clear and the photograph gets those six rems back. */
+      top: 1.25rem;
       align-self: start;
     }
 
@@ -155,6 +157,21 @@
      from the row when you scroll back up. Height is animated rather than display-toggled so
      the page does not jump under the reader. */
 %>
+<%
+  /* On a product page the header scrolls away instead of sticking.
+
+     Everywhere else a sticky header earns its 135px: search, the phone number and the bag
+     are worth having within reach while somebody browses a long listing. On a product page
+     the job is to show one garment as large as it will go, and the header was taking a fifth
+     of the screen away from it — the shrink-on-scroll gave 90px back and it still was not
+     enough.
+
+     Scrolling away costs little here: the shopper arrived to look at one thing, and the
+     buy bar follows them down the page anyway once the real buttons leave. */
+  // startsWith rather than a regex: a slash-heavy pattern is one lost backslash away from
+  // being a syntax error, and this one already was.
+  const stickyHeader = !String(currentPath || '').startsWith('/product/');
+%>
 <div x-data="{
        small: false,
        measure() {
@@ -165,7 +182,7 @@
      }"
      x-init="small = window.scrollY > 160"
      @scroll.window.passive="measure()"
-     class="sticky top-0 z-50">
+     class="<%= stickyHeader ? 'sticky top-0 z-50' : 'relative z-50' %>">
 <% if (marquee.length) { %>
   <!-- Two passes so the loop has no visible seam; the copy is aria-hidden so a screen
        reader does not read every offer twice. -->
