@@ -1,7 +1,4 @@
 {
-  "plan": "scale",
-  "planExtras": [],
-  "_planReadme": "Which tier this client bought: starter | growth | scale (see src/plan.js). planExtras adds individual feature ids on top of the tier, for the deal where a client pays for one extra thing. Changing this line is the ONLY difference between a Rs49k and a Rs1.99L store.",
   "_readme": [
     "Raja Whole Sale, Gonda — a RETAIL shop whose rates are wholesale-like.",
     "Run: npm run raja",

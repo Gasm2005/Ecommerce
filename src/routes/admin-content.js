@@ -31,7 +31,7 @@ const router = express.Router();
 
 /* Re-declared here because both routers are mounted separately; the guard that
    populates res.locals.user runs in admin.js and applies to both. */
-const { requireSection, requireFeature } = require('./gate');
+const { requireSection } = require('./gate');
 
 /** ASCII-safe: toast text carries currency symbols and curly quotes. */
 function notify(res, message, tone) {

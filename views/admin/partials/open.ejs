@@ -83,34 +83,25 @@
         ]},
         { title: 'Store', items: [
           { href: '/admin/settings', label: 'Settings', key: 'settings' },
-          { href: '/admin/plan', label: 'Plan & features', key: 'plan' },
-          { href: '/admin/license', label: 'Licence', key: 'license' },
           { href: '/admin/activity', label: 'Activity log', key: 'activity' }
         ]}
       ]; %>
 
-      <%
-        /* Two different reasons a link may not work, shown differently:
-           · no permission → hidden entirely (it isn't this person's job)
-           · not in the plan → shown with a padlock (it IS the platform's job,
-             the store just hasn't bought it) */
-      %>
+      <!-- Every section a role can see is a live link — nothing on a single-business
+           build is locked behind a plan. The archived reseller toolkit's padlock logic
+           lived here; see src/routes/gate.js for where it used to hook in. -->
       <% groups.forEach(function (g) { %>
         <% const visible = g.items.filter(function (it) { return can(it.key === 'lowstock' ? 'products' : it.key); }); %>
         <% if (!visible.length) return; %>
         <p class="px-3 pb-2 pt-4 text-[9px] uppercase tracking-luxe text-muted/70"><%= g.title %></p>
         <ul class="space-y-0.5">
           <% visible.forEach(function (it) { %>
-            <% const open = unlocked(it.key === 'lowstock' ? 'products' : it.key); %>
             <li>
               <a href="<%= it.href %><%= adminToken ? (it.href.includes('?') ? '&' : '?') + 'token=' + adminToken : '' %>"
-                 <%= open ? '' : 'title="Not included in your plan"' %>
                  class="flex items-center justify-between rounded px-3 py-2 transition
-                        <%= active === it.key ? 'bg-maroon text-ivory' : (open ? 'text-ink hover:bg-cream' : 'text-muted/60 hover:bg-cream') %>">
+                        <%= active === it.key ? 'bg-maroon text-ivory' : 'text-ink hover:bg-cream' %>">
                 <span><%= it.label %></span>
-                <% if (!open) { %>
-                  <span class="ml-2 text-[11px] leading-none opacity-60" aria-label="locked">🔒</span>
-                <% } else if (it.badge) { %>
+                <% if (it.badge) { %>
                   <span class="ml-2 min-w-[20px] rounded-full px-1.5 text-center text-[10px] leading-[18px]
                     <%= active === it.key ? 'bg-ivory/25 text-ivory' : (it.tone === 'warning' ? 'bg-warning/25 text-ink' : 'bg-maroon text-ivory') %>"><%= it.badge %></span>
                 <% } %>
@@ -125,31 +116,6 @@
           View storefront
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
         </a>
-
-        <% if (typeof plan !== 'undefined' && plan && can('settings')) { %>
-          <a href="/admin/plan" class="flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-muted hover:text-maroon">
-            <span><%= plan.label %> plan</span>
-            <span class="text-[10px] normal-case tracking-normal">view</span>
-          </a>
-        <% } %>
-
-        <%
-          /* Licence warning. Shown early and quietly — the first a client hears
-             about a renewal should not be the day the admin locks. */
-          const lic = typeof licence !== 'undefined' ? licence : null;
-          const nag = lic && ['expiring', 'grace', 'invalid', 'mismatch', 'expired'].includes(lic.state);
-        %>
-        <% if (nag && can('settings')) { %>
-          <a href="/admin/license"
-             class="block border px-3 py-2 text-[11px] leading-relaxed
-                    <%= lic.state === 'expiring' ? 'border-warning/50 bg-warning/5 text-ink' : 'border-critical/50 bg-critical/5 text-critical' %>">
-            <span class="block text-[9px] uppercase tracking-luxe opacity-70">Licence</span>
-            <%= lic.state === 'expiring' ? `Renews in ${lic.daysLeft} day${lic.daysLeft === 1 ? '' : 's'}`
-                : lic.state === 'grace' ? `Expired · ${lic.graceDaysLeft} day${lic.graceDaysLeft === 1 ? '' : 's'} of grace left`
-                : lic.state === 'mismatch' ? 'Wrong domain for this licence'
-                : lic.state === 'invalid' ? 'Key is not valid' : 'Expired' %>
-          </a>
-        <% } %>
 
         <% if (typeof user !== 'undefined' && user) { %>
           <div class="border-t border-line pt-3">

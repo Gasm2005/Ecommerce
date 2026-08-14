@@ -3,40 +3,24 @@
 /**
  * The one gate every admin route passes through.
  *
- * Three questions, in this order:
- *   1. ROLE     may this person do this? Staff get 403.
- *   2. LICENCE  is this store's licence in order? A lapsed one locks the admin.
- *   3. PLAN     did this store buy this feature? 402 and an upgrade page.
+ * One question: ROLE. May this person do this? Staff get 403.
  *
- * Order matters. Asking about plans first would show a staff member which
- * features their employer didn't pay for, which is the client's business.
- *
- * The storefront is never gated here. A licence dispute is between the agency and
- * the client; the client's own customers keep shopping.
+ * This used to ask two more questions first — licence, then plan — because the
+ * codebase was built to be resold to many clients under a licence key, with
+ * features locked behind a plan tier. That whole toolkit (licence signing,
+ * plan gating, the reseller provisioning script) has been parked in
+ * archive/reseller-toolkit/ rather than deleted: this build is a dedicated,
+ * fully-unlocked site for one business, and there was nothing to gate. If a
+ * resold, licensed version is ever needed again, the archived gate.js.orig in
+ * that folder is the wall this one used to be — restoring it is a matter of
+ * bringing plan.js and license.js back and re-adding the two checks below the
+ * role check, in that order (role, then licence, then plan; asking about plans
+ * first would show a staff member what their employer didn't buy, which was
+ * never their business).
  */
 
 const auth = require('../auth');
-const plan = require('../plan');
-const license = require('../license');
 const { loadConfig } = require('../config');
-
-/** Pages a store can always reach, even with a lapsed licence. */
-const ALWAYS_OPEN = ['/license', '/logout', '/account', '/plan'];
-
-function licenceWall(req, res) {
-  const status = license.status(req.get('host'));
-  if (!status.restricted) return false;
-  if (ALWAYS_OPEN.some((p) => req.path === p || req.path.startsWith(p + '/'))) return false;
-
-  res.status(402).render('admin/license', {
-    status,
-    shortId: license.shortId(status.licence),
-    saved: false,
-    error: null,
-    wall: true
-  });
-  return true;
-}
 
 function requireSection(section) {
   return function sectionGate(req, res, next) {
@@ -48,28 +32,8 @@ function requireSection(section) {
         user: res.locals.user
       });
     }
-
-    if (licenceWall(req, res)) return undefined;
-
-    const config = loadConfig();
-    const host = req.get('host');
-    if (!plan.sectionUnlocked(config, section, host)) {
-      const feature = plan.FEATURES.find((f) => f.section === section);
-      const info = plan.overview(config, host);
-      return res.status(402).render('admin/locked', {
-        feature: feature || { id: section, label: section },
-        plan: info.plan,
-        unlockedBy: (info.features.find((f) => f.section === section) || {}).unlockedBy || info.upgradeTo
-      });
-    }
-
     return next();
   };
 }
 
-/** Gate a single capability that isn't a whole admin section. */
-function requireFeature(id) {
-  return plan.requireFeature(id);
-}
-
-module.exports = { requireSection, requireFeature, licenceWall, ALWAYS_OPEN };
+module.exports = { requireSection };

@@ -27,7 +27,6 @@ const delivery = require('./src/delivery');
 const fulfilment = require('./src/fulfilment');
 const variants = require('./src/variants');
 const audience = require('./src/audience');
-const plans = require('./src/plan');
 const cod = require('./src/cod');
 const payments = require('./src/payments');
 const notifications = require('./src/notifications');
@@ -108,7 +107,8 @@ app.use((req, res, next) => {
     && !audience.hasChosen(req, config);
   // The header renders THIS nav, not config.nav — menswear must not show Sarees.
   res.locals.nav = audience.navFor(req, config);
-  res.locals.hasFeature = (id) => plans.hasFeature(config, id);
+  // No plan gate on a dedicated single-business build — see src/routes/gate.js.
+  res.locals.hasFeature = () => true;
   res.locals.marketing = marketing;
   res.locals.origin = marketing.origin(req, config);
   res.locals.seo = null;      // per-page meta, set by the route
@@ -161,16 +161,15 @@ app.get('/manifest.webmanifest', (req, res) => {
 });
 
 /**
- * Storefront half of the plan gate.
- *
- * A locked feature returns 404, not 402: a customer has no business seeing what
- * the shop owner did or didn't buy. To them the page simply does not exist.
+ * Used to be the storefront half of the plan gate — a locked feature answered 404
+ * rather than showing a customer what the shop owner hadn't paid for. Nothing is
+ * locked on a dedicated single-business build, so this is a pass-through now. Left
+ * in place (rather than removed at each of its nine call sites) so a resold,
+ * licensed build — the toolkit for which is parked in archive/reseller-toolkit/ —
+ * can reconnect it to plan.hasFeature() again without touching every route.
  */
-function storefrontFeature(id) {
-  return function storefrontGate(req, res, next) {
-    if (plans.hasFeature(loadConfig(), id)) return next();
-    return next('route');
-  };
+function storefrontFeature() {
+  return function storefrontGate(req, res, next) { next(); };
 }
 
 /**
@@ -506,13 +505,12 @@ function validateStep(step, body) {
  * partial and the step fragment can never disagree with what we charge.
  */
 /**
- * The config as the COD rules should see it. A store whose plan doesn't include
- * cash on delivery behaves exactly like a store whose owner switched it off —
- * same code path, same message, one less thing that can disagree.
+ * COD availability is governed entirely by config.shipping.cod.enabled now — the
+ * plan overlay that used to sit in front of it is archived along with the rest of
+ * the reseller toolkit.
  */
 function codConfigFor(config) {
-  if (plans.hasFeature(config, 'cod')) return config;
-  return { ...config, shipping: { ...config.shipping, cod: { ...(config.shipping.cod || {}), enabled: false } } };
+  return config;
 }
 
 function checkoutSummary(req, res, config, state) {

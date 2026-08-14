@@ -106,26 +106,9 @@ function checkConfig() {
     return fail('Config', 'site.config.json will not parse: ' + err.message, 'Fix the JSON.');
   }
 
-  /* Shared with the provisioning script so the two cannot drift. It also strips
-     diacritics: the demo brand is "AANYÄ", and /aanya/i never matched it, so this
-     check had been passing on the support email alone. */
-  const { looksLikeDemo } = require('../src/provision');
-  if (looksLikeDemo(config.brand.name) || looksLikeDemo(config.brand.supportEmail)) {
-    fail('Config', `Brand is still the demo one ("${config.brand.name}").`,
-      'Run npm run provision, or edit config/site.config.json.');
-  } else {
-    ok('Config', `Brand: ${config.brand.name}`);
-  }
-
-  const plans = require('../src/plan');
-  const plan = plans.planOf(config);
-  if (!config.plan) {
-    warn('Config', 'No plan set — the client gets the full platform.',
-      'Set "plan" in config/site.config.json to what they paid for.');
-  } else {
-    const locked = plans.overview(config).locked.length;
-    ok('Config', `Plan: ${plan.label} (${locked} feature${locked === 1 ? '' : 's'} locked)`);
-  }
+  // Dedicated single-business build: no demo-brand check (this IS the brand) and
+  // no plan check (nothing is gated — see src/routes/gate.js).
+  ok('Config', `Brand: ${config.brand.name}`);
 
   // GST invoices are a legal document; a missing field is not a style issue.
   const invoice = require('../src/invoice');
@@ -200,12 +183,9 @@ function checkIntegrations() {
   const config = require('../src/config').loadConfig();
   const payments = require('../src/payments');
   const notifications = require('../src/notifications');
-  const plans = require('../src/plan');
 
   const pay = payments.status(config);
-  if (!plans.hasFeature(config, 'payment-gateway')) {
-    ok('Payments', 'Not in this plan — manual/COD only');
-  } else if (!pay.live) {
+  if (!pay.live) {
     warn('Payments', `Gateway "${pay.provider}" is selected but not connected — orders fall back to manual.`,
       'Admin → Settings → Payments, add the client’s own keys.');
   } else if (pay.mode === 'test') {
@@ -252,38 +232,6 @@ function checkIntegrations() {
   }
 }
 
-/* ----------------------------------------------------------- licence ---- */
-
-function checkLicence() {
-  const license = require('../src/license');
-  const status = license.status(process.env.PUBLIC_HOST);
-
-  if (status.state === 'unlicensed') {
-    warn('Licence', 'No licence key installed — the store runs on the plan in its config file.',
-      'Issue one: node scripts/issue-license.js --store "Name" --plan growth --months 12');
-    return;
-  }
-  if (status.restricted) {
-    fail('Licence', status.reason || `Licence state: ${status.state}.`,
-      'Install a current key at Admin → Licence.');
-    return;
-  }
-  if (status.state === 'grace') {
-    fail('Licence', status.reason, 'Renew before the grace period ends and the admin locks.');
-    return;
-  }
-  if (status.state === 'expiring') {
-    warn('Licence', status.reason, 'Issue a renewal key.');
-    return;
-  }
-  ok('Licence', `${status.licence.plan} · ${status.licence.store} · ${status.daysLeft} days left · ${license.shortId(status.licence)}`);
-
-  if (!(status.licence.domains || []).length) {
-    warn('Licence', 'This licence is not domain-locked — the same key works on any host.',
-      'Reissue with --domains theirdomain.com for a client deployment.');
-  }
-}
-
 /* -------------------------------------------------------- deployment ---- */
 
 function checkDeployment() {
@@ -316,10 +264,15 @@ function checkDeployment() {
     }
   }
 
-  // The one file that must never exist on a client's machine.
+  // This build carries the agency's reseller toolkit in archive/ for later reuse.
+  // Neither it nor the licence signing key belongs on whatever you hand to the client.
+  if (fs.existsSync(path.join(ROOT, 'archive'))) {
+    warn('Deploy', 'archive/ (the agency reseller toolkit) is present in this copy.',
+      'Fine on the agency machine; leave it out of anything you ship to the client.');
+  }
   if (fs.existsSync(path.join(ROOT, '.license-keys', 'private.pem'))) {
-    fail('Deploy', 'The licence SIGNING KEY is present on this machine.',
-      'If this is a client server, delete .license-keys/ now — it can mint licences for every store.');
+    warn('Deploy', 'A licence signing key sits in .license-keys/ on this machine.',
+      'Git-ignored and unused by the live site — just do not copy it anywhere else.');
   }
 
   const gitignore = path.join(ROOT, '.gitignore');
@@ -337,7 +290,7 @@ function checkDeployment() {
 /* -------------------------------------------------------------- print ---- */
 
 function run() {
-  [checkRuntime, checkStorage, checkConfig, checkLicence, checkAccess, checkIntegrations, checkDeployment]
+  [checkRuntime, checkStorage, checkConfig, checkAccess, checkIntegrations, checkDeployment]
     .forEach((check) => {
       try {
         check();

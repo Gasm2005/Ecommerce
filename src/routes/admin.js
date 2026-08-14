@@ -16,8 +16,6 @@ const reviews = require('../reviews');
 const marketing = require('../marketing');
 const activity = require('../activity');
 const invoice = require('../invoice');
-const plan = require('../plan');
-const license = require('../license');
 const exporter = require('../exporter');
 const gstReturn = require('../gst-return');
 const hx = require('../hx');
@@ -69,7 +67,7 @@ function adminGuard(req, res, next) {
 }
 
 /** Section-level permission gate — a hidden sidebar link is not a permission. */
-const { requireSection, requireFeature } = require('./gate');
+const { requireSection } = require('./gate');
 
 /** Compact money for axis labels and tight tiles: ₹1.2L, ₹45k. */
 function compact(n, config) {
@@ -102,13 +100,10 @@ router.use(adminGuard, (req, res, next) => {
   res.locals.openReturns = returns.overview().open;
   res.locals.can = (section) => auth.can(res.locals.user, section);
   res.locals.roles = auth.ROLES;
-  // Plan state for the chrome. Locked sections stay VISIBLE with a padlock —
-  // a client should know what the platform can do, not wonder what's missing.
-  res.locals.plan = plan.planOf(loadConfig(), req.get('host'));
-  res.locals.unlocked = (section) => plan.sectionUnlocked(loadConfig(), section, req.get('host'));
-  // Licence state, so the chrome can warn before it walls anything off.
-  res.locals.licence = license.status(req.get('host'));
-  res.locals.hasFeature = (id) => plan.hasFeature(loadConfig(), id);
+  // No plan or licence gate on a dedicated single-business build — see gate.js.
+  // hasFeature stays defined and true for every id: themes (and the archived
+  // reseller toolkit's views) call it, and it costs nothing to keep answering.
+  res.locals.hasFeature = () => true;
   res.locals.adminActions = null;
   res.locals.adminSubtitle = null;
 
@@ -259,35 +254,8 @@ function accountModel(req, res, extra = {}) {
   };
 }
 
-function licenseModel(req, extra) {
-  const status = license.status(req.get('host'));
-  return {
-    status,
-    shortId: license.shortId(status.licence),
-    saved: false, error: null, wall: false,
-    ...(extra || {})
-  };
-}
-
-router.get('/license', (req, res) => {
-  res.render('admin/license', licenseModel(req, { saved: req.query.saved === '1' }));
-});
-
-router.post('/license', requireSection('settings'), (req, res) => {
-  const result = license.activate(req.body.key);
-  if (!result.ok) {
-    return res.status(422).render('admin/license', licenseModel(req, { error: result.reason }));
-  }
-  activity.log('Licence', `Activated ${result.licence.plan} licence for ${result.licence.store}`);
-  res.redirect('/admin/license' + (res.locals.adminToken ? `?token=${res.locals.adminToken}&saved=1` : '?saved=1'));
-});
-
-router.post('/license/remove', requireSection('settings'), (req, res) => {
-  license.deactivate();
-  activity.log('Licence', 'Licence key removed');
-  hx.trigger(res, { 'admin:reload': true });
-  res.status(200).send('');
-});
+// Licence and plan admin routes were archived with the rest of the reseller
+// toolkit — see src/routes/gate.js for where they used to hook in.
 
 /**
  * "Your data is yours."
@@ -333,10 +301,6 @@ router.get('/export/gst.zip', requireSection('reports'), (req, res) => {
   res.type('application/zip')
     .set('Content-Disposition', `attachment; filename="gstr1-working-papers-${stamp}.zip"`)
     .send(buffer);
-});
-
-router.get('/plan', (req, res) => {
-  res.render('admin/plan', { info: plan.overview(loadConfig(), req.get('host')) });
 });
 
 router.get('/account', (req, res) => res.render('admin/account', accountModel(req, res)));
